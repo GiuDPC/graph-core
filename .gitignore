@@ -1,5 +1,9 @@
-# Carpeta de compilación
+# Carpetas de compilación
 build/
+build_win/
+build_windows/
+compile_commands.json
+imgui.ini
 
 # IDE
 .vscode/
