@@ -111,3 +111,53 @@ target_include_directories(OptiClusters PRIVATE
     ${CMAKE_SOURCE_DIR}/src/interfaz
     ${CMAKE_SOURCE_DIR}/src/audio
 )
+
+# ============================================================================
+# Tests unitarios (GoogleTest)
+# ============================================================================
+option(BUILD_TESTS "Build unit tests" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        v1.14.0
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+
+    # Include paths para tests (necesitan imgui para ImVec2 en Nodo.h)
+    set(TEST_INCLUDE_DIRS
+        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/src/nucleo
+        ${CMAKE_SOURCE_DIR}/src/nucleo/tipos
+        ${CMAKE_SOURCE_DIR}/src/nucleo/algoritmos
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
+    )
+
+    add_executable(test_grafo
+        tests/test_grafo.cpp
+    )
+    target_include_directories(test_grafo PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_grafo PRIVATE GTest::gtest_main)
+
+    add_executable(test_dijkstra
+        tests/test_dijkstra.cpp
+    )
+    target_include_directories(test_dijkstra PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_dijkstra PRIVATE GTest::gtest_main)
+
+    add_executable(test_unionfind
+        tests/test_unionfind.cpp
+    )
+    target_include_directories(test_unionfind PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_unionfind PRIVATE GTest::gtest_main)
+
+    # Habilitar descubrimiento automatico de tests con CTest
+    include(GoogleTest)
+    gtest_discover_tests(test_grafo)
+    gtest_discover_tests(test_dijkstra)
+    gtest_discover_tests(test_unionfind)
+endif()
