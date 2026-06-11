@@ -1,81 +1,81 @@
 # graph-core
 
-Interactive graph visualization and network simulation tool built with C++17, Dear ImGui, GLFW, and OpenGL 3.3.
+Visualizador y simulador de grafos interactivo creado con C++17, Dear ImGui, GLFW y OpenGL 3.3.
 
-## Features
+## Caracteristicas
 
-- Graph editing with interactive canvas (pan, zoom, drag nodes)
-- Graph algorithms: Dijkstra, Kruskal MST, BFS, DFS, cycle detection, graph coloring, isomorphism verification
-- Network simulation with real-time packet visualization, traffic flows, congestion, jitter, and automatic events
-- Step-by-step algorithm animation
-- Isomorphism testing with dual-graph editing
-- Audio feedback for algorithm steps and network events
-- Hardware deployment panel for network planning
-- Topology templates (enterprise, mesh, star, simplified internet)
-- Project save/load in JSON format
+- Editor de grafos con lienzo interactivo (pan, zoom, arrastrar nodos)
+- Algoritmos de grafos: Dijkstra, Kruskal MST, BFS, DFS, deteccion de ciclos, coloreo, verificacion de isomorfismo
+- Simulacion de red con visualizacion de paquetes en tiempo real, flujos de trafico, congestion, jitter y eventos automaticos
+- Animacion paso a paso de algoritmos
+- Pruebas de isomorfismo con editor de doble grafo
+- Sonido con feedback para pasos de algoritmos y eventos de red
+- Panel de despliegue de hardware para planificacion de red
+- Plantillas de topologia (empresarial, malla, estrella, internet simplificada)
+- Guardado y carga de proyectos en formato JSON
 
-## Requirements
+## Requisitos
 
-- C++17 compatible compiler (GCC 9+, Clang 10+, MSVC 2019+)
+- Compilador con soporte C++17 (GCC 9+, Clang 10+, MSVC 2019+)
 - CMake 3.20+
-- OpenGL 3.3 capable GPU
-- GLFW, OpenGL, X11/Wayland (Linux) or Win32 (Windows) development libraries
+- GPU compatible con OpenGL 3.3
+- Librerias de desarrollo de GLFW, OpenGL, X11/Wayland (Linux) o Win32 (Windows)
 
-On Arch Linux: `sudo pacman -S cmake glfw-x11 wayland`
+En Arch Linux: `sudo pacman -S cmake glfw-x11 wayland`
 
-On Debian/Ubuntu: `sudo apt install cmake libglfw3-dev libxkbcommon-dev`
+En Debian/Ubuntu: `sudo apt install cmake libglfw3-dev libxkbcommon-dev`
 
-## Build
+## Compilar
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```
 
-## Run
+## Ejecutar
 
 ```bash
 ./build/graph-core
 ```
 
-## Run tests
+## Ejecutar tests
 
 ```bash
 ./build/test_grafo && ./build/test_dijkstra && ./build/test_unionfind
 ```
 
-## Cross-compile for Windows
+## Cross-compile para Windows
 
-Requires MinGW-w64. Use the provided toolchain file:
+Requiere MinGW-w64. Usar el toolchain incluido:
 
 ```bash
 cmake -B build_win -DCMAKE_TOOLCHAIN_FILE=mingw-toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build build_win -j$(nproc)
 ```
 
-## Project structure
+## Estructura del proyecto
 
 ```
 src/
-  main.cpp                  # Entry point
-  audio/                    # Sound system (miniaudio, synthetic sounds)
-  interfaz/                 # UI layer
-    Interfaz.h              # Main orchestrator
-    componentes/            # Status bar, menus, dialogs, log panel
-    lienzo/                 # Canvas rendering and input handling
-    paneles/                # Graph editor, network simulation, hardware, isomorphism
-    util/                   # Easing, animation, colors
-  nucleo/                   # Core domain
-    Grafo.h                 # Graph data structure
-    SimuladorRed.h          # Network simulation engine
-    Topologias.h            # Topology generators
-    UnionFind.h             # Union-Find data structure
-    algoritmos/             # Graph algorithms
-    tipos/                  # Node, edge, hardware types
-  persistencia/             # JSON serialization
-tests/                      # Unit tests (GoogleTest)
+  main.cpp                  # Punto de entrada
+  audio/                    # Sistema de sonido (miniaudio, sonidos sinteticos)
+  interfaz/                 # Capa de UI
+    Interfaz.h              # Orquestador principal
+    componentes/            # Barra de estado, menus, dialogos, panel de logs
+    lienzo/                 # Renderizado del canvas y manejo de entrada
+    paneles/                # Editor de grafos, simulacion de red, hardware, isomorfismo
+    util/                   # Easing, animacion, colores
+  nucleo/                   # Dominio principal
+    Grafo.h                 # Estructura de datos del grafo
+    SimuladorRed.h          # Motor de simulacion de red
+    Topologias.h            # Generadores de topologia
+    UnionFind.h             # Estructura Union-Find
+    algoritmos/             # Algoritmos de grafos
+    tipos/                  # Tipos de nodo, arista, hardware
+  persistencia/             # Serializacion JSON
+tests/                      # Tests unitarios (GoogleTest)
 ```
 
-## License
+## Licencia
 
 MIT
