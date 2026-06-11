@@ -298,6 +298,13 @@ Chain strategy: pending
 **Depende de**: T005, T006, T008
 **Archivos**: `src/interfaz/paneles/PanelGrafos.h` (crear), `src/interfaz/Interfaz.h` (modificar)
 **Riesgo**: Alto
+**Estado**: ✅ COMPLETO
+
+- [x] PanelGrafos.h creado con namespace PanelGrafos y todas las funciones extraídas
+- [x] selectorModo, menuGeneral, controlesAnimacion, propiedadesNodo
+- [x] subpanelDijkstra, subpanelKruskal, subpanelBFS, subpanelDFS
+- [x] subpanelCiclos, subpanelColoreo, subpanelArbol, aplicarLayoutArbol
+- [x] Delegación a PanelIsomorfismo para el case Isomorfismo
 
 **Pasos exactos**:
 1. Crear `src/interfaz/paneles/PanelGrafos.h` con `#pragma once`, incluye `Interfaz.h` y todos los algoritmos (`Dijkstra.h`, `Kruskal.h`, `BFS.h`, `DFS.h`, `Ciclos.h`, `Coloreo.h`, `Isomorfismo.h`, `Arbol.h`)
@@ -355,6 +362,11 @@ Chain strategy: pending
 **Depende de**: T005
 **Archivos**: `src/interfaz/paneles/PanelRed.h` (crear), `src/interfaz/Interfaz.h` (modificar)
 **Riesgo**: Alto
+**Estado**: ✅ COMPLETO
+
+- [x] PanelRed.h creado con namespace PanelRed::dibujar()
+- [x] Topologías predefinidas, simulación, tráfico, fallos, tabla nodos, log eventos
+- [x] Llamada desde dibujar(): `PanelRed::dibujar(*this, red)`
 
 **Pasos exactos**:
 1. Crear `src/interfaz/paneles/PanelRed.h` con `#pragma once`, incluye `Interfaz.h`, `nucleo/Topologias.h`, `nucleo/SimuladorRed.h`
@@ -392,6 +404,11 @@ Chain strategy: pending
 **Depende de**: T003
 **Archivos**: `src/interfaz/paneles/PanelHardware.h` (crear), `src/interfaz/Interfaz.h` (modificar), `src/interfaz/lienzo/LienzoRed.h` (crear en Fase 5)
 **Riesgo**: Medio
+**Estado**: ✅ COMPLETO (parcial — popup se usará desde LienzoRed en Fase 5)
+
+- [x] PanelHardware.h creado con PanelHardware::icono() y PanelHardware::desplegar()
+- [x] El popup "Crear Equipo" se usará desde LienzoRed.h en Fase 5
+- [x] iconoHardware() se mantiene en Interfaz temporalmente (se eliminará en Fase 5)
 
 **Pasos exactos**:
 1. Crear `src/interfaz/paneles/PanelHardware.h` con `#pragma once`, incluye `Interfaz.h`, `nucleo/tipos/TipoHardware.h`
@@ -420,6 +437,11 @@ Chain strategy: pending
 **Depende de**: T005, T010
 **Archivos**: `src/interfaz/paneles/PanelIsomorfismo.h` (crear), `src/interfaz/Interfaz.h` (modificar)
 **Riesgo**: Medio
+**Estado**: ✅ COMPLETO
+
+- [x] PanelIsomorfismo.h creado con PanelIsomorfismo::dibujar()
+- [x] PanelGrafos delega en PanelIsomorfismo via forward declaration
+- [x] Todas las variables iso_* se acceden via self.
 
 **Pasos exactos**:
 1. Crear `src/interfaz/paneles/PanelIsomorfismo.h` con `#pragma once`, incluye `Interfaz.h`, `nucleo/algoritmos/Isomorfismo.h`
