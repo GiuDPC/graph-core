@@ -12,7 +12,7 @@
 
 extern Sonidos g_sonidos;
 
-// Motor de simulacion de red v4.0
+// Motor de simulacion de red
 // Mejoras: colas de paquetes, eventos automáticos, ruteo cacheado,
 //           CPU/RAM reactiva, jitter con efecto real
 class SimuladorRed {

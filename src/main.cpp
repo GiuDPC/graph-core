@@ -124,7 +124,7 @@ int main(int, char**) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* ventana = glfwCreateWindow(
-        1500, 900, "OptiClusters v4.0 \xe2\x80\x94 NetSim Pro", nullptr, nullptr
+        1500, 900, "graph-core v1.0", nullptr, nullptr
     );
     if (!ventana) {
         fprintf(stderr, "Error: No se pudo crear la ventana GLFW\n");

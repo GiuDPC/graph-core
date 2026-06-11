@@ -1,6 +1,6 @@
 #pragma once
 
-// Sistema de audio para OptiClusters v4.0
+// Sistema de audio para graph-core
 // Usa miniaudio.h (header-only) para generar sonidos sintéticos
 // SIN archivos de audio externos — todo se genera por código
 

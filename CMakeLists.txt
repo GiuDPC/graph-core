@@ -1,12 +1,12 @@
 # ============================================================================
-# OptiClusters — Sistema de compilación principal
+# graph-core — Sistema de compilación principal
 # ============================================================================
 # Versión mínima de CMake requerida
 cmake_minimum_required(VERSION 3.20)
 
 # Nombre del proyecto, versión y lenguaje
-project(OptiClusters
-    VERSION 4.0.0
+project(graph-core
+    VERSION 1.0.0
     LANGUAGES CXX
 )
 
@@ -83,26 +83,26 @@ target_link_libraries(imgui_lib PUBLIC OpenGL::GL)
 # ============================================================================
 # Nuestro ejecutable
 # ============================================================================
-# OptiClusters — con audio v4.0
+# Ejecutable principal
 
-add_executable(OptiClusters
+add_executable(graph-core
     src/main.cpp
     src/audio/miniaudio_impl.cpp
 )
 
 # Cuando compilamos para Windows (nativo o cross), ocultamos la consola
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set_target_properties(OptiClusters PROPERTIES WIN32_EXECUTABLE TRUE)
+    set_target_properties(graph-core PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
 # Linkear nuestro programa con ImGui y JSON
-target_link_libraries(OptiClusters PRIVATE
+target_link_libraries(graph-core PRIVATE
     imgui_lib
     nlohmann_json::nlohmann_json
 )
 
 # Que nuestro código pueda hacer #include de nuestros propios headers
-target_include_directories(OptiClusters PRIVATE
+target_include_directories(graph-core PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/nucleo
     ${CMAKE_SOURCE_DIR}/src/nucleo/tipos

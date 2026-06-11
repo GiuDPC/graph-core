@@ -248,7 +248,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground);
     ImGui::PopStyleVar(3);
 
-    ImGuiID dock_id = ImGui::GetID("OptiClustersDock");
+    ImGuiID dock_id = ImGui::GetID("GraphCoreDock");
     ImGui::DockSpace(dock_id);
 
     static bool layout_init = false;

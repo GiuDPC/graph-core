@@ -63,11 +63,11 @@ inline void dibujar(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
                 ImGui::TextDisabled("No se detecto dispositivo de sonido");
             }
             ImGui::Separator();
-            ImGui::TextDisabled("OptiClusters v4.0 — NetSim Pro");
+            ImGui::TextDisabled("graph-core v1.0");
             ImGui::EndMenu();
         }
         if (ImGui::MenuItem(ICON_FA_CIRCLE_INFO " Acerca de")) {
-            ImGui::OpenPopup("Acerca de OptiClusters");
+            ImGui::OpenPopup("Acerca de");
         }
         ImGui::EndMainMenuBar();
     }

@@ -6,10 +6,10 @@
 // Diálogos modales: Acerca de, fallback de carga/guardado
 namespace Dialogos {
 
-// ── Modal "Acerca de OptiClusters" ────────────────────────────────────────
-inline void acercaDe() {
-    if (ImGui::BeginPopupModal("Acerca de OptiClusters", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("OptiClusters v4.0 — NetSim Pro");
+// ── Modal "Acerca de" ─────────────────────────────────────────────────────
+void acercaDe() {
+    if (ImGui::BeginPopupModal("Acerca de", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("graph-core v1.0");
         ImGui::Text("Motor avanzado de visualizacion de grafos");
         ImGui::Text("Con audio y simulacion mejorada");
         ImGui::Separator();

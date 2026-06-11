@@ -1,7 +1,5 @@
-# Carpetas de compilación
-build/
-build_win/
-build_windows/
+# Build
+build*/
 compile_commands.json
 imgui.ini
 
@@ -12,11 +10,19 @@ imgui.ini
 *.swo
 *~
 
-# Compilados
+# Compiled artifacts
 *.o
 *.exe
 *.out
+*.a
 
-# Sistema
+# OS
 .DS_Store
 Thumbs.db
+
+# Dev tooling config (not needed to compile)
+openspec/
+.atl/
+
+# User manual (not part of source)
+MANUAL_USUARIO.md

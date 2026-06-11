@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
 
-// Constantes de color semánticas para la UI de OptiClusters
+// Constantes de color semánticas para la UI de graph-core
 namespace Colores {
 
 // ── Nodos ─────────────────────────────────────────────────────────────────
