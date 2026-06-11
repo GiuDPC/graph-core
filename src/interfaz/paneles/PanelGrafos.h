@@ -86,13 +86,13 @@ inline void controlesAnimacion(Interfaz& self) {
     if (ImGui::Button(ICON_FA_FORWARD_STEP " Paso", ImVec2(bw, 0))) {
         if (self.anim_estado.paso_actual + 1 < (int)self.anim_estado.pasos.size()) {
             self.anim_estado.paso_actual++;
-            self.aplicarPaso(self.anim_estado.pasos[self.anim_estado.paso_actual]);
+            AnimacionUI::aplicarPaso(self, self.anim_estado.pasos[self.anim_estado.paso_actual]);
             self.anim_estado.pausada = true;
         }
     }
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(bw, 0))) {
-        self.resetAnimacion();
+        AnimacionUI::reset(self);
     }
 }
 
@@ -272,7 +272,7 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
     if (ImGui::Button(ICON_FA_PLAY " Animacion", ImVec2(-1, 32))) {
         auto pasos = Algoritmos::generarPasos(
             red, self.dijkstra_origen, self.dijkstra_destino, self.dijkstra_usar_latencia);
-        self.iniciarAnimacion(pasos);
+        AnimacionUI::iniciar(self, pasos);
         self.ruta_optima.clear(); self.mostrar_mst = false;
         self.registrarLog("[Dijkstra] Animacion iniciada: " +
             red.nombreNodo(self.dijkstra_origen) + " -> " + red.nombreNodo(self.dijkstra_destino));
@@ -281,7 +281,7 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
         auto res = Algoritmos::dijkstra(
             red, self.dijkstra_origen, self.dijkstra_destino, self.dijkstra_usar_latencia);
         self.ruta_optima = res.ruta;
-        self.mostrar_mst = false; self.resetAnimacion();
+        self.mostrar_mst = false; AnimacionUI::reset(self);
         if (res.hay_ruta)
             self.registrarLog("[OK] Dijkstra: " + std::to_string(res.saltos) +
                 " saltos, costo=" + std::to_string((int)res.costo_total));
@@ -344,7 +344,7 @@ inline void subpanelKruskal(Interfaz& self, Grafo& red) {
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion", ImVec2(-1, 32))) {
         auto pasos = Algoritmos::Kruskal::generarPasos(red);
-        self.iniciarAnimacion(pasos);
+        AnimacionUI::iniciar(self, pasos);
         self.ruta_optima.clear(); self.mostrar_mst = false;
         self.registrarLog("[Kruskal] Animacion MST iniciada");
     }
@@ -352,7 +352,7 @@ inline void subpanelKruskal(Interfaz& self, Grafo& red) {
         auto res = Algoritmos::Kruskal::kruskal(red);
         self.aristas_mst = res.aristas_mst;
         self.mostrar_mst = true;
-        self.ruta_optima.clear(); self.resetAnimacion();
+        self.ruta_optima.clear(); AnimacionUI::reset(self);
         self.registrarLog("[OK] Kruskal MST: " + std::to_string(res.aristas_aceptadas) +
             " aristas, peso total=" + std::to_string((int)res.peso_total));
     }
@@ -423,13 +423,13 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
 
         if (ImGui::Button(ICON_FA_PLAY " Animacion BFS", ImVec2(-1, 32))) {
             auto pasos = Algoritmos::BFS::generarPasos(red, self.bfs_nodo_inicio);
-            self.iniciarAnimacion(pasos);
+            AnimacionUI::iniciar(self, pasos);
             self.bfs_resultado = Algoritmos::BFS::bfs(red, self.bfs_nodo_inicio);
             self.registrarLog("[BFS] Iniciado desde " + red.nombreNodo(self.bfs_nodo_inicio));
         }
         if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
             self.bfs_resultado = Algoritmos::BFS::bfs(red, self.bfs_nodo_inicio);
-            self.resetAnimacion();
+            AnimacionUI::reset(self);
             self.registrarLog("[OK] BFS: " + std::to_string(self.bfs_resultado.orden_visita.size()) +
                 " nodos visitados");
         }
@@ -485,12 +485,12 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion DFS", ImVec2(-1, 32))) {
         auto pasos = Algoritmos::DFS::generarPasos(red, self.dfs_nodo_inicio);
-        self.iniciarAnimacion(pasos);
+        AnimacionUI::iniciar(self, pasos);
         self.registrarLog("[DFS] Iniciado desde " + red.nombreNodo(self.dfs_nodo_inicio));
     }
     if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
         self.dfs_resultado = Algoritmos::DFS::dfs(red, self.dfs_nodo_inicio);
-        self.resetAnimacion();
+        AnimacionUI::reset(self);
         self.registrarLog("[OK] DFS: " + std::to_string(self.dfs_resultado.orden_visita.size()) +
             " nodos, " + std::to_string(self.dfs_resultado.back_edges.size()) + " back-edges");
     }

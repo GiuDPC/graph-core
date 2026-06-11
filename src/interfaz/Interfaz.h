@@ -15,17 +15,9 @@
 #include "nucleo/algoritmos/Arbol.h"
 #include "nucleo/tipos/EstadoRed.h"
 #include "nucleo/SimuladorRed.h"
-#include "nucleo/Topologias.h"
-#include "persistencia/SerializadorJSON.h"
 #include "IconsFontAwesome6.h"
-#include "portable-file-dialogs.h"
 #include "audio/Sonidos.h"
-#include "interfaz/util/Easing.h"
 #include "interfaz/util/Animacion.h"
-#include "interfaz/util/Colores.h"
-#include <cmath>
-#include <set>
-#include <cstdio>
 #include <GLFW/glfw3.h>
 
 extern Sonidos g_sonidos;
@@ -147,222 +139,12 @@ public:
         if (system_logs.size() > 100) system_logs.erase(system_logs.begin());
     }
 
-    const char* iconoHardware(TipoHardware tipo) {
-        switch (tipo) {
-            case TipoHardware::Servidor: return ICON_FA_SERVER;
-            case TipoHardware::Router:   return ICON_FA_NETWORK_WIRED;
-            case TipoHardware::Switch:   return ICON_FA_RIGHT_LEFT;
-            case TipoHardware::Firewall: return ICON_FA_SHIELD_HALVED;
-            case TipoHardware::Terminal: return ICON_FA_DESKTOP;
-            default: return ICON_FA_CIRCLE;
-        }
-    }
-
-    // ── Wrappers de animacion (delegan a Animacion:: + efectos secundarios) ─
-    void iniciarAnimacion(std::vector<PasoAnimacion> pasos) {
-        Animacion::iniciar(anim_estado, std::move(pasos));
-        if (!anim_estado.pasos.empty()) {
-            registrarLog("Animacion iniciada: " + std::to_string(anim_estado.pasos.size()) + " pasos");
-            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
-        }
-    }
-
-    void aplicarPaso(const PasoAnimacion& p) {
-        Animacion::aplicarPaso(anim_estado, p);
-        switch (p.accion) {
-            case PasoAnimacion::VISITAR:   g_sonidos.reproducir(Sonidos::VISITAR_NODO); break;
-            case PasoAnimacion::CONFIRMAR: g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA); break;
-            case PasoAnimacion::EXPLORAR:  g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO); break;
-            case PasoAnimacion::DESCARTAR: g_sonidos.reproducir(Sonidos::DESCARTAR); break;
-        }
-        if (!p.descripcion.empty()) registrarLog(p.descripcion);
-    }
-
-    void resetAnimacion() {
-        Animacion::reset(anim_estado);
-    }
+    // Nota: los wrappers de animacion (iniciar/aplicarPaso/reset)
+    // se movieron a AnimacionUI.h (con side effects de log/sonido)
 
         // LIENZO DE RED — extraido a LienzoRed.h (namespace LienzoRed)
 
-        // MATRICES
-        void dibujarMatrices(Grafo& red) {
-        ImGui::Begin("Matrices");
-        if (fontMono) ImGui::PushFont(fontMono);
-
-        if (ImGui::BeginTabBar("MatricesTabs")) {
-            if (ImGui::BeginTabItem(ICON_FA_TABLE_CELLS " Adyacencia")) {
-                dibujarMatrizAdyacencia(red);
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem(ICON_FA_TABLE_LIST " Incidencia")) {
-                dibujarMatrizIncidencia(red);
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-
-        if (fontMono) ImGui::PopFont();
-        ImGui::End();
-    }
-
-    void dibujarMatrizAdyacencia(Grafo& red) {
-        if (red.nodos.empty()) { ImGui::TextDisabled("Grafo vacio."); return; }
-
-        ImVec2 region = ImGui::GetContentRegionAvail();
-        ImGui::BeginChild("MatAdjChild", ImVec2(region.x, region.y - 4), false,
-            ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-        int cols = (int)red.nodos.size() + 1;
-        float col_w_label = 52.0f;
-        float col_w_data  = 32.0f;
-
-        if (ImGui::BeginTable("MatAdj", cols, 
-            ImGuiTableFlags_Borders | 
-            ImGuiTableFlags_RowBg | 
-            ImGuiTableFlags_SizingFixedFit |
-            ImGuiTableFlags_ScrollX)) 
-        {
-            ImGui::TableSetupScrollFreeze(1, 1);
-            ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, col_w_label);
-            for (size_t c = 0; c < red.nodos.size(); c++) {
-                ImGui::TableSetupColumn(red.nodos[c].nombre.c_str(), ImGuiTableColumnFlags_WidthFixed, col_w_data);
-            }
-
-            // Header
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextDisabled("\\");
-            for (size_t c = 0; c < red.nodos.size(); c++) {
-                ImGui::TableSetColumnIndex((int)c + 1);
-                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.83f, 1.0f), "%s", red.nodos[c].nombre.c_str());
-            }
-
-            // Rows
-            for (size_t f = 0; f < red.nodos.size(); f++) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.83f, 1.0f), "%s", red.nodos[f].nombre.c_str());
-
-                for (size_t c = 0; c < red.nodos.size(); c++) {
-                    ImGui::TableSetColumnIndex((int)c + 1);
-                    if (f == c) {
-                        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.35f, 1.0f), "x");
-                        continue;
-                    }
-
-                    float peso = -1;
-                    for (const auto& a : red.aristas) {
-                        if ((a.origen_id == red.nodos[f].id && a.destino_id == red.nodos[c].id) ||
-                            (!a.es_dirigida && a.origen_id == red.nodos[c].id && a.destino_id == red.nodos[f].id)) {
-                            peso = a.peso_actual;
-                            break;
-                        }
-                    }
-
-                    if (peso >= 0) {
-                        ImVec4 col;
-                        if (peso <= 3.0f) col = ImVec4(0.0f, 0.9f, 0.5f, 1.0f);       // green
-                        else if (peso <= 10.0f) col = ImVec4(1.0f, 0.85f, 0.0f, 1.0f); // yellow
-                        else col = ImVec4(1.0f, 0.3f, 0.3f, 1.0f);                     // red
-                        ImGui::TextColored(col, "%.0f", peso);
-                    } else {
-                        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.35f, 1.0f), "-");
-                    }
-                }
-            }
-            ImGui::EndTable();
-        }
-        ImGui::EndChild();
-    }
-
-    void dibujarMatrizIncidencia(Grafo& red) {
-        if (red.nodos.empty() || red.aristas.empty()) {
-            ImGui::TextDisabled("Sin datos.");
-            return;
-        }
-
-        // Contenedor con scroll controlado — ESTO es lo que faltaba
-        ImVec2 region = ImGui::GetContentRegionAvail();
-        ImGui::BeginChild("MatIncChild", ImVec2(region.x, region.y - 4), false,
-            ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-        int cols = (int)red.aristas.size() + 1;
-        float col_w_label = 52.0f;
-        float col_w_data  = 32.0f;
-
-        if (ImGui::BeginTable("MatInc", cols,
-            ImGuiTableFlags_Borders |
-            ImGuiTableFlags_RowBg   |
-            ImGuiTableFlags_SizingFixedFit |
-            ImGuiTableFlags_ScrollX))
-        {
-            // Congelar primera columna (nombres de nodos) al hacer scroll horizontal
-            ImGui::TableSetupScrollFreeze(1, 1);
-
-            // Definir anchos fijos por columna
-            ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, col_w_label);
-            for (int e = 0; e < (int)red.aristas.size(); e++) {
-                char hdr[16];
-                snprintf(hdr, sizeof(hdr), "e%d", e);
-                ImGui::TableSetupColumn(hdr, ImGuiTableColumnFlags_WidthFixed, col_w_data);
-            }
-
-            // Fila de headers
-            ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextDisabled("\\");
-            for (int e = 0; e < (int)red.aristas.size(); e++) {
-                ImGui::TableSetColumnIndex(e + 1);
-                ImGui::TextColored(ImVec4(0.8f, 0.5f, 0.2f, 1.0f), "e%d", e);
-            }
-
-            // Filas de nodos
-            for (size_t f = 0; f < red.nodos.size(); f++) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.83f, 1.0f), "%s", red.nodos[f].nombre.c_str());
-
-                for (size_t e = 0; e < red.aristas.size(); e++) {
-                    ImGui::TableSetColumnIndex((int)e + 1);
-                    const auto& a = red.aristas[e];
-                    if (a.origen_id == red.nodos[f].id || a.destino_id == red.nodos[f].id) {
-                        ImGui::TextColored(ImVec4(0.0f, 0.9f, 0.5f, 1.0f), "1");
-                    } else {
-                        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.35f, 1.0f), "0");
-                    }
-                }
-            }
-
-            ImGui::EndTable();
-        }
-
-        ImGui::EndChild();
-    }
-
-        // CONSOLA KERNEL
-        void dibujarPanelLogs() {
-        ImGui::Begin("Registro del Kernel");
-        if (fontMono) ImGui::PushFont(fontMono);
-
-        if (ImGui::Button(ICON_FA_TRASH_CAN " Limpiar")) system_logs.clear();
-        ImGui::SameLine();
-        ImGui::Text("%d entradas", (int)system_logs.size());
-        ImGui::Separator();
-
-        ImGui::BeginChild("LogScroll", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (const auto& log : system_logs) {
-            ImVec4 col(0.5f, 0.7f, 0.5f, 1.0f);
-            if (log.find("[!]") != std::string::npos) col = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
-            else if (log.find("[OK]") != std::string::npos) col = ImVec4(0.0f, 1.0f, 0.5f, 1.0f);
-            ImGui::TextColored(col, "%s", log.c_str());
-        }
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-            ImGui::SetScrollHereY(1.0f);
-        ImGui::EndChild();
-
-        if (fontMono) ImGui::PopFont();
-        ImGui::End();
-    }
+        // MATRICES, LOG PANEL — extraidos a Matrices.h y LogPanel.h
 
     };  // class Interfaz
 
@@ -373,8 +155,11 @@ public:
 #include "interfaz/paneles/PanelHardware.h"
 #include "interfaz/paneles/PanelRed.h"
 #include "interfaz/paneles/PanelIsomorfismo.h"
+#include "interfaz/util/AnimacionUI.h"
 #include "interfaz/paneles/PanelGrafos.h"
 #include "interfaz/lienzo/LienzoRed.h"
+#include "interfaz/paneles/Matrices.h"
+#include "interfaz/componentes/LogPanel.h"
 
 // ── Cuerpo de dibujar() — definido aqui para que los modulos esten visibles ─
 inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
@@ -405,7 +190,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
                 anim_estado.activa = false;
             } else {
                 const PasoAnimacion& paso = anim_estado.pasos[anim_estado.paso_actual];
-                aplicarPaso(paso);
+                AnimacionUI::aplicarPaso(*this, paso);
 
                 // Lanzar particula si el paso involucra una arista
                 if (paso.arista_origen >= 0 && paso.arista_destino >= 0) {
@@ -497,8 +282,8 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         PanelRed::dibujar(*this, red);
     }
     LienzoRed::dibujar(red, *this);
-    dibujarMatrices(red);
-    dibujarPanelLogs();
+    Matrices::dibujar(red, *this);
+    LogPanel::dibujar(*this);
 
     // Dialogos modales
     Dialogos::acercaDe();

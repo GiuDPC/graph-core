@@ -13,6 +13,18 @@ class Interfaz;
 
 namespace LienzoRed {
 
+// Helper: icono FontAwesome segun tipo de hardware
+inline const char* iconoHardware(TipoHardware tipo) {
+    switch (tipo) {
+        case TipoHardware::Servidor: return ICON_FA_SERVER;
+        case TipoHardware::Router:   return ICON_FA_NETWORK_WIRED;
+        case TipoHardware::Switch:   return ICON_FA_RIGHT_LEFT;
+        case TipoHardware::Firewall: return ICON_FA_SHIELD_HALVED;
+        case TipoHardware::Terminal: return ICON_FA_DESKTOP;
+        default: return ICON_FA_CIRCLE;
+    }
+}
+
 inline void dibujar(Grafo& red, Interfaz& self) {
         ImGui::Begin("Lienzo de Red");
         ImVec2 tamano = ImGui::GetContentRegionAvail();
@@ -426,7 +438,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 dl->AddCircle(n.posicion, n.radio, colorBorde, 32, 2.5f);
 
                 if (!es_g2 && self.modo_actual == Interfaz::ModoApp::Redes) {
-                    const char* icono = self.iconoHardware(n.tipo);
+                    const char* icono = iconoHardware(n.tipo);
                     ImVec2 is = ImGui::CalcTextSize(icono);
                     dl->AddText(ImVec2(n.posicion.x - is.x * 0.5f, n.posicion.y - is.y * 0.5f),
                         IM_COL32(255, 255, 255, 230), icono);
