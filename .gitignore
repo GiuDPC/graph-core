@@ -1,0 +1,18 @@
+# Carpeta de compilación
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compilados
+*.o
+*.exe
+*.out
+
+# Sistema
+.DS_Store
+Thumbs.db

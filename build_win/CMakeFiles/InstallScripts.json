@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/giuseppe/Escritorio/OptiClusters/build_win/cmake_install.cmake",
+		"/home/giuseppe/Escritorio/OptiClusters/build_win/_deps/glfw-build/cmake_install.cmake",
+		"/home/giuseppe/Escritorio/OptiClusters/build_win/_deps/glfw-build/src/cmake_install.cmake",
+		"/home/giuseppe/Escritorio/OptiClusters/build_win/_deps/json-build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
