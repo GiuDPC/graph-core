@@ -20,6 +20,9 @@
 #include "IconsFontAwesome6.h"
 #include "portable-file-dialogs.h"
 #include "audio/Sonidos.h"
+#include "interfaz/util/Easing.h"
+#include "interfaz/util/Animacion.h"
+#include "interfaz/util/Colores.h"
 #include <cmath>
 #include <set>
 #include <cstdio>
@@ -113,53 +116,7 @@ public:
     bool ciclo_analizado = false;
 
     // --- Animacion paso a paso ---
-    std::vector<PasoAnimacion> pasos_animacion;
-    int paso_actual = -1;
-    float timer_paso = 0.0f;
-    float velocidad_paso = 0.5f;
-    bool animacion_activa = false;
-    bool animacion_pausada = false;
-    std::set<int> nodos_visitados;
-    std::set<int> nodos_procesando;
-    std::set<std::pair<int,int>> aristas_exploradas;
-    std::set<std::pair<int,int>> aristas_confirmadas;
-    std::set<std::pair<int,int>>       aristas_descartadas;
-
-    // ── NUEVO: particula de animacion ─────────────────────────────────────────
-    struct Particula {
-        bool   activa     = false;
-        ImVec2 pos_inicio;
-        ImVec2 pos_fin;
-        float  progreso   = 0.0f;   // 0.0 → 1.0
-        float  duracion   = 0.3f;   // segundos para cruzar la arista
-        ImU32  color      = IM_COL32(0, 255, 200, 255);
-        float  radio      = 6.0f;
-    };
-
-    Particula particula_activa;
-    std::map<int, float> tiempo_visita_nodo;  // nodo_id → tiempo cuando fue visitado
-
-    // ── Easing functions ──────────────────────────────────────────────────────
-    static float easeInOutCubic(float t) {
-        return t < 0.5f
-            ? 4.0f * t * t * t
-            : 1.0f - powf(-2.0f * t + 2.0f, 3.0f) / 2.0f;
-    }
-
-    static float easeOutBounce(float t) {
-        if (t < 1.0f / 2.75f) {
-            return 7.5625f * t * t;
-        } else if (t < 2.0f / 2.75f) {
-            t -= 1.5f / 2.75f;
-            return 7.5625f * t * t + 0.75f;
-        } else if (t < 2.5f / 2.75f) {
-            t -= 2.25f / 2.75f;
-            return 7.5625f * t * t + 0.9375f;
-        } else {
-            t -= 2.625f / 2.75f;
-            return 7.5625f * t * t + 0.984375f;
-        }
-    }
+    Animacion::EstadoAnimacion anim_estado;
 
     // --- Simulacion ---
     bool simulacion_jitter = false;
@@ -181,201 +138,48 @@ public:
     // --- Panning ---
     ImVec2 offset_lienzo = ImVec2(0, 0);
 
-        // FUNCION PRINCIPAL
-        void dibujar(Grafo& red, GLFWwindow* ventana) {
-        // Tick de simulacion de red
-        if (modo_actual == ModoApp::Redes && sim_inicializada) {
-            simulador.tick(red, ImGui::GetIO().DeltaTime);
-        }
+    // FUNCION PRINCIPAL (declaracion — cuerpo definido al final del archivo)
+    void dibujar(Grafo& red, GLFWwindow* ventana);
 
-        // Avanzar animacion
-        if (animacion_activa && !animacion_pausada) {
-            float dt = ImGui::GetIO().DeltaTime;
-            timer_paso += dt;
-
-            // Actualizar particula en movimiento
-            if (particula_activa.activa) {
-                particula_activa.progreso += dt / particula_activa.duracion;
-                if (particula_activa.progreso >= 1.0f) {
-                    particula_activa.progreso = 1.0f;
-                    particula_activa.activa  = false;
-                }
-            }
-
-            // Avanzar al siguiente paso cuando el timer vence
-            if (timer_paso >= velocidad_paso && animacion_activa) {
-                timer_paso -= velocidad_paso;
-                paso_actual++;
-                if (paso_actual >= (int)pasos_animacion.size()) {
-                    animacion_activa = false;
-                } else {
-                    const PasoAnimacion& paso = pasos_animacion[paso_actual];
-                    aplicarPaso(paso);
-
-                    // Lanzar particula si el paso involucra una arista
-                    if (paso.arista_origen >= 0 && paso.arista_destino >= 0) {
-                        Nodo* o = red.obtenerNodo(paso.arista_origen);
-                        Nodo* d = red.obtenerNodo(paso.arista_destino);
-                        if (o && d) {
-                            particula_activa.activa     = true;
-                            particula_activa.pos_inicio = o->posicion;
-                            particula_activa.pos_fin    = d->posicion;
-                            particula_activa.progreso   = 0.0f;
-                            particula_activa.duracion   = velocidad_paso * 0.8f;
-
-                            // Color segun tipo de paso
-                            switch (paso.accion) {
-                                case PasoAnimacion::EXPLORAR:
-                                    particula_activa.color = IM_COL32(0, 200, 255, 255);
-                                    break;
-                                case PasoAnimacion::CONFIRMAR:
-                                    particula_activa.color = IM_COL32(255, 180, 0, 255);
-                                    break;
-                                case PasoAnimacion::DESCARTAR:
-                                    particula_activa.color = IM_COL32(255, 60, 60, 200);
-                                    break;
-                                default:
-                                    particula_activa.color = IM_COL32(0, 255, 180, 255);
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Jitter
-        if (simulacion_jitter && modo_actual == ModoApp::Redes) {
-            red.aplicarJitter(jitter_porcentaje);
-        } else {
-            red.resetearPesos();
-        }
-
-        dibujarMenuBar(red, ventana);
-
-        // DockSpace manual (deja 30px para StatusBar)
-        ImGuiViewport* vp = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(vp->WorkPos);
-        ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
-        ImGui::SetNextWindowViewport(vp->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::Begin("##DockArea", nullptr,
-            ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground);
-        ImGui::PopStyleVar(3);
-
-        ImGuiID dock_id = ImGui::GetID("OptiClustersDock");
-        ImGui::DockSpace(dock_id);
-
-        static bool layout_init = false;
-        if (!layout_init) {
-            layout_init = true;
-            // Solo construir layout si no hay imgui.ini guardado
-            std::ifstream ini_check("imgui.ini");
-            if (!ini_check.good()) {
-                ImGui::DockBuilderRemoveNode(dock_id);
-                ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
-                ImGui::DockBuilderSetNodeSize(dock_id, ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
-
-                ImGuiID main_id = dock_id;
-                ImGuiID izq_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Left, 0.22f, nullptr, &main_id);
-                ImGuiID der_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Right, 0.28f, nullptr, &main_id);
-                ImGuiID abajo_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Down, 0.25f, nullptr, &main_id);
-
-                ImGuiID redes_id = ImGui::DockBuilderSplitNode(izq_id, ImGuiDir_Down, 0.5f, nullptr, &izq_id);
-                ImGui::DockBuilderDockWindow("Panel de Red", redes_id);
-
-                ImGui::DockBuilderDockWindow("Herramientas de Red", izq_id);
-                ImGui::DockBuilderDockWindow("Matrices", der_id);
-                ImGui::DockBuilderDockWindow("Registro del Kernel", abajo_id);
-                ImGui::DockBuilderDockWindow("Lienzo de Red", main_id);
-                ImGui::DockBuilderFinish(dock_id);
-            }
-        }
-        ImGui::End();
-
-        dibujarPanelHerramientas(red);
-        if (modo_actual == ModoApp::Redes) {
-            dibujarPanelRedes(red);
-        }
-        dibujarLienzo(red);
-        dibujarMatrices(red);
-        dibujarPanelLogs();
-        dibujarStatusBar();
+    // ── Utilidades publicas (necesarias para modulos externos) ──────────────
+    void registrarLog(const std::string& msg) {
+        system_logs.push_back("[SYS] " + msg);
+        if (system_logs.size() > 100) system_logs.erase(system_logs.begin());
     }
 
-private:
-        // MENU BAR
-        void dibujarMenuBar(Grafo& red, GLFWwindow* ventana) {
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu(ICON_FA_FILE " Archivo")) {
-                if (ImGui::MenuItem(ICON_FA_FILE_CIRCLE_PLUS " Nuevo Proyecto")) {
-                    red.limpiar();
-                    resetAnimacion();
-                    ruta_optima.clear(); aristas_mst.clear(); mostrar_mst = false;
-                    registrarLog("Proyecto nuevo creado");
-                }
-                ImGui::Separator();
-                if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN " Cargar...")) {
-                    auto resultado = pfd::open_file("Cargar topologia", ".", {"Archivos JSON", "*.json"}).result();
-                    if (resultado.empty()) {
-                        registrarLog("[!] Error: no se pudo abrir el dialogo de archivos.");
-                        registrarLog("[!] Verifica que 'zenity' este instalado: sudo apt install zenity");
-                        ImGui::OpenPopup("FallbackCargar");
-                    } else {
-                        Persistencia::cargar(red, resultado[0]);
-                        resetAnimacion();
-                        ruta_optima.clear(); aristas_mst.clear(); mostrar_mst = false;
-                        registrarLog("[OK] Proyecto cargado: " + resultado[0]);
-                    }
-                }
-                if (ImGui::MenuItem(ICON_FA_FLOPPY_DISK " Guardar como...")) {
-                    auto resultado = pfd::save_file("Guardar topologia", "topologia.json", {"Archivos JSON", "*.json"}).result();
-                    if (resultado.empty()) {
-                        registrarLog("[!] Error: no se pudo abrir el dialogo de guardado.");
-                        registrarLog("[!] Verifica que 'zenity' este instalado: sudo apt install zenity");
-                        ImGui::OpenPopup("FallbackGuardar");
-                    } else {
-                        std::string ruta = resultado;
-                        if (ruta.find(".json") == std::string::npos) ruta += ".json";
-                        Persistencia::guardar(red, ruta);
-                        registrarLog("[OK] Proyecto guardado: " + ruta);
-                    }
-                }
-                ImGui::Separator();
-                if (ImGui::MenuItem(ICON_FA_DOOR_OPEN " Salir")) {
-                    glfwSetWindowShouldClose(ventana, true);
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu(ICON_FA_SLIDERS " Opciones")) {
-                if (g_sonidos.funciona()) {
-                    ImGui::Text(ICON_FA_VOLUME_HIGH " Audio");
-                    float vol = g_sonidos.getVolumen();
-                    if (ImGui::SliderFloat("Volumen", &vol, 0.0f, 1.0f, "%.0f%%")) {
-                        g_sonidos.setVolumen(vol);
-                    }
-                } else {
-                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f),
-                        ICON_FA_VOLUME_XMARK " Audio no disponible");
-                    ImGui::TextDisabled("No se detecto dispositivo de sonido");
-                }
-                ImGui::Separator();
-                ImGui::TextDisabled("OptiClusters v4.0 — NetSim Pro");
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu(ICON_FA_CIRCLE_INFO " Acerca de")) {
-                ImGui::Text("OptiClusters v4.0 — NetSim Pro");
-                ImGui::Text("Motor avanzado de visualizacion de grafos");
-                ImGui::Text("Con audio y simulacion mejorada");
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
+    const char* iconoHardware(TipoHardware tipo) {
+        switch (tipo) {
+            case TipoHardware::Servidor: return ICON_FA_SERVER;
+            case TipoHardware::Router:   return ICON_FA_NETWORK_WIRED;
+            case TipoHardware::Switch:   return ICON_FA_RIGHT_LEFT;
+            case TipoHardware::Firewall: return ICON_FA_SHIELD_HALVED;
+            case TipoHardware::Terminal: return ICON_FA_DESKTOP;
+            default: return ICON_FA_CIRCLE;
         }
+    }
+
+    // ── Wrappers de animacion (delegan a Animacion:: + efectos secundarios) ─
+    void iniciarAnimacion(std::vector<PasoAnimacion> pasos) {
+        Animacion::iniciar(anim_estado, std::move(pasos));
+        if (!anim_estado.pasos.empty()) {
+            registrarLog("Animacion iniciada: " + std::to_string(anim_estado.pasos.size()) + " pasos");
+            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
+        }
+    }
+
+    void aplicarPaso(const PasoAnimacion& p) {
+        Animacion::aplicarPaso(anim_estado, p);
+        switch (p.accion) {
+            case PasoAnimacion::VISITAR:   g_sonidos.reproducir(Sonidos::VISITAR_NODO); break;
+            case PasoAnimacion::CONFIRMAR: g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA); break;
+            case PasoAnimacion::EXPLORAR:  g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO); break;
+            case PasoAnimacion::DESCARTAR: g_sonidos.reproducir(Sonidos::DESCARTAR); break;
+        }
+        if (!p.descripcion.empty()) registrarLog(p.descripcion);
+    }
+
+    void resetAnimacion() {
+        Animacion::reset(anim_estado);
     }
 
         // PANEL DE HERRAMIENTAS
@@ -411,15 +215,15 @@ private:
 
         // Barra de progreso
         float progreso = 0.0f;
-        if (!pasos_animacion.empty())
-            progreso = (float)(paso_actual + 1) / (float)pasos_animacion.size();
+        if (!anim_estado.pasos.empty())
+            progreso = (float)(anim_estado.paso_actual + 1) / (float)anim_estado.pasos.size();
 
         ImGui::ProgressBar(progreso, ImVec2(-1, 8));
-        ImGui::Text("Paso %d / %d", paso_actual + 1, (int)pasos_animacion.size());
+        ImGui::Text("Paso %d / %d", anim_estado.paso_actual + 1, (int)anim_estado.pasos.size());
 
         // Descripcion del paso actual
-        if (paso_actual >= 0 && paso_actual < (int)pasos_animacion.size()) {
-            const auto& paso = pasos_animacion[paso_actual];
+        if (anim_estado.paso_actual >= 0 && anim_estado.paso_actual < (int)anim_estado.pasos.size()) {
+            const auto& paso = anim_estado.pasos[anim_estado.paso_actual];
             if (!paso.descripcion.empty()) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180, 230, 255, 255));
                 ImGui::TextWrapped("%s", paso.descripcion.c_str());
@@ -427,24 +231,24 @@ private:
             }
         }
 
-        ImGui::SliderFloat("Velocidad##anim", &velocidad_paso, 0.05f, 2.0f, "%.2f s/paso");
+        ImGui::SliderFloat("Velocidad##anim", &anim_estado.velocidad_paso, 0.05f, 2.0f, "%.2f s/paso");
 
         float bw = (ancho - 16) / 3.0f;
-        if (animacion_activa && !animacion_pausada) {
+        if (anim_estado.activa && !anim_estado.pausada) {
             if (ImGui::Button(ICON_FA_PAUSE " Pausar", ImVec2(bw, 0)))
-                animacion_pausada = true;
+                anim_estado.pausada = true;
         } else {
             if (ImGui::Button(ICON_FA_PLAY " Play", ImVec2(bw, 0))) {
-                if (!animacion_activa && paso_actual >= 0) animacion_activa = true;
-                animacion_pausada = false;
+                if (!anim_estado.activa && anim_estado.paso_actual >= 0) anim_estado.activa = true;
+                anim_estado.pausada = false;
             }
         }
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_FORWARD_STEP " Paso", ImVec2(bw, 0))) {
-            if (paso_actual + 1 < (int)pasos_animacion.size()) {
-                paso_actual++;
-                aplicarPaso(pasos_animacion[paso_actual]);
-                animacion_pausada = true;
+            if (anim_estado.paso_actual + 1 < (int)anim_estado.pasos.size()) {
+                anim_estado.paso_actual++;
+                aplicarPaso(anim_estado.pasos[anim_estado.paso_actual]);
+                anim_estado.pausada = true;
             }
         }
         ImGui::SameLine();
@@ -541,7 +345,7 @@ private:
         }
 
         // Controles de animacion — siempre visibles cuando hay animacion activa
-        if (animacion_activa || paso_actual >= 0) {
+        if (anim_estado.activa || anim_estado.paso_actual >= 0) {
             ImGui::Separator();
             dibujarControlesAnimacion();
         }
@@ -701,11 +505,11 @@ private:
             }
             ImGui::TextWrapped("%s", ruta_str.c_str());
             ImGui::Text("Saltos: %d", (int)ruta_optima.size() - 1);
-        } else if (!animacion_activa) {
+        } else if (!anim_estado.activa) {
             ImGui::TextDisabled("Ejecuta un algoritmo para ver resultados.");
         }
 
-        if (animacion_activa && !dijkstra_tabla_dist.empty()) {
+        if (anim_estado.activa && !dijkstra_tabla_dist.empty()) {
             ImGui::Separator();
             ImGui::Text("Tabla de distancias:");
             if (ImGui::BeginTable("tabDist", 2,
@@ -1801,25 +1605,25 @@ private:
 
                 if (!es_g2) {
                     // Animacion: color de aristas
-                    bool anim_activa_o_finalizada = (animacion_activa || paso_actual >= 0);
+                    bool anim_activa_o_finalizada = (anim_estado.activa || anim_estado.paso_actual >= 0);
                     
                     if (anim_activa_o_finalizada) {
                         auto parR = std::make_pair(a.destino_id, a.origen_id);
 
-                        if (aristas_confirmadas.count(par) || aristas_confirmadas.count({a.origen_id, a.destino_id}) ||
-                            aristas_confirmadas.count(parR)) {
+                        if (anim_estado.confirmadas.count(par) || anim_estado.confirmadas.count({a.origen_id, a.destino_id}) ||
+                            anim_estado.confirmadas.count(parR)) {
                             // Arista confirmada: dorada con brillo
                             col    = IM_COL32(255, 179, 0, 255);
                             grosor = 5.0f;
                             // Agregar linea de brillo encima
                             dl->AddLine(o->posicion, d->posicion,
                                 IM_COL32(255, 230, 100, 80), grosor + 4.0f);
-                        } else if (aristas_exploradas.count(par) || aristas_exploradas.count({a.origen_id, a.destino_id}) ||
-                                   aristas_exploradas.count(parR)) {
+                        } else if (anim_estado.exploradas.count(par) || anim_estado.exploradas.count({a.origen_id, a.destino_id}) ||
+                                   anim_estado.exploradas.count(parR)) {
                             col    = IM_COL32(0, 188, 212, 220);
                             grosor = 3.5f;
-                        } else if (aristas_descartadas.count(par) || aristas_descartadas.count({a.origen_id, a.destino_id}) ||
-                                   aristas_descartadas.count(parR)) {
+                        } else if (anim_estado.descartadas.count(par) || anim_estado.descartadas.count({a.origen_id, a.destino_id}) ||
+                                   anim_estado.descartadas.count(parR)) {
                             // Arista descartada: roja pulsante
                             float pulse_a = (sinf((float)ImGui::GetTime() * 5.0f) + 1.0f) * 0.5f;
                             col    = IM_COL32(255, 68, 68, (int)(60 + pulse_a * 60));
@@ -1829,7 +1633,7 @@ private:
                     
                     // Mostrar resultados finales siempre que no este corriendo la animacion activamente
                     // o cuando haya terminado.
-                    bool mostrar_resultados_finales = (!animacion_activa && paso_actual >= (int)pasos_animacion.size() - 1);
+                    bool mostrar_resultados_finales = (!anim_estado.activa && anim_estado.paso_actual >= (int)anim_estado.pasos.size() - 1);
                     
                     if (!anim_activa_o_finalizada || mostrar_resultados_finales) {
                         // Dijkstra highlight
@@ -1936,15 +1740,15 @@ private:
             float tiempo = (float)ImGui::GetTime();
             for (auto& n : g_dib.nodos) {
                 ImU32 colorFondo, colorBorde;
-                bool es_anim = (!es_g2 && (animacion_activa || paso_actual >= 0));
+                bool es_anim = (!es_g2 && (anim_estado.activa || anim_estado.paso_actual >= 0));
 
                 if (es_g2) {
                     colorFondo = IM_COL32(180, 180, 0, 255);
                     colorBorde = IM_COL32(255, 255, 100, 255);
-                } else if (es_anim && nodos_procesando.count(n.id)) {
+                } else if (es_anim && anim_estado.procesando.count(n.id)) {
                     colorFondo = IM_COL32(255, 215, 0, 200);
                     colorBorde = IM_COL32(255, 235, 100, 255);
-                } else if (es_anim && nodos_visitados.count(n.id)) {
+                } else if (es_anim && anim_estado.visitados.count(n.id)) {
                     colorFondo = IM_COL32(0, 230, 118, 200);
                     colorBorde = IM_COL32(100, 255, 180, 255);
                 } else if (mostrar_coloreo && (int)colores_nodos.size() > n.id && colores_nodos[n.id] != -1) {
@@ -2011,11 +1815,11 @@ private:
                 }
 
                 // Efecto de "pop" al ser visitado por primera vez
-                if (es_anim && nodos_visitados.count(n.id) &&
-                    tiempo_visita_nodo.count(n.id)) {
-                    float t_since = (float)ImGui::GetTime() - tiempo_visita_nodo[n.id];
+                if (es_anim && anim_estado.visitados.count(n.id) &&
+                    anim_estado.tiempo_visita_nodo.count(n.id)) {
+                    float t_since = (float)ImGui::GetTime() - anim_estado.tiempo_visita_nodo[n.id];
                     if (t_since < 0.4f) {
-                        float scale = 1.0f + easeOutBounce(t_since / 0.4f) * 0.3f;
+                        float scale = 1.0f + Easing::easeOutBounce(t_since / 0.4f) * 0.3f;
                         float r_extra = n.radio * (scale - 1.0f);
                         dl->AddCircleFilled(n.posicion, n.radio + r_extra,
                             IM_COL32(0, 230, 120, 80), 32);
@@ -2081,7 +1885,7 @@ private:
                     Nodo* nd = g_dib.obtenerNodo(v);
                     if (!no || !nd) continue;
 
-                    float t = easeInOutCubic(pkt.progreso);
+                    float t = Easing::easeInOutCubic(pkt.progreso);
                     ImVec2 pos_pkt(
                         no->posicion.x + (nd->posicion.x - no->posicion.x) * t,
                         no->posicion.y + (nd->posicion.y - no->posicion.y) * t
@@ -2109,71 +1913,25 @@ private:
             }
 
             // ── Dibujar particula de animacion ─────────────────────────────────
-            if ((animacion_activa || paso_actual >= 0) && particula_activa.activa) {
-                float t_ease = easeInOutCubic(particula_activa.progreso);
+            if ((anim_estado.activa || anim_estado.paso_actual >= 0) && anim_estado.particula.activa) {
+                float t_ease = Easing::easeInOutCubic(anim_estado.particula.progreso);
 
                 ImVec2 pos(
-                    particula_activa.pos_inicio.x + (particula_activa.pos_fin.x - particula_activa.pos_inicio.x) * t_ease,
-                    particula_activa.pos_inicio.y + (particula_activa.pos_fin.y - particula_activa.pos_inicio.y) * t_ease
+                    anim_estado.particula.pos_inicio.x + (anim_estado.particula.pos_fin.x - anim_estado.particula.pos_inicio.x) * t_ease,
+                    anim_estado.particula.pos_inicio.y + (anim_estado.particula.pos_fin.y - anim_estado.particula.pos_inicio.y) * t_ease
                 );
 
                 // Halo exterior pulsante
-                float halo_r = particula_activa.radio * 2.5f * (1.0f - particula_activa.progreso * 0.5f);
-                ImU32 col_halo = (particula_activa.color & 0x00FFFFFF) | (60 << 24);
+                float halo_r = anim_estado.particula.radio * 2.5f * (1.0f - anim_estado.particula.progreso * 0.5f);
+                ImU32 col_halo = (anim_estado.particula.color & 0x00FFFFFF) | (60 << 24);
                 dl->AddCircleFilled(pos, halo_r, col_halo, 24);
 
                 // Punto principal
-                dl->AddCircleFilled(pos, particula_activa.radio, particula_activa.color, 24);
+                dl->AddCircleFilled(pos, anim_estado.particula.radio, anim_estado.particula.color, 24);
 
                 // Brillo central
-                dl->AddCircleFilled(pos, particula_activa.radio * 0.4f, IM_COL32(255, 255, 255, 200), 16);
+                dl->AddCircleFilled(pos, anim_estado.particula.radio * 0.4f, IM_COL32(255, 255, 255, 200), 16);
             }
-        }
-
-        // ─── Fallback: Cargar manualmente ───
-        if (ImGui::BeginPopupModal("FallbackCargar", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("No se pudo abrir el dialogo del sistema.");
-            ImGui::Text("Escribi la ruta del archivo .json manualmente:");
-            static char ruta_cargar[256] = {};
-            ImGui::SetNextItemWidth(400);
-            ImGui::InputText("##rutaCargar", ruta_cargar, sizeof(ruta_cargar));
-            ImGui::Spacing();
-            if (ImGui::Button("Cargar", ImVec2(120, 0))) {
-                if (strlen(ruta_cargar) > 0) {
-                    Persistencia::cargar(red, std::string(ruta_cargar));
-                    resetAnimacion();
-                    ruta_optima.clear(); aristas_mst.clear(); mostrar_mst = false;
-                    registrarLog("[OK] Cargado desde ruta manual: " + std::string(ruta_cargar));
-                    memset(ruta_cargar, 0, sizeof(ruta_cargar));
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancelar", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-        }
-
-        // ─── Fallback: Guardar manualmente ───
-        if (ImGui::BeginPopupModal("FallbackGuardar", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("No se pudo abrir el dialogo del sistema.");
-            ImGui::Text("Asegurate de que la ruta sea valida o relativa al binario:");
-            static char ruta_guardar[256] = {};
-            ImGui::SetNextItemWidth(400);
-            ImGui::InputText("##rutaGuardar", ruta_guardar, sizeof(ruta_guardar));
-            ImGui::Spacing();
-            if (ImGui::Button("Guardar", ImVec2(120, 0))) {
-                if (strlen(ruta_guardar) > 0) {
-                    std::string ruta = ruta_guardar;
-                    if (ruta.find(".json") == std::string::npos) ruta += ".json";
-                    Persistencia::guardar(red, ruta);
-                    registrarLog("[OK] Guardado en ruta manual: " + ruta);
-                    memset(ruta_guardar, 0, sizeof(ruta_guardar));
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancelar", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
         }
 
         ImGui::End();
@@ -2359,137 +2117,141 @@ private:
         ImGui::End();
     }
 
-        // BARRA DE ESTADO
-        void dibujarStatusBar() {
-        ImGuiViewport* vp = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2(vp->Pos.x, vp->Pos.y + vp->Size.y - 30));
-        ImGui::SetNextWindowSize(ImVec2(vp->Size.x, 30));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 6));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.07f, 0.07f, 0.09f, 1.0f));
-        ImGui::Begin("##StatusBar", nullptr,
-            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse |
-            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking |
-            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+    };  // class Interfaz
 
-        const char* modo_txt = (modo_actual == ModoApp::Grafos) ? ICON_FA_DIAGRAM_PROJECT " GRAFOS" : ICON_FA_NETWORK_WIRED " REDES";
-        ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f), "%s", modo_txt);
+// ── Includes de modulos de UI (despues de la definicion de Interfaz) ──────
+#include "interfaz/componentes/StatusBar.h"
+#include "interfaz/componentes/MenuPrincipal.h"
+#include "interfaz/componentes/Dialogos.h"
 
-        ImGui::SameLine(180);
-        if (animacion_activa) {
-            ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.0f, 1.0f), ICON_FA_SPINNER " ANIMANDO");
-        } else if (modo_actual == ModoApp::Redes && sim_inicializada) {
-            if (simulador.estado.activa) {
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), ICON_FA_PLAY " SIMULANDO x%.1f", simulador.estado.velocidad);
-            } else {
-                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PAUSE " PAUSADA");
+// ── Cuerpo de dibujar() — definido aqui para que los modulos esten visibles ─
+inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
+    // Tick de simulacion de red
+    if (modo_actual == ModoApp::Redes && sim_inicializada) {
+        simulador.tick(red, ImGui::GetIO().DeltaTime);
+    }
+
+    // Avanzar animacion
+    if (anim_estado.activa && !anim_estado.pausada) {
+        float dt = ImGui::GetIO().DeltaTime;
+        anim_estado.timer_paso += dt;
+
+        // Actualizar particula en movimiento
+        if (anim_estado.particula.activa) {
+            anim_estado.particula.progreso += dt / anim_estado.particula.duracion;
+            if (anim_estado.particula.progreso >= 1.0f) {
+                anim_estado.particula.progreso = 1.0f;
+                anim_estado.particula.activa  = false;
             }
-            ImGui::SameLine(400);
-            ImGui::Text("T: %.0fs | Flujos: %d | Paqs: %d",
-                simulador.estado.tiempo,
-                (int)simulador.estado.flujos.size(),
-                (int)simulador.obtenerPaquetes().size());
-        } else if (simulacion_jitter && modo_actual == ModoApp::Redes) {
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), ICON_FA_WAVE_SQUARE " JITTER ACTIVO");
-        } else {
-            ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.5f, 1.0f), ICON_FA_CIRCLE_CHECK " ENGINE OK");
         }
 
-        ImGui::SameLine(650);
-        ImGui::Text("FPS: %.0f", ImGui::GetIO().Framerate);
+        // Avanzar al siguiente paso cuando el timer vence
+        if (anim_estado.timer_paso >= anim_estado.velocidad_paso && anim_estado.activa) {
+            anim_estado.timer_paso -= anim_estado.velocidad_paso;
+            anim_estado.paso_actual++;
+            if (anim_estado.paso_actual >= (int)anim_estado.pasos.size()) {
+                anim_estado.activa = false;
+            } else {
+                const PasoAnimacion& paso = anim_estado.pasos[anim_estado.paso_actual];
+                aplicarPaso(paso);
 
-        ImGui::SameLine(750);
-        if (g_sonidos.funciona()) {
-            float v = g_sonidos.getVolumen();
-            ImGui::TextColored(ImVec4(0.3f, 0.8f, 0.3f, 1.0f),
-                ICON_FA_VOLUME_HIGH " %d%%", (int)(v*100));
-        } else {
-            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f),
-                ICON_FA_VOLUME_XMARK " SIN AUDIO");
-        }
+                // Lanzar particula si el paso involucra una arista
+                if (paso.arista_origen >= 0 && paso.arista_destino >= 0) {
+                    Nodo* o = red.obtenerNodo(paso.arista_origen);
+                    Nodo* d = red.obtenerNodo(paso.arista_destino);
+                    if (o && d) {
+                        anim_estado.particula.activa     = true;
+                        anim_estado.particula.pos_inicio = o->posicion;
+                        anim_estado.particula.pos_fin    = d->posicion;
+                        anim_estado.particula.progreso   = 0.0f;
+                        anim_estado.particula.duracion   = anim_estado.velocidad_paso * 0.8f;
 
-        ImGui::End();
-        ImGui::PopStyleColor();
-        ImGui::PopStyleVar();
-    }
-
-        // ANIMACION
-        void iniciarAnimacion(std::vector<PasoAnimacion> pasos) {
-        resetAnimacion();
-        pasos_animacion = std::move(pasos);
-        animacion_activa = true;
-        animacion_pausada = false;
-        paso_actual = -1;
-        timer_paso = 0.0f;
-        if (!pasos_animacion.empty()) {
-            registrarLog("Animacion iniciada: " + std::to_string(pasos_animacion.size()) + " pasos");
-            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
-        }
-    }
-
-    void aplicarPaso(const PasoAnimacion& p) {
-        switch (p.accion) {
-            case PasoAnimacion::VISITAR:
-                if (p.nodo_id >= 0) {
-                    nodos_procesando.insert(p.nodo_id);
-                    nodos_visitados.insert(p.nodo_id);
-                    tiempo_visita_nodo[p.nodo_id] = (float)ImGui::GetTime();
+                        // Color segun tipo de paso
+                        switch (paso.accion) {
+                            case PasoAnimacion::EXPLORAR:
+                                anim_estado.particula.color = IM_COL32(0, 200, 255, 255);
+                                break;
+                            case PasoAnimacion::CONFIRMAR:
+                                anim_estado.particula.color = IM_COL32(255, 180, 0, 255);
+                                break;
+                            case PasoAnimacion::DESCARTAR:
+                                anim_estado.particula.color = IM_COL32(255, 60, 60, 200);
+                                break;
+                            default:
+                                anim_estado.particula.color = IM_COL32(0, 255, 180, 255);
+                                break;
+                        }
+                    }
                 }
-                g_sonidos.reproducir(Sonidos::VISITAR_NODO);
-                break;
-            case PasoAnimacion::CONFIRMAR:
-                if (p.nodo_id >= 0) {
-                    nodos_procesando.erase(p.nodo_id);
-                    nodos_visitados.insert(p.nodo_id);
-                }
-                if (p.arista_origen >= 0 && p.arista_destino >= 0) {
-                    aristas_confirmadas.insert({p.arista_origen, p.arista_destino});
-                    aristas_exploradas.erase({p.arista_origen, p.arista_destino});
-                }
-                g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
-                break;
-            case PasoAnimacion::EXPLORAR:
-                if (p.arista_origen >= 0 && p.arista_destino >= 0)
-                    aristas_exploradas.insert({p.arista_origen, p.arista_destino});
-                g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO);
-                break;
-            case PasoAnimacion::DESCARTAR:
-                if (p.arista_origen >= 0 && p.arista_destino >= 0)
-                    aristas_descartadas.insert({p.arista_origen, p.arista_destino});
-                g_sonidos.reproducir(Sonidos::DESCARTAR);
-                break;
-        }
-        if (!p.descripcion.empty()) registrarLog(p.descripcion);
-    }
-
-    void resetAnimacion() {
-        pasos_animacion.clear();
-        paso_actual = -1;
-        timer_paso = 0.0f;
-        animacion_activa = false;
-        animacion_pausada = false;
-        nodos_visitados.clear();
-        nodos_procesando.clear();
-        aristas_exploradas.clear();
-        aristas_confirmadas.clear();
-        aristas_descartadas.clear();
-        particula_activa.activa = false;
-        tiempo_visita_nodo.clear();
-    }
-
-        // UTILIDADES
-        void registrarLog(const std::string& msg) {
-        system_logs.push_back("[SYS] " + msg);
-        if (system_logs.size() > 100) system_logs.erase(system_logs.begin());
-    }
-
-    const char* iconoHardware(TipoHardware tipo) {
-        switch (tipo) {
-            case TipoHardware::Servidor: return ICON_FA_SERVER;
-            case TipoHardware::Router:   return ICON_FA_NETWORK_WIRED;
-            case TipoHardware::Switch:   return ICON_FA_RIGHT_LEFT;
-            case TipoHardware::Firewall: return ICON_FA_SHIELD_HALVED;
-            case TipoHardware::Terminal: return ICON_FA_DESKTOP;
-            default: return ICON_FA_CIRCLE;
+            }
         }
     }
-};
+
+    // Jitter
+    if (simulacion_jitter && modo_actual == ModoApp::Redes) {
+        red.aplicarJitter(jitter_porcentaje);
+    } else {
+        red.resetearPesos();
+    }
+
+    MenuPrincipal::dibujar(*this, red, ventana);
+
+    // DockSpace manual (deja 30px para StatusBar)
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(vp->WorkPos);
+    ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
+    ImGui::SetNextWindowViewport(vp->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin("##DockArea", nullptr,
+        ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dock_id = ImGui::GetID("OptiClustersDock");
+    ImGui::DockSpace(dock_id);
+
+    static bool layout_init = false;
+    if (!layout_init) {
+        layout_init = true;
+        std::ifstream ini_check("imgui.ini");
+        if (!ini_check.good()) {
+            ImGui::DockBuilderRemoveNode(dock_id);
+            ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dock_id, ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
+
+            ImGuiID main_id = dock_id;
+            ImGuiID izq_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Left, 0.22f, nullptr, &main_id);
+            ImGuiID der_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Right, 0.28f, nullptr, &main_id);
+            ImGuiID abajo_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Down, 0.25f, nullptr, &main_id);
+
+            ImGuiID redes_id = ImGui::DockBuilderSplitNode(izq_id, ImGuiDir_Down, 0.5f, nullptr, &izq_id);
+            ImGui::DockBuilderDockWindow("Panel de Red", redes_id);
+
+            ImGui::DockBuilderDockWindow("Herramientas de Red", izq_id);
+            ImGui::DockBuilderDockWindow("Matrices", der_id);
+            ImGui::DockBuilderDockWindow("Registro del Kernel", abajo_id);
+            ImGui::DockBuilderDockWindow("Lienzo de Red", main_id);
+            ImGui::DockBuilderFinish(dock_id);
+        }
+    }
+    ImGui::End();
+
+    dibujarPanelHerramientas(red);
+    if (modo_actual == ModoApp::Redes) {
+        dibujarPanelRedes(red);
+    }
+    dibujarLienzo(red);
+    dibujarMatrices(red);
+    dibujarPanelLogs();
+
+    // Dialogos modales
+    Dialogos::acercaDe();
+    Dialogos::fallbackCargar(*this, red);
+    Dialogos::fallbackGuardar(*this, red);
+
+    StatusBar::dibujar(*this);
+}

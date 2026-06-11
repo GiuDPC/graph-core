@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-#include "imgui.h"          // ImVec2 — unico header de ImGui permitido en tipos
+#include "imgui.h"          // ImVec2 (miembro de datos: necesita definición completa, no solo forward decl)
+                             // TODO(refactor): extraer Posicion2D propia del dominio para eliminar dependencia de ImGui
 #include "TipoHardware.h"
 
 // Nodo del grafo
