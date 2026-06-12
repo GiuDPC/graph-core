@@ -103,7 +103,7 @@ inline std::vector<PasoAnimacion> generarPasosColoreo(const Grafo& g) {
     int primero = g.nodos[0].id;
     colores[primero] = 0;
     pasos.push_back({PasoAnimacion::COLOREAR, primero, -1, -1,
-        "Color 0 → " + g.nombreNodo(primero)});
+        "color 0 -> " + g.nombreNodo(primero)});
 
     for (size_t i = 1; i < g.nodos.size(); i++) {
         int u = g.nodos[i].id;
@@ -122,7 +122,7 @@ inline std::vector<PasoAnimacion> generarPasosColoreo(const Grafo& g) {
         colores[u] = c;
 
         pasos.push_back({PasoAnimacion::COLOREAR, u, -1, -1,
-            "Color " + std::to_string(c) + " → " + g.nombreNodo(u)});
+            "color " + std::to_string(c) + " -> " + g.nombreNodo(u)});
     }
     return pasos;
 }

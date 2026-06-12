@@ -332,6 +332,8 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
         construirLayout(dock_id, dock_size);
         ImGui::DockBuilderFinish(dock_id);
+        // Asegurar que quede activa de entrada
+        ImGui::SetWindowFocus("Lienzo de Red");
     }
     ImGui::End();
 

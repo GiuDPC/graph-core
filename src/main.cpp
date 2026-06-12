@@ -126,13 +126,15 @@ int main(int, char**) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* ventana = glfwCreateWindow(
-        1500, 900, "OptiClusters", nullptr, nullptr
+        1500, 900, "graphCore", nullptr, nullptr
     );
     if (!ventana) {
         fprintf(stderr, "Error: No se pudo crear la ventana GLFW\n");
         glfwTerminate();
         return 1;
     }
+
+    setWindowIcon(ventana, "graph-core-logo.png");
 
     glfwMakeContextCurrent(ventana);
     glfwSwapInterval(1);
@@ -182,8 +184,8 @@ int main(int, char**) {
     static Interfaz ui;
     ui.estado_ui.fontMono = g_fontMono;
 
-    TextureInfo logo = cargarTextura("/home/giuseppe/Escritorio/OptiClusters/graph-core-logo.png");
-    setWindowIcon(ventana, "/home/giuseppe/Escritorio/OptiClusters/graph-core-logo.png");
+    TextureInfo logo = cargarTextura("/home/giuseppe/Escritorio/graphCore/graph-core-logo.png");
+    setWindowIcon(ventana, "/home/giuseppe/Escritorio/graphCore/graph-core-logo.png");
     ui.estado_ui.id_logo = logo.id;
     ui.estado_ui.width_logo = logo.width;
     ui.estado_ui.height_logo = logo.height;

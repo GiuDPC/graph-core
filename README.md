@@ -1,4 +1,4 @@
-# graphCore: Simulador y Visualizador de Grafos y Redes
+# GraphCore: Simulador y Visualizador de Grafos y Redes
 
 Version 2.0.0. Aplicacion de escritorio para la visualizacion interactiva de algoritmos sobre
 grafos y la simulacion de trafico de red a nivel de paquetes. Construida con C++17, Dear ImGui,
@@ -34,6 +34,9 @@ GLFW y OpenGL 3.3.
 - **Planaridad** -- Verificacion de la cota de Euler (|E| <= 3|V| - 6), deteccion
   heuristica de subdivisiones de K5 y K3.3 (teorema de Kuratowski), deteccion de cruces
   entre aristas con resaltado visual.
+- **Generadores Fractales** -- Construccion automatizada de topologias matematicas complejas basadas en patrones recursivos. Incluye 5 generadores: Triangulo de Sierpinski, Mandala Geometrico (Planar), Arbol Fractal, Copo de Nieve de Koch y Malla Hexagonal. Ideales para pruebas de estres algoritmico y aplicacion de teorias de coloreo dinamico.
+- **Detector Automático de Propiedades** -- Identificación en tiempo real de características del grafo en la barra lateral: Conexo, Bipartito, Árbol, Completo, Regular y Euleriano.
+- **Euler y Hamilton** -- Búsqueda de circuitos y caminos eulerianos (algoritmo de Hierholzer) y caminos hamiltonianos mediante backtracking. Detecta automáticamente si el grafo es euleriano.
 
 ### Simulacion de red
 
@@ -123,7 +126,7 @@ sudo pacman -S cmake glfw-x11 wayland
 ### Linux (GCC/Clang)
 ```bash
 git clone <repositorio>
-cd graphCore
+cd GraphCore
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```
@@ -136,7 +139,7 @@ pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
 
 # En la terminal MSYS2 MinGW 64-bit:
 git clone <repositorio>
-cd graphCore
+cd GraphCore
 cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```

@@ -57,6 +57,11 @@ inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
                 g_sonidos.reproducir(Sonidos::DESCARTAR);
                 break;
             case PasoAnimacion::COLOREAR:
+                if (p.nodo_id >= 0 && p.nodo_id < (int)self.estado_grafos.resultado_coloreo.colores.size()) {
+                    if (self.estado_grafos.colores_nodos.size() < self.estado_grafos.resultado_coloreo.colores.size())
+                        self.estado_grafos.colores_nodos.resize(self.estado_grafos.resultado_coloreo.colores.size(), -1);
+                    self.estado_grafos.colores_nodos[p.nodo_id] = self.estado_grafos.resultado_coloreo.colores[p.nodo_id];
+                }
                 g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
                 break;
         }

@@ -21,6 +21,8 @@ struct EstadoUI {
         CatColoreo,
         CatIsomorfismo,
         CatMatrices,
+        CatFractales,
+        CatEulerHamilton,
         // redes
         CatTopologia,
         CatSimular,

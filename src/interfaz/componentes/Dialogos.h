@@ -17,8 +17,8 @@ void acercaDe() {
         
         // Titulo
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.9f, 0.7f, 1.0f));
-        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("OptiClusters").x) * 0.5f);
-        ImGui::Text("OptiClusters");
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graphCore").x) * 0.5f);
+        ImGui::Text("graphCore");
         ImGui::PopStyleColor();
         
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v2.0").x) * 0.5f);

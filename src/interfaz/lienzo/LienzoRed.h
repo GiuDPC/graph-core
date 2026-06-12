@@ -60,6 +60,11 @@ inline ImU32 imColorProtocolo(const std::string& tipo) {
 
 // ── Funcion principal de dibujo ─────────────────────────────────────────────
 inline void dibujar(Grafo& red, Interfaz& self) {
+    static bool primera_vez = true;
+    if (primera_vez) {
+        ImGui::SetNextWindowFocus();
+        primera_vez = false;
+    }
     ImGui::Begin("Lienzo de Red");
     ImVec2 tamano = ImGui::GetContentRegionAvail();
     ImDrawList* dl = ImGui::GetWindowDrawList();
@@ -670,22 +675,22 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         if (self.estado_grafos.mostrar_coloreo) {
             char buf[128];
             if (self.estado_grafos.modo_fractal) {
-                snprintf(buf, sizeof(buf), "coloreo fractal: mandelbrot modula colores greedy | χ=%d",
+                snprintf(buf, sizeof(buf), "coloreo fractal (colores dinamicos) | colores=%d",
                     self.estado_grafos.resultado_coloreo.num_colores);
                 dl->AddText(ImVec2(ox, oy), IM_COL32(200, 100, 255, 240), ICON_FA_FAN);
                 dl->AddText(ImVec2(ox + 22, oy), IM_COL32(200, 100, 255, 240), buf);
                 oy += 22;
                 dl->AddText(ImVec2(ox, oy), IM_COL32(150, 60, 200, 180),
-                    "cada nodo hereda color greedy + fractal segun posicion en canvas");
+                    "los nodos cambian de color con el tiempo segun su posicion fractal");
             } else {
-                snprintf(buf, sizeof(buf), "coloreo greedy | χ(greedy)=%d  χ(welsh-powell)=%d",
+                snprintf(buf, sizeof(buf), "coloreo clasico | colores usados: %d (greedy), %d (welsh-powell)",
                     self.estado_grafos.resultado_coloreo.num_colores,
                     self.estado_grafos.resultado_welsh_powell.num_colores);
                 dl->AddText(ImVec2(ox, oy), IM_COL32(200, 100, 255, 240), ICON_FA_PAINTBRUSH);
                 dl->AddText(ImVec2(ox + 22, oy), IM_COL32(200, 100, 255, 240), buf);
                 oy += 22;
                 dl->AddText(ImVec2(ox, oy), IM_COL32(150, 60, 200, 180),
-                    "adyacentes tienen colores distintos (greedy = cota superior)");
+                    "dos nodos conectados nunca comparten el mismo color");
             }
             oy += 22;
 
