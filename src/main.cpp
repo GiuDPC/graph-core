@@ -12,6 +12,8 @@
 ImFont* g_fontMono = nullptr;
 Sonidos g_sonidos; // sistema de audio global
 
+#include "interfaz/util/TextureLoader.h"
+
 static void callbackErrorGlfw(int error, const char* descripcion) {
     fprintf(stderr, "[GLFW ERROR %d] %s\n", error, descripcion);
 }
@@ -124,7 +126,7 @@ int main(int, char**) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* ventana = glfwCreateWindow(
-        1500, 900, "graph-core v1.0", nullptr, nullptr
+        1500, 900, "OptiClusters", nullptr, nullptr
     );
     if (!ventana) {
         fprintf(stderr, "Error: No se pudo crear la ventana GLFW\n");
@@ -141,6 +143,7 @@ int main(int, char**) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
+    io.IniFilename = nullptr; // Desactivar el guardado del layout en ini para usar siempre la estructura predefinida
 
     // --- Cargar fuentes ---
     ImFont* fontMain = io.Fonts->AddFontFromFileTTF("recursos/fuentes/Roboto-Regular.ttf", 16.0f);
@@ -177,7 +180,13 @@ int main(int, char**) {
     ImVec4 colorFondo = ImVec4(0.06f, 0.06f, 0.08f, 1.00f);
     Grafo red;
     static Interfaz ui;
-    ui.fontMono = g_fontMono;
+    ui.estado_ui.fontMono = g_fontMono;
+
+    TextureInfo logo = cargarTextura("/home/giuseppe/Escritorio/OptiClusters/graph-core-logo.png");
+    setWindowIcon(ventana, "/home/giuseppe/Escritorio/OptiClusters/graph-core-logo.png");
+    ui.estado_ui.id_logo = logo.id;
+    ui.estado_ui.width_logo = logo.width;
+    ui.estado_ui.height_logo = logo.height;
 
     while (!glfwWindowShouldClose(ventana)) {
         glfwPollEvents();

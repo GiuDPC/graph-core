@@ -5,8 +5,10 @@
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.h"
 #include "nucleo/algoritmos/Isomorfismo.h"
+#include "audio/Sonidos.h"
 
 class Interfaz;
+extern Sonidos g_sonidos;
 
 namespace PanelIsomorfismo {
 
@@ -35,8 +37,8 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         }
         if (ImGui::BeginTabItem("G2 (El Grafo a Comparar)")) {
             ImGui::Text("Nodos: %d  |  Aristas: %d",
-                (int)self.grafo_iso_g2.nodos.size(), (int)self.grafo_iso_g2.aristas.size());
-            auto degs = Algoritmos::Isomorfismo::secuenciaGrados(self.grafo_iso_g2);
+                (int)self.estado_grafos.grafo_iso_g2.nodos.size(), (int)self.estado_grafos.grafo_iso_g2.aristas.size());
+            auto degs = Algoritmos::Isomorfismo::secuenciaGrados(self.estado_grafos.grafo_iso_g2);
             std::string dstr;
             for (int d : degs) dstr += std::to_string(d) + " ";
             ImGui::TextWrapped("Secuencia de grados: %s", dstr.c_str());
@@ -45,13 +47,13 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
                 "Opciones para G2:");
 
-            if (ImGui::Button(ICON_FA_WAND_MAGIC_SPARKLES " Generar Isomorfo Automatico", ImVec2(-1, 0))) {
-                self.grafo_iso_g2.limpiar();
+            if (ImGui::Button(ICON_FA_WAND_MAGIC_SPARKLES " Generar Aleatorio", ImVec2(-1, 32))) {
+                self.estado_grafos.grafo_iso_g2.limpiar();
                 if (!red.nodos.empty()) {
                     std::vector<int> idx(red.nodos.size());
                     for (size_t i = 0; i < idx.size(); ++i) idx[i] = i;
                     for (size_t i = 0; i < idx.size(); ++i) {
-                        size_t j = i + rand() % (idx.size() - i);
+                        size_t j = i + std::uniform_int_distribution<size_t>(0, idx.size() - i - 1)(red.obtenerGeneradorAleatorio());
                         std::swap(idx[i], idx[j]);
                     }
                     std::map<int, int> mapa;
@@ -72,47 +74,57 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                         float ang = (2.0f * 3.14159f / idx.size()) * i;
                         Nodo n(i, ImVec2(cx + cosf(ang) * radio, cy + sinf(ang) * radio), n_orig.tipo);
                         n.nombre = "Iso_" + n_orig.nombre;
-                        self.grafo_iso_g2.nodos.push_back(n);
+                        self.estado_grafos.grafo_iso_g2.nodos.push_back(n);
                         mapa[n_orig.id] = i;
                     }
                     for (const auto& a : red.aristas) {
-                        self.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
+                        self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
                     }
-                    self.grafo_iso_g2.contador_ids = (int)red.nodos.size();
-                    self.iso_editando_g2 = true;
-                    self.iso_analizado = false;
-                    self.registrarLog("[OK] G2 generado automaticamente. ¡Estan desordenados pero son identicos!");
+                    self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
+                    self.estado_grafos.iso_editando_g2 = true;
+                    self.estado_grafos.iso_analizado = false;
+                    self.registrarLog("[OK] G2 generado. Estan desordenados pero identicos.");
+                    g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
                 }
             }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Crea una copia del grafo con permutacion aleatoria.");
 
-            ImGui::Checkbox("Dibujar G2 manualmente", &self.iso_editando_g2);
-            if (self.iso_editando_g2) {
+            ImGui::Checkbox("Dibujar G2 manualmente", &self.estado_grafos.iso_editando_g2);
+            if (self.estado_grafos.iso_editando_g2) {
                 ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f),
                     ICON_FA_PENCIL " Click derecho en el lienzo para crear nodos/aristas en G2");
             }
-            if (ImGui::Button("Limpiar G2", ImVec2(-1, 0))) {
-                self.grafo_iso_g2.limpiar();
-                self.iso_analizado = false;
+            if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {
+                self.estado_grafos.grafo_iso_g2.limpiar();
+                self.estado_grafos.iso_analizado = false;
             }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Elimina el segundo grafo y reinicia la verificacion de isomorfismo.");
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
     }
 
     ImGui::Separator();
-    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Verificar Isomorfismo", ImVec2(-1, 36))) {
-        if (red.nodos.empty() || self.grafo_iso_g2.nodos.empty()) {
+    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Verificar Isomorfismo", ImVec2(-1, 32))) {
+        if (red.nodos.empty() || self.estado_grafos.grafo_iso_g2.nodos.empty()) {
             self.registrarLog("[!] Isomorfismo: ambos grafos deben tener nodos");
+            g_sonidos.reproducir(Sonidos::DESCARTAR);
         } else {
-            self.resultado_iso = Algoritmos::Isomorfismo::verificar(red, self.grafo_iso_g2);
-            self.iso_analizado = true;
-            self.registrarLog(self.resultado_iso.son_isomorfos
+            self.estado_grafos.resultado_iso = Algoritmos::Isomorfismo::verificar(red, self.estado_grafos.grafo_iso_g2);
+            self.estado_grafos.iso_analizado = true;
+            bool son = self.estado_grafos.resultado_iso.son_isomorfos;
+            self.registrarLog(son
                 ? "[OK] Isomorfismo: ¡Genial! Los grafos SON isomorfos."
                 : "[!] Isomorfismo: Los grafos NO son isomorfos.");
+            g_sonidos.reproducir(son ? Sonidos::TRIUNFO_DIJKSTRA : Sonidos::DESCARTAR);
         }
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Compara ambos grafos para determinar si son estructuralmente identicos.");
 
-    if (self.iso_analizado) {
+    if (self.estado_grafos.iso_analizado) {
         ImGui::Separator();
 
         auto icono_cond = [](bool ok) {
@@ -123,27 +135,27 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         };
 
         ImGui::Text("Condiciones necesarias:");
-        ImGui::TextColored(col_cond(self.resultado_iso.misma_cantidad_nodos),
-            "%s Misma cantidad de nodos", icono_cond(self.resultado_iso.misma_cantidad_nodos));
-        ImGui::TextColored(col_cond(self.resultado_iso.misma_cantidad_aristas),
-            "%s Misma cantidad de aristas", icono_cond(self.resultado_iso.misma_cantidad_aristas));
-        ImGui::TextColored(col_cond(self.resultado_iso.misma_secuencia_grados),
-            "%s Misma secuencia de grados", icono_cond(self.resultado_iso.misma_secuencia_grados));
+        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos),
+            "%s Misma cantidad de nodos", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos));
+        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas),
+            "%s Misma cantidad de aristas", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas));
+        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados),
+            "%s Misma secuencia de grados", icono_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados));
 
         ImGui::Spacing();
-        if (self.resultado_iso.son_isomorfos) {
+        if (self.estado_grafos.resultado_iso.son_isomorfos) {
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
                 ICON_FA_CHECK " SON ISOMORFOS");
             ImGui::Text("Mapeo de nodos:");
-            for (const auto& par : self.resultado_iso.mapeo) {
+            for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
                 ImGui::BulletText("%s (G1) <-> %s (G2)",
                     red.nombreNodo(par.first).c_str(),
-                    self.grafo_iso_g2.nombreNodo(par.second).c_str());
+                    self.estado_grafos.grafo_iso_g2.nombreNodo(par.second).c_str());
             }
         } else {
             ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
                 ICON_FA_XMARK " NO SON ISOMORFOS");
-            ImGui::TextWrapped("%s", self.resultado_iso.descripcion.c_str());
+            ImGui::TextWrapped("%s", self.estado_grafos.resultado_iso.descripcion.c_str());
         }
     }
 }

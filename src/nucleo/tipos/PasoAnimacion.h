@@ -3,7 +3,7 @@
 
 // Paso de animacion (resultado de un tick de algoritmo)
 struct PasoAnimacion {
-    enum Accion { VISITAR, EXPLORAR, CONFIRMAR, DESCARTAR };
+    enum Accion { VISITAR, EXPLORAR, CONFIRMAR, DESCARTAR, COLOREAR };
 
     Accion      accion;
     int         nodo_id      = -1;

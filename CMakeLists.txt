@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Nombre del proyecto, versión y lenguaje
 project(graph-core
-    VERSION 1.0.0
+    VERSION 2.0.0
     LANGUAGES CXX
 )
 
@@ -58,7 +58,7 @@ FetchContent_MakeAvailable(json)
 add_library(imgui_lib STATIC
     # Archivos core de ImGui
     ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    $<$<CONFIG:Debug>:${imgui_SOURCE_DIR}/imgui_demo.cpp>
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
@@ -80,6 +80,9 @@ target_link_libraries(imgui_lib PUBLIC glfw)
 find_package(OpenGL REQUIRED)
 target_link_libraries(imgui_lib PUBLIC OpenGL::GL)
 
+# Sistema de hilos (necesario para miniaudio — audio async)
+find_package(Threads REQUIRED)
+
 # ============================================================================
 # Nuestro ejecutable
 # ============================================================================
@@ -95,10 +98,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(graph-core PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
-# Linkear nuestro programa con ImGui y JSON
+# Linkear nuestro programa con ImGui, JSON, y sistema
 target_link_libraries(graph-core PRIVATE
     imgui_lib
     nlohmann_json::nlohmann_json
+    ${CMAKE_DL_LIBS}    # dlopen() → miniaudio carga PulseAudio/ALSA en runtime
+    Threads::Threads     # hilos de audio (miniaudio async engine)
 )
 
 # Que nuestro código pueda hacer #include de nuestros propios headers

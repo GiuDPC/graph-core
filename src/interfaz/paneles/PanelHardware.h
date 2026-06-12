@@ -33,7 +33,7 @@ inline void desplegar(Interfaz& self, Grafo& red, const ImVec2& pos_click) {
             if (ImGui::Selectable(label)) {
                 red.agregarNodo(pos_click, (TipoHardware)i);
                 self.registrarLog("Hardware desplegado: " + std::string(tipos[i]) + " " + red.nodos.back().nombre);
-                self.ruta_optima.clear(); self.aristas_mst.clear(); self.mostrar_mst = false;
+                self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
             }
         }
         ImGui::EndPopup();

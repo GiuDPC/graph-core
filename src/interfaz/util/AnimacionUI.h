@@ -7,31 +7,68 @@
 
 class Interfaz;
 
-// Wrappers de animacion que agregan efectos secundarios (log, sonido)
-// sobre las funciones puras de Animacion::.
+// Wrappers de animación que agregan sonido + log + efectos visuales
 namespace AnimacionUI {
 
 inline void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
-    Animacion::iniciar(self.anim_estado, std::move(pasos));
-    if (!self.anim_estado.pasos.empty()) {
-        self.registrarLog("Animacion iniciada: " + std::to_string(self.anim_estado.pasos.size()) + " pasos");
-        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
+    Animacion::iniciar(self.estado_grafos.anim_estado, std::move(pasos));
+    if (!self.estado_grafos.anim_estado.pasos.empty()) {
+        self.registrarLog("🎬 Animación iniciada: " +
+            std::to_string(self.estado_grafos.anim_estado.pasos.size()) + " pasos");
+        g_sonidos.reproducir(Sonidos::CLICK_MENU);
     }
 }
 
+inline void finalizar(Interfaz& self) {
+    // Sonido exclusivo Dijkstra si aplica; sino fanfarria general
+    if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)
+        g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
+    else
+        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
+    self.registrarLog("✅ Algoritmo completado (" +
+        std::to_string(self.estado_grafos.anim_estado.pasos.size()) + " pasos)");
+}
+
 inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
-    Animacion::aplicarPaso(self.anim_estado, p);
-    switch (p.accion) {
-        case PasoAnimacion::VISITAR:   g_sonidos.reproducir(Sonidos::VISITAR_NODO); break;
-        case PasoAnimacion::CONFIRMAR: g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA); break;
-        case PasoAnimacion::EXPLORAR:  g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO); break;
-        case PasoAnimacion::DESCARTAR: g_sonidos.reproducir(Sonidos::DESCARTAR); break;
+    Animacion::aplicarPaso(self.estado_grafos.anim_estado, p);
+
+    // Sonidos según tipo de paso y modo
+    if (self.estado_grafos.anim_estado.velocidad_paso < 0.15f) {
+        // Alta velocidad -> solo sonidos esenciales para no saturar
+        if (p.accion == PasoAnimacion::CONFIRMAR)
+            g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+        else if (p.accion == PasoAnimacion::DESCARTAR)
+            g_sonidos.reproducir(Sonidos::DESCARTAR);
+    } else {
+        switch (p.accion) {
+            case PasoAnimacion::VISITAR:
+                g_sonidos.reproducir(Sonidos::VISITAR_NODO);
+                break;
+            case PasoAnimacion::CONFIRMAR:
+                g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+                break;
+            case PasoAnimacion::EXPLORAR:
+                if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes)
+                    g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO);
+                else
+                    g_sonidos.reproducir(Sonidos::VISITAR_NODO);
+                break;
+            case PasoAnimacion::DESCARTAR:
+                g_sonidos.reproducir(Sonidos::DESCARTAR);
+                break;
+            case PasoAnimacion::COLOREAR:
+                g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+                break;
+        }
     }
+
+    // Log con descripción del paso si tiene
     if (!p.descripcion.empty()) self.registrarLog(p.descripcion);
 }
 
 inline void reset(Interfaz& self) {
-    Animacion::reset(self.anim_estado);
+    Animacion::reset(self.estado_grafos.anim_estado);
+    self.registrarLog("⏹ Animación reiniciada");
 }
 
 } // namespace AnimacionUI

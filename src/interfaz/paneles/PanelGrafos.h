@@ -17,6 +17,9 @@ class Interfaz;
 namespace PanelIsomorfismo {
     inline void dibujar(Interfaz& self, Grafo& red);
 }
+namespace Matrices {
+    inline void dibujar(Grafo& red, class Interfaz& self);
+}
 
 // PanelGrafos: namespace que agrupa funciones del panel "Herramientas de Red"
 // y sus subpaneles de algoritmos. El subpanel Isomorfismo se delega a PanelIsomorfismo.
@@ -28,20 +31,20 @@ inline void selectorModo(Interfaz& self, Grafo& red) {
     float ancho = ImGui::GetContentRegionAvail().x;
     ImVec2 btnSize(ancho * 0.48f, 32);
 
-    bool en_grafos = (self.modo_actual == Interfaz::ModoApp::Grafos);
+    bool en_grafos = (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos);
     if (en_grafos) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
     if (ImGui::Button(ICON_FA_DIAGRAM_PROJECT " GRAFOS", btnSize)) {
-        self.modo_actual = Interfaz::ModoApp::Grafos;
+        self.estado_ui.modo_actual = Interfaz::ModoApp::Grafos;
         self.registrarLog("Modo cambiado: Grafos");
     }
     if (en_grafos) ImGui::PopStyleColor();
 
     ImGui::SameLine();
 
-    bool en_redes = (self.modo_actual == Interfaz::ModoApp::Redes);
+    bool en_redes = (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes);
     if (en_redes) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
     if (ImGui::Button(ICON_FA_NETWORK_WIRED " REDES", btnSize)) {
-        self.modo_actual = Interfaz::ModoApp::Redes;
+        self.estado_ui.modo_actual = Interfaz::ModoApp::Redes;
         self.registrarLog("Modo cambiado: Redes");
     }
     if (en_redes) ImGui::PopStyleColor();
@@ -55,62 +58,86 @@ inline void controlesAnimacion(Interfaz& self) {
         ICON_FA_FILM " ANIMACION");
 
     float progreso = 0.0f;
-    if (!self.anim_estado.pasos.empty())
-        progreso = (float)(self.anim_estado.paso_actual + 1) / (float)self.anim_estado.pasos.size();
+    if (!self.estado_grafos.anim_estado.pasos.empty())
+        progreso = (float)(self.estado_grafos.anim_estado.paso_actual + 1) / (float)self.estado_grafos.anim_estado.pasos.size();
 
-    ImGui::ProgressBar(progreso, ImVec2(-1, 8));
-    ImGui::Text("Paso %d / %d", self.anim_estado.paso_actual + 1, (int)self.anim_estado.pasos.size());
+    ImGui::ProgressBar(progreso, ImVec2(-1, 18));
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Progreso: paso %d de %d",
+            self.estado_grafos.anim_estado.paso_actual + 1, (int)self.estado_grafos.anim_estado.pasos.size());
+    ImGui::Text("Paso %d / %d", self.estado_grafos.anim_estado.paso_actual + 1, (int)self.estado_grafos.anim_estado.pasos.size());
 
-    if (self.anim_estado.paso_actual >= 0 && self.anim_estado.paso_actual < (int)self.anim_estado.pasos.size()) {
-        const auto& paso = self.anim_estado.pasos[self.anim_estado.paso_actual];
+    if (self.estado_grafos.anim_estado.paso_actual >= 0 && self.estado_grafos.anim_estado.paso_actual < (int)self.estado_grafos.anim_estado.pasos.size()) {
+        const auto& paso = self.estado_grafos.anim_estado.pasos[self.estado_grafos.anim_estado.paso_actual];
         if (!paso.descripcion.empty()) {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180, 230, 255, 255));
-            ImGui::TextWrapped("%s", paso.descripcion.c_str());
+
+            // Icono según tipo de paso
+            const char* icono_paso = "";
+            switch (paso.accion) {
+                case PasoAnimacion::VISITAR:   icono_paso = ICON_FA_CIRCLE " "; break;
+                case PasoAnimacion::EXPLORAR:  icono_paso = ICON_FA_MAGNIFYING_GLASS " "; break;
+                case PasoAnimacion::CONFIRMAR: icono_paso = ICON_FA_CHECK " "; break;
+                case PasoAnimacion::DESCARTAR: icono_paso = ICON_FA_XMARK " "; break;
+                case PasoAnimacion::COLOREAR:  icono_paso = ICON_FA_PAINTBRUSH " "; break;
+            }
+            ImGui::TextWrapped("%s%s", icono_paso, paso.descripcion.c_str());
             ImGui::PopStyleColor();
         }
     }
 
-    ImGui::SliderFloat("Velocidad##anim", &self.anim_estado.velocidad_paso, 0.05f, 2.0f, "%.2f s/paso");
+    ImGui::SliderFloat("Velocidad##anim", &self.estado_grafos.anim_estado.velocidad_paso, 0.05f, 2.0f, "%.2f s/paso");
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Tiempo entre cada paso. Mas rapido = menos sonidos para no saturar.");
 
     float bw = (ancho - 16) / 3.0f;
-    if (self.anim_estado.activa && !self.anim_estado.pausada) {
-        if (ImGui::Button(ICON_FA_PAUSE " Pausar", ImVec2(bw, 0)))
-            self.anim_estado.pausada = true;
+    if (self.estado_grafos.anim_estado.activa && !self.estado_grafos.anim_estado.pausada) {
+            if (ImGui::Button(ICON_FA_PAUSE " Pausar", ImVec2(bw, 32))) {
+            self.estado_grafos.anim_estado.pausada = true;
+            g_sonidos.reproducir(Sonidos::CLICK_MENU);
+        }
     } else {
-        if (ImGui::Button(ICON_FA_PLAY " Play", ImVec2(bw, 0))) {
-            if (!self.anim_estado.activa && self.anim_estado.paso_actual >= 0) self.anim_estado.activa = true;
-            self.anim_estado.pausada = false;
+        if (ImGui::Button(ICON_FA_PLAY " Play", ImVec2(bw, 32))) {
+            if (!self.estado_grafos.anim_estado.activa && self.estado_grafos.anim_estado.paso_actual >= 0) self.estado_grafos.anim_estado.activa = true;
+            self.estado_grafos.anim_estado.pausada = false;
+            g_sonidos.reproducir(Sonidos::CLICK_MENU);
         }
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Reanudar reproduccion automatica de la animacion.");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_FORWARD_STEP " Paso", ImVec2(bw, 0))) {
-        if (self.anim_estado.paso_actual + 1 < (int)self.anim_estado.pasos.size()) {
-            self.anim_estado.paso_actual++;
-            AnimacionUI::aplicarPaso(self, self.anim_estado.pasos[self.anim_estado.paso_actual]);
-            self.anim_estado.pausada = true;
+    if (ImGui::Button(ICON_FA_FORWARD_STEP " Paso", ImVec2(bw, 32))) {
+        if (self.estado_grafos.anim_estado.paso_actual + 1 < (int)self.estado_grafos.anim_estado.pasos.size()) {
+            self.estado_grafos.anim_estado.paso_actual++;
+            AnimacionUI::aplicarPaso(self, self.estado_grafos.anim_estado.pasos[self.estado_grafos.anim_estado.paso_actual]);
+            self.estado_grafos.anim_estado.pausada = true;
         }
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Avanza UN paso manualmente (con sonido y efecto).");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(bw, 0))) {
+    if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(bw, 32))) {
         AnimacionUI::reset(self);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Reinicia la animacion desde el principio.");
 }
 
 // ── Propiedades del nodo seleccionado + tabla de aristas editables ─────────
 inline void propiedadesNodo(Interfaz& self, Grafo& red) {
-    if (self.nodo_seleccionado >= 0) {
-        Nodo* n = red.obtenerNodo(self.nodo_seleccionado);
+    if (self.estado_ui.nodo_seleccionado >= 0) {
+        Nodo* n = red.obtenerNodo(self.estado_ui.nodo_seleccionado);
         if (n) {
             ImGui::Separator();
             ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.83f, 1.0f), ICON_FA_CIRCLE_INFO " PROPIEDADES");
             ImGui::Text("ID: %d", n->id);
 
-            snprintf(self.buffer_nombre, sizeof(self.buffer_nombre), "%s", n->nombre.c_str());
-            if (ImGui::InputText("Nombre", self.buffer_nombre, sizeof(self.buffer_nombre))) {
-                n->nombre = self.buffer_nombre;
+            snprintf(self.estado_ui.buffer_nombre, sizeof(self.estado_ui.buffer_nombre), "%s", n->nombre.c_str());
+            if (ImGui::InputText("Nombre", self.estado_ui.buffer_nombre, sizeof(self.estado_ui.buffer_nombre))) {
+                n->nombre = self.estado_ui.buffer_nombre;
             }
 
-            if (self.modo_actual == Interfaz::ModoApp::Redes) {
+            if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
                 int tipo_int = (int)n->tipo;
                 const char* tipos[] = {"Servidor", "Router", "Switch", "Firewall", "Terminal"};
                 if (ImGui::Combo("Tipo", &tipo_int, tipos, 5)) {
@@ -121,11 +148,11 @@ inline void propiedadesNodo(Interfaz& self, Grafo& red) {
             }
 
             ImGui::Spacing();
-            if (ImGui::Button(ICON_FA_TRASH_CAN " Eliminar Nodo", ImVec2(-1, 0))) {
+            if (ImGui::Button(ICON_FA_TRASH_CAN " Eliminar Nodo", ImVec2(-1, 32))) {
                 self.registrarLog("Nodo eliminado: " + n->nombre);
-                red.eliminarNodo(self.nodo_seleccionado);
-                self.nodo_seleccionado = -1;
-                self.ruta_optima.clear(); self.aristas_mst.clear(); self.mostrar_mst = false;
+                red.eliminarNodo(self.estado_ui.nodo_seleccionado);
+                self.estado_ui.nodo_seleccionado = -1;
+                self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
             }
         }
     }
@@ -145,7 +172,7 @@ inline void propiedadesNodo(Interfaz& self, Grafo& red) {
             if (ImGui::SmallButton(ICON_FA_TRASH_CAN)) {
                 self.registrarLog("Arista eliminada: " + red.nombreNodo(a.origen_id) + " - " + red.nombreNodo(a.destino_id));
                 red.aristas.erase(red.aristas.begin() + i);
-                self.ruta_optima.clear(); self.aristas_mst.clear(); self.mostrar_mst = false;
+                self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
                 ImGui::PopID();
                 break;
             }
@@ -154,159 +181,232 @@ inline void propiedadesNodo(Interfaz& self, Grafo& red) {
     }
 }
 
-// ── Menu general ──────────────────────────────────────────────────────────
+// ── Menu general (con tooltips educativos) ─────────────────────────────────
 inline void menuGeneral(Interfaz& self, Grafo& red) {
     float ancho = ImGui::GetContentRegionAvail().x;
 
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
         ICON_FA_ROUTE " ENRUTAMIENTO");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.05f, 0.35f, 0.28f, 1.0f));
-    if (ImGui::Button(ICON_FA_DIAMOND " Dijkstra — Ruta Optima", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Dijkstra;
+    if (ImGui::Button(ICON_FA_DIAMOND " Dijkstra — Ruta Optima", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Dijkstra;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Encuentra el camino mas corto entre dos nodos.\n"
+            "Su equivalente en redes es OSPF (Open Shortest Path First).\n"
+            "Usa una cola de prioridad para explorar siempre el nodo mas cercano.");
     ImGui::PopStyleColor();
     ImGui::Spacing();
 
     ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.8f, 1.0f),
         ICON_FA_CIRCLE_NODES " TOPOLOGIA OPTIMA");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.05f, 0.30f, 1.0f));
-    if (ImGui::Button(ICON_FA_TREE " Kruskal — MST", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Kruskal;
+    if (ImGui::Button(ICON_FA_TREE " Kruskal — MST", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Kruskal;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Arbol de Expansion Minima: conecta todos los nodos\n"
+            "con el menor costo total posible.\n"
+            "En redes = STP (Spanning Tree Protocol) para evitar bucles en switches.");
     ImGui::PopStyleColor();
     ImGui::Spacing();
 
     ImGui::TextColored(ImVec4(0.2f, 0.6f, 1.0f, 1.0f),
-        ICON_FA_MAGNIFYING_GLASS " RECORRIDO");
+        ICON_FA_MAGNIFYING_GLASS " RECORRIDO DE GRAFOS");
     float bw = (ancho - 8) / 2.0f;
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.05f, 0.18f, 0.38f, 1.0f));
-    if (ImGui::Button(ICON_FA_LAYER_GROUP " BFS", ImVec2(bw, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::BFS;
+    if (ImGui::Button(ICON_FA_LAYER_GROUP " BFS", ImVec2(bw, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::BFS;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Busqueda en Anchura (Breadth First Search):\n"
+            "Explora nivel por nivel. Garantiza el camino con MENOS saltos.\n"
+            "Aplicacion: descubrir la red a N saltos de distancia.");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_CODE_BRANCH " DFS", ImVec2(bw, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::DFS;
+    if (ImGui::Button(ICON_FA_CODE_BRANCH " DFS", ImVec2(bw, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::DFS;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Busqueda en Profundidad (Depth First Search):\n"
+            "Explora yendo tan profundo como puede, luego retrocede.\n"
+            "Sirve para detectar ciclos (back-edges) en el grafo.");
     ImGui::PopStyleColor();
     ImGui::Spacing();
 
     ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.1f, 1.0f),
-        ICON_FA_CIRCLE_EXCLAMATION " ANALISIS");
+        ICON_FA_CIRCLE_EXCLAMATION " ANALISIS DE GRAFOS");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.35f, 0.15f, 0.05f, 1.0f));
-    if (ImGui::Button(ICON_FA_ROTATE " Detectar Ciclos", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Ciclos;
+    if (ImGui::Button(ICON_FA_ROTATE " Detectar Ciclos", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Ciclos;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Un ciclo es un camino que empieza y termina en el mismo nodo.\n"
+            "Un grafo conexo sin ciclos es un ARBOL.\n"
+            "En redes: los ciclos causan 'broadcast storms' que saturan la red.");
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.20f, 0.08f, 0.28f, 1.0f));
-    if (ImGui::Button(ICON_FA_PAINTBRUSH " Coloreo Greedy", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Coloreo;
+    if (ImGui::Button(ICON_FA_PAINTBRUSH " Coloreo Greedy", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Coloreo;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Asigna colores a los nodos para que adyacentes tengan colores distintos.\n"
+            "Aplicacion real: asignacion de canales WiFi sin interferencias.\n"
+            "El numero cromatico minimo es un problema NP-duro (teorema de los 4 colores).");
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.08f, 0.20f, 0.25f, 1.0f));
-    if (ImGui::Button(ICON_FA_OBJECT_GROUP " Isomorfismo", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Isomorfismo;
+    if (ImGui::Button(ICON_FA_OBJECT_GROUP " Isomorfismo", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Isomorfismo;
         self.resetGrafoIsomorfismo();
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Dos grafos son isomorfos si tienen la MISMA estructura\n"
+            "aunque los nodos se llamen diferente.\n"
+            "Se usa para detectar redes equivalentes a nivel topologico.");
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.05f, 0.28f, 0.10f, 1.0f));
-    if (ImGui::Button(ICON_FA_SITEMAP " Analisis de Arbol", ImVec2(-1, 36))) {
-        self.modo_panel = Interfaz::ModoPanel::Arbol;
-        self.arbol_analizado = false;
-        self.arbol_layout_aplicado = false;
+    if (ImGui::Button(ICON_FA_SITEMAP " Analisis de Arbol", ImVec2(-1, 32))) {
+        self.estado_grafos.modo_panel = Interfaz::ModoPanel::Arbol;
+        self.estado_grafos.arbol_analizado = false;
+        self.estado_grafos.arbol_layout_aplicado = false;
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Analiza si el grafo es un arbol y muestra propiedades:\n"
+            "altura, hojas, nivel por nodo, ancestros, primos.\n"
+            "Un arbol con n nodos debe tener exactamente n-1 aristas y ser conexo.");
     ImGui::PopStyleColor();
 
-    if (self.modo_actual == Interfaz::ModoApp::Redes) {
+    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
         ImGui::Spacing();
         ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f),
             ICON_FA_WAVE_SQUARE " SIMULACION");
-        ImGui::Checkbox("Activar Jitter", &self.simulacion_jitter);
-        if (self.simulacion_jitter) {
-            ImGui::SliderFloat("Intensidad##jitter", &self.jitter_porcentaje, 0.01f, 0.50f, "%.0f%%");
+        ImGui::Checkbox("Activar Jitter", &self.estado_redes.simulacion_jitter);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Simula inestabilidad en la red: variacion aleatoria de latencia.\n"
+                "Comun en redes WiFi y enlaces satelitales.");
+        if (self.estado_redes.simulacion_jitter) {
+            ImGui::SliderFloat("Intensidad##jitter", &self.estado_redes.jitter_porcentaje, 0.01f, 0.50f, "%.0f%%");
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Porcentaje de variacion sobre el peso original de cada arista.");
         }
+    }
+    
+    // ── Estadisticas rapidas del grafo actual ───────────────────────────────
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::TextDisabled(ICON_FA_CHART_BAR " Resumen del grafo");
+    if (!red.nodos.empty()) {
+        int aristas = (int)red.aristas.size();
+        int n_nodos = (int)red.nodos.size();
+        float densidad = (n_nodos > 1) ? (2.0f * aristas) / (n_nodos * (n_nodos - 1)) : 0;
+        ImGui::Text("%s %d nodos  |  %s %d aristas  |  Densidad: %.1f%%",
+            ICON_FA_CIRCLE, n_nodos, ICON_FA_LINK, aristas, densidad * 100.0f);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Densidad = aristas reales / aristas posibles.\n"
+                "0%% = grafo vacio, 100%% = grafo completo (todos conectados con todos).");
+    } else {
+        ImGui::TextDisabled(ICON_FA_CIRCLE_INFO " Haz clic derecho en el lienzo para crear nodos");
     }
 }
 
-// ── Subpanel: Dijkstra ────────────────────────────────────────────────────
+// ── Subpanel: Dijkstra (con tooltips educativos) ──────────────────────────
 inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
-        ICON_FA_DIAMOND " DIJKSTRA");
+        ICON_FA_DIAMOND " DIJKSTRA — RUTA OPTIMA");
     ImGui::TextWrapped(
         "Encuentra la ruta de menor costo entre dos nodos. "
-        "En redes: equivale al protocolo OSPF de enrutamiento.");
+        "Usa una cola de prioridad para explorar siempre el nodo mas cercano.");
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("🔍 Edsger Dijkstra (1956): '¿Cual es el camino mas corto entre dos ciudades?'\n"
+            "📡 En redes: OSPF (Open Shortest Path First) usa exactamente este algoritmo.\n"
+            "🧮 Complejidad: O((V+E) log V) con cola de prioridad.");
     ImGui::Spacing();
 
     ImGui::Text("Origen:");
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::BeginCombo("##origen_d", red.nombreNodo(self.dijkstra_origen).c_str())) {
+    if (ImGui::BeginCombo("##origen_d", red.nombreNodo(self.estado_grafos.dijkstra_origen).c_str())) {
         for (const auto& n : red.nodos) {
-            bool sel = (n.id == self.dijkstra_origen);
+            bool sel = (n.id == self.estado_grafos.dijkstra_origen);
             if (ImGui::Selectable(n.nombre.c_str(), sel))
-                self.dijkstra_origen = n.id;
+                self.estado_grafos.dijkstra_origen = n.id;
             if (sel) ImGui::SetItemDefaultFocus();
         }
         ImGui::EndCombo();
     }
     ImGui::Text("Destino:");
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::BeginCombo("##destino_d", red.nombreNodo(self.dijkstra_destino).c_str())) {
+    if (ImGui::BeginCombo("##destino_d", red.nombreNodo(self.estado_grafos.dijkstra_destino).c_str())) {
         for (const auto& n : red.nodos) {
-            bool sel = (n.id == self.dijkstra_destino);
+            bool sel = (n.id == self.estado_grafos.dijkstra_destino);
             if (ImGui::Selectable(n.nombre.c_str(), sel))
-                self.dijkstra_destino = n.id;
+                self.estado_grafos.dijkstra_destino = n.id;
             if (sel) ImGui::SetItemDefaultFocus();
         }
         ImGui::EndCombo();
     }
 
-    if (self.modo_actual == Interfaz::ModoApp::Redes) {
-        ImGui::Checkbox("Incluir latencia de hardware", &self.dijkstra_usar_latencia);
+    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
+        ImGui::Checkbox("Incluir latencia de hardware", &self.estado_grafos.dijkstra_usar_latencia);
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Suma la latencia de cada tipo de equipo al costo de la ruta");
+            ImGui::SetTooltip("Suma la latencia de cada tipo de equipo al costo de la ruta.\n"
+                "Servidor=1ms, Router=3ms, Switch=5ms, Firewall=10ms, Terminal=2ms.");
     }
     ImGui::Spacing();
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion", ImVec2(-1, 32))) {
         auto pasos = Algoritmos::generarPasos(
-            red, self.dijkstra_origen, self.dijkstra_destino, self.dijkstra_usar_latencia);
+            red, self.estado_grafos.dijkstra_origen, self.estado_grafos.dijkstra_destino, self.estado_grafos.dijkstra_usar_latencia);
         AnimacionUI::iniciar(self, pasos);
-        self.ruta_optima.clear(); self.mostrar_mst = false;
+        self.estado_grafos.ruta_optima.clear(); self.estado_grafos.mostrar_mst = false;
         self.registrarLog("[Dijkstra] Animacion iniciada: " +
-            red.nombreNodo(self.dijkstra_origen) + " -> " + red.nombreNodo(self.dijkstra_destino));
+            red.nombreNodo(self.estado_grafos.dijkstra_origen) + " -> " + red.nombreNodo(self.estado_grafos.dijkstra_destino));
+        g_sonidos.reproducir(Sonidos::VISITAR_NODO);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Muestra cada paso del algoritmo con particulas animadas y sonido.");
     if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
         auto res = Algoritmos::dijkstra(
-            red, self.dijkstra_origen, self.dijkstra_destino, self.dijkstra_usar_latencia);
-        self.ruta_optima = res.ruta;
-        self.mostrar_mst = false; AnimacionUI::reset(self);
-        if (res.hay_ruta)
+            red, self.estado_grafos.dijkstra_origen, self.estado_grafos.dijkstra_destino, self.estado_grafos.dijkstra_usar_latencia);
+        self.estado_grafos.ruta_optima = res.ruta;
+        self.estado_grafos.dijkstra_costo_total = res.costo_total;
+        self.estado_grafos.mostrar_mst = false; AnimacionUI::reset(self);
+        if (res.hay_ruta) {
             self.registrarLog("[OK] Dijkstra: " + std::to_string(res.saltos) +
                 " saltos, costo=" + std::to_string((int)res.costo_total));
-        else
+            g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
+        } else {
             self.registrarLog("[!] Dijkstra: no existe ruta entre esos nodos");
+            g_sonidos.reproducir(Sonidos::DESCARTAR);
+        }
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Calcula la ruta optima al instante (sin animacion).");
 
     ImGui::Separator();
-    if (!self.ruta_optima.empty()) {
+    if (!self.estado_grafos.ruta_optima.empty()) {
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
             ICON_FA_CHECK " Ruta encontrada:");
         std::string ruta_str;
-        for (size_t i = 0; i < self.ruta_optima.size(); i++) {
-            if (i > 0) ruta_str += " -> ";
-            ruta_str += red.nombreNodo(self.ruta_optima[i]);
+        for (size_t i = 0; i < self.estado_grafos.ruta_optima.size(); i++) {
+            if (i > 0) ruta_str += " → ";
+            ruta_str += red.nombreNodo(self.estado_grafos.ruta_optima[i]);
         }
         ImGui::TextWrapped("%s", ruta_str.c_str());
-        ImGui::Text("Saltos: %d", (int)self.ruta_optima.size() - 1);
-    } else if (!self.anim_estado.activa) {
-        ImGui::TextDisabled("Ejecuta un algoritmo para ver resultados.");
+        ImGui::Text("Saltos: %d | Costo total: %.1f",
+            (int)self.estado_grafos.ruta_optima.size() - 1,
+            self.estado_grafos.dijkstra_costo_total);
+    } else if (!self.estado_grafos.anim_estado.activa && self.estado_grafos.anim_estado.paso_actual < 0) {
+        ImGui::TextDisabled(ICON_FA_CIRCLE_INFO " Selecciona origen/destino y ejecuta.");
     }
 
-    if (self.anim_estado.activa && !self.dijkstra_tabla_dist.empty()) {
+    if (self.estado_grafos.anim_estado.activa && !self.estado_grafos.dijkstra_tabla_dist.empty()) {
         ImGui::Separator();
         ImGui::Text("Tabla de distancias:");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Muestra la distancia desde el origen a cada nodo.\n"
+                "INF = nodo aun no alcanzable.");
         if (ImGui::BeginTable("tabDist", 2,
             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
             ImGuiTableFlags_SizingFixedFit)) {
@@ -318,11 +418,11 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%s", n.nombre.c_str());
                 ImGui::TableSetColumnIndex(1);
-                float d = (n.id < (int)self.dijkstra_tabla_dist.size())
-                    ? self.dijkstra_tabla_dist[n.id]
+                float d = (n.id < (int)self.estado_grafos.dijkstra_tabla_dist.size())
+                    ? self.estado_grafos.dijkstra_tabla_dist[n.id]
                     : std::numeric_limits<float>::infinity();
                 if (d == std::numeric_limits<float>::infinity())
-                    ImGui::TextDisabled("INF");
+                    ImGui::TextDisabled("∞");
                 else
                     ImGui::Text("%.1f", d);
             }
@@ -334,55 +434,60 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
 // ── Subpanel: Kruskal (MST) ───────────────────────────────────────────────
 inline void subpanelKruskal(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.8f, 1.0f),
-        ICON_FA_TREE " KRUSKAL — MST");
+        ICON_FA_TREE " KRUSKAL — ARBOL DE EXPANSION MINIMA");
     ImGui::TextWrapped(
-        "Encuentra el Arbol de Expansion Minima: la red que conecta "
-        "todos los nodos con el menor costo total. "
-        "En redes: equivale al protocolo STP (Spanning Tree Protocol) "
-        "que evita loops en switches.");
+        "Encuentra la red que conecta todos los nodos con el menor costo total posible.");
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("🔍 Joseph Kruskal (1956): ordena aristas por peso y las agrega si no forman ciclo.\n"
+            "📡 En redes: STP (Spanning Tree Protocol) evita bucles en switches.\n"
+            "🧮 Usa Union-Find (DSU) para detectar ciclos en tiempo casi constante.\n"
+            "⚡ Complejidad: O(E log E) por ordenar aristas.");
     ImGui::Spacing();
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion", ImVec2(-1, 32))) {
         auto pasos = Algoritmos::Kruskal::generarPasos(red);
         AnimacionUI::iniciar(self, pasos);
-        self.ruta_optima.clear(); self.mostrar_mst = false;
+        self.estado_grafos.ruta_optima.clear(); self.estado_grafos.mostrar_mst = false;
         self.registrarLog("[Kruskal] Animacion MST iniciada");
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Visualiza paso a paso como se construye el arbol de expansion minima.");
     if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
         auto res = Algoritmos::Kruskal::kruskal(red);
-        self.aristas_mst = res.aristas_mst;
-        self.mostrar_mst = true;
-        self.ruta_optima.clear(); AnimacionUI::reset(self);
+        self.estado_grafos.aristas_mst = res.aristas_mst;
+        self.estado_grafos.mostrar_mst = true;
+        self.estado_grafos.ruta_optima.clear(); AnimacionUI::reset(self);
         self.registrarLog("[OK] Kruskal MST: " + std::to_string(res.aristas_aceptadas) +
             " aristas, peso total=" + std::to_string((int)res.peso_total));
+        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Calcula el arbol de expansion minima al instante.");
 
-    if (self.mostrar_mst && !self.aristas_mst.empty()) {
+    if (self.estado_grafos.mostrar_mst && !self.estado_grafos.aristas_mst.empty()) {
         ImGui::Separator();
-        ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.8f, 1.0f),
-            ICON_FA_CHECK " MST calculado:");
 
         float peso_total_grafo = 0;
         for (const auto& a : red.aristas) peso_total_grafo += a.peso;
 
         float peso_mst = 0;
-        for (const auto& a : self.aristas_mst) peso_mst += a.peso;
+        for (const auto& a : self.estado_grafos.aristas_mst) peso_mst += a.peso;
 
-        ImGui::Text("Aristas en MST:  %d / %d",
-            (int)self.aristas_mst.size(), (int)red.aristas.size());
+        ImGui::Text("Aristas en MST:  %d / %d", (int)self.estado_grafos.aristas_mst.size(), (int)red.aristas.size());
         ImGui::Text("Peso MST:        %.1f", peso_mst);
         ImGui::Text("Peso total red:  %.1f", peso_total_grafo);
 
         float ahorro = peso_total_grafo - peso_mst;
         if (ahorro > 0) {
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
-                "Ahorro vs. red completa: %.1f", ahorro);
+                "Ahorro vs. red completa: %.1f (%.0f%%)", ahorro,
+                (peso_total_grafo > 0) ? (ahorro / peso_total_grafo * 100.0f) : 0);
         }
 
         ImGui::Separator();
         ImGui::Text("Aristas del MST:");
-        for (const auto& a : self.aristas_mst) {
-            ImGui::BulletText("%s - %s (%.1f)",
+        for (const auto& a : self.estado_grafos.aristas_mst) {
+            ImGui::BulletText("%s — %s (%.1f)",
                 red.nombreNodo(a.origen_id).c_str(),
                 red.nombreNodo(a.destino_id).c_str(),
                 a.peso);
@@ -406,14 +511,14 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
     if (red.nodos.empty()) {
         ImGui::TextDisabled("No hay nodos");
     } else {
-        if (!red.obtenerNodo(self.bfs_nodo_inicio) && !red.nodos.empty())
-            self.bfs_nodo_inicio = red.nodos[0].id;
+        if (!red.obtenerNodo(self.estado_grafos.bfs_nodo_inicio) && !red.nodos.empty())
+            self.estado_grafos.bfs_nodo_inicio = red.nodos[0].id;
 
-        if (ImGui::BeginCombo("##inicio_bfs", red.nombreNodo(self.bfs_nodo_inicio).c_str())) {
+        if (ImGui::BeginCombo("##inicio_bfs", red.nombreNodo(self.estado_grafos.bfs_nodo_inicio).c_str())) {
             for (const auto& n : red.nodos) {
-                bool sel = (n.id == self.bfs_nodo_inicio);
+                bool sel = (n.id == self.estado_grafos.bfs_nodo_inicio);
                 if (ImGui::Selectable(n.nombre.c_str(), sel)) {
-                    self.bfs_nodo_inicio = n.id;
+                    self.estado_grafos.bfs_nodo_inicio = n.id;
                 }
                 if (sel) ImGui::SetItemDefaultFocus();
             }
@@ -422,21 +527,27 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
         ImGui::Spacing();
 
         if (ImGui::Button(ICON_FA_PLAY " Animacion BFS", ImVec2(-1, 32))) {
-            auto pasos = Algoritmos::BFS::generarPasos(red, self.bfs_nodo_inicio);
+            auto pasos = Algoritmos::BFS::generarPasos(red, self.estado_grafos.bfs_nodo_inicio);
             AnimacionUI::iniciar(self, pasos);
-            self.bfs_resultado = Algoritmos::BFS::bfs(red, self.bfs_nodo_inicio);
-            self.registrarLog("[BFS] Iniciado desde " + red.nombreNodo(self.bfs_nodo_inicio));
+            self.estado_grafos.bfs_resultado = Algoritmos::BFS::bfs(red, self.estado_grafos.bfs_nodo_inicio);
+            self.registrarLog("[BFS] Iniciado desde " + red.nombreNodo(self.estado_grafos.bfs_nodo_inicio));
+            g_sonidos.reproducir(Sonidos::VISITAR_NODO);
         }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Recorre el grafo por niveles, visitando todos los vecinos antes de avanzar.");
         if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
-            self.bfs_resultado = Algoritmos::BFS::bfs(red, self.bfs_nodo_inicio);
+            self.estado_grafos.bfs_resultado = Algoritmos::BFS::bfs(red, self.estado_grafos.bfs_nodo_inicio);
             AnimacionUI::reset(self);
-            self.registrarLog("[OK] BFS: " + std::to_string(self.bfs_resultado.orden_visita.size()) +
+            self.registrarLog("[OK] BFS: " + std::to_string(self.estado_grafos.bfs_resultado.orden_visita.size()) +
                 " nodos visitados");
+            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
         }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Ejecuta la busqueda en anchura y muestra el resultado.");
 
-        if (!self.bfs_resultado.nivel.empty()) {
+        if (!self.estado_grafos.bfs_resultado.nivel.empty()) {
             ImGui::Separator();
-            ImGui::Text("Distancias desde %s:", red.nombreNodo(self.bfs_nodo_inicio).c_str());
+            ImGui::Text("Distancias desde %s:", red.nombreNodo(self.estado_grafos.bfs_nodo_inicio).c_str());
             if (ImGui::BeginTable("tabBFS", 2,
                 ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
                 ImGui::TableSetupColumn("Nodo", ImGuiTableColumnFlags_WidthFixed, 60);
@@ -447,8 +558,8 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
                     ImGui::TableSetColumnIndex(0);
                     ImGui::Text("%s", n.nombre.c_str());
                     ImGui::TableSetColumnIndex(1);
-                    auto it = self.bfs_resultado.nivel.find(n.id);
-                    if (it != self.bfs_resultado.nivel.end())
+                    auto it = self.estado_grafos.bfs_resultado.nivel.find(n.id);
+                    if (it != self.estado_grafos.bfs_resultado.nivel.end())
                         ImGui::Text("%d saltos", it->second);
                     else
                         ImGui::TextDisabled("inaccesible");
@@ -468,15 +579,15 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
         "Las aristas que vuelven a un nodo ya visitado (back-edges) indican ciclos.");
     ImGui::Spacing();
 
-    if (!red.obtenerNodo(self.dfs_nodo_inicio) && !red.nodos.empty())
-        self.dfs_nodo_inicio = red.nodos[0].id;
+    if (!red.obtenerNodo(self.estado_grafos.dfs_nodo_inicio) && !red.nodos.empty())
+        self.estado_grafos.dfs_nodo_inicio = red.nodos[0].id;
 
     ImGui::Text("Nodo de inicio:");
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::BeginCombo("##inicio_dfs", red.nombreNodo(self.dfs_nodo_inicio).c_str())) {
+    if (ImGui::BeginCombo("##inicio_dfs", red.nombreNodo(self.estado_grafos.dfs_nodo_inicio).c_str())) {
         for (const auto& n : red.nodos) {
-            bool sel = (n.id == self.dfs_nodo_inicio);
-            if (ImGui::Selectable(n.nombre.c_str(), sel)) self.dfs_nodo_inicio = n.id;
+            bool sel = (n.id == self.estado_grafos.dfs_nodo_inicio);
+            if (ImGui::Selectable(n.nombre.c_str(), sel)) self.estado_grafos.dfs_nodo_inicio = n.id;
             if (sel) ImGui::SetItemDefaultFocus();
         }
         ImGui::EndCombo();
@@ -484,32 +595,38 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
     ImGui::Spacing();
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion DFS", ImVec2(-1, 32))) {
-        auto pasos = Algoritmos::DFS::generarPasos(red, self.dfs_nodo_inicio);
+        auto pasos = Algoritmos::DFS::generarPasos(red, self.estado_grafos.dfs_nodo_inicio);
         AnimacionUI::iniciar(self, pasos);
-        self.registrarLog("[DFS] Iniciado desde " + red.nombreNodo(self.dfs_nodo_inicio));
+        self.registrarLog("[DFS] Iniciado desde " + red.nombreNodo(self.estado_grafos.dfs_nodo_inicio));
+        g_sonidos.reproducir(Sonidos::VISITAR_NODO);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Explora el grafo en profundidad, retrocediendo solo al llegar a un callejon.");
     if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
-        self.dfs_resultado = Algoritmos::DFS::dfs(red, self.dfs_nodo_inicio);
+        self.estado_grafos.dfs_resultado = Algoritmos::DFS::dfs(red, self.estado_grafos.dfs_nodo_inicio);
         AnimacionUI::reset(self);
-        self.registrarLog("[OK] DFS: " + std::to_string(self.dfs_resultado.orden_visita.size()) +
-            " nodos, " + std::to_string(self.dfs_resultado.back_edges.size()) + " back-edges");
+        self.registrarLog("[OK] DFS: " + std::to_string(self.estado_grafos.dfs_resultado.orden_visita.size()) +
+            " nodos, " + std::to_string(self.estado_grafos.dfs_resultado.back_edges.size()) + " back-edges");
+        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Ejecuta la busqueda en profundidad y muestra el resultado.");
 
-    if (!self.dfs_resultado.orden_visita.empty()) {
+    if (!self.estado_grafos.dfs_resultado.orden_visita.empty()) {
         ImGui::Separator();
         ImGui::Text("Orden de visita:");
         std::string orden;
-        for (size_t i = 0; i < self.dfs_resultado.orden_visita.size(); i++) {
+        for (size_t i = 0; i < self.estado_grafos.dfs_resultado.orden_visita.size(); i++) {
             if (i > 0) orden += " -> ";
-            orden += red.nombreNodo(self.dfs_resultado.orden_visita[i]);
+            orden += red.nombreNodo(self.estado_grafos.dfs_resultado.orden_visita[i]);
         }
         ImGui::TextWrapped("%s", orden.c_str());
 
-        if (!self.dfs_resultado.back_edges.empty()) {
+        if (!self.estado_grafos.dfs_resultado.back_edges.empty()) {
             ImGui::Spacing();
             ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.2f, 1.0f),
                 ICON_FA_TRIANGLE_EXCLAMATION " Back-edges (ciclos):");
-            for (const auto& [u, v] : self.dfs_resultado.back_edges) {
+            for (const auto& [u, v] : self.estado_grafos.dfs_resultado.back_edges) {
                 ImGui::BulletText("%s -> %s",
                     red.nombreNodo(u).c_str(), red.nombreNodo(v).c_str());
             }
@@ -531,74 +648,256 @@ inline void subpanelCiclos(Interfaz& self, Grafo& red) {
         "el STP los elimina automaticamente.");
     ImGui::Spacing();
 
-    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Analizar", ImVec2(-1, 36))) {
-        self.resultado_ciclos = Algoritmos::detectarCiclos(red);
-        self.ciclo_analizado = true;
-        if (self.resultado_ciclos.tiene_ciclo)
-            self.registrarLog("[!] Ciclo detectado: " + self.resultado_ciclos.descripcion);
-        else
-            self.registrarLog("[OK] Grafo aciclico: " + self.resultado_ciclos.descripcion);
+    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Analizar", ImVec2(-1, 32))) {
+        self.estado_grafos.resultado_ciclos = Algoritmos::detectarCiclos(red);
+        self.estado_grafos.ciclo_analizado = true;
+        if (self.estado_grafos.resultado_ciclos.tiene_ciclo) {
+            self.registrarLog("[!] Ciclo detectado: " + self.estado_grafos.resultado_ciclos.descripcion);
+            g_sonidos.reproducir(Sonidos::DESCARTAR);
+        } else {
+            self.registrarLog("[OK] Grafo aciclico: " + self.estado_grafos.resultado_ciclos.descripcion);
+            g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+        }
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Determina si el grafo contiene ciclos usando el algoritmo de Union-Find.");
 
-    if (self.ciclo_analizado) {
+    if (self.estado_grafos.ciclo_analizado) {
         ImGui::Separator();
-        if (self.resultado_ciclos.tiene_ciclo) {
+        if (self.estado_grafos.resultado_ciclos.tiene_ciclo) {
             ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
                 ICON_FA_TRIANGLE_EXCLAMATION " CICLO DETECTADO");
-            ImGui::TextWrapped("%s", self.resultado_ciclos.descripcion.c_str());
+            ImGui::TextWrapped("%s", self.estado_grafos.resultado_ciclos.descripcion.c_str());
             ImGui::Spacing();
             ImGui::Text("Aristas que forman el ciclo:");
-            for (const auto& [u, v] : self.resultado_ciclos.aristas_ciclo) {
+            for (const auto& [u, v] : self.estado_grafos.resultado_ciclos.aristas_ciclo) {
                 ImGui::BulletText("%s - %s",
                     red.nombreNodo(u).c_str(), red.nombreNodo(v).c_str());
             }
         } else {
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
                 ICON_FA_CHECK " Grafo aciclico");
-            ImGui::TextWrapped("%s", self.resultado_ciclos.descripcion.c_str());
+            ImGui::TextWrapped("%s", self.estado_grafos.resultado_ciclos.descripcion.c_str());
         }
     }
 }
 
-// ── Subpanel: Coloreo ─────────────────────────────────────────────────────
+// ── Subpanel: Coloreo (OVERHAUL) ──────────────────────────────────────────
 inline void subpanelColoreo(Interfaz& self, Grafo& red) {
+    // ── Cabecera educativa ─────────────────────────────────────────────────
     ImGui::TextColored(ImVec4(0.7f, 0.1f, 0.7f, 1.0f),
-        ICON_FA_PAINTBRUSH " COLOREO GREEDY");
+        ICON_FA_PAINTBRUSH " COLOREO — TEORIA DE GRAFOS");
     ImGui::TextWrapped(
-        "Asigna colores a los nodos de forma que nodos adyacentes tengan colores distintos. "
-        "El numero cromatico es el minimo de colores necesarios. "
-        "Aplicacion real: asignacion de canales WiFi para evitar interferencias.");
+        "Asigna colores a los nodos para que adyacentes tengan colores distintos. "
+        "El minimo de colores necesarios es el NUMERO CROMATICO χ(G). "
+        "Problema NP-duro — el algoritmo greedy da una cota superior.");
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("🎨 Teorema de los 4 colores (Appel & Haken, 1976):\n"
+            "TODO mapa/grafo planar puede colorearse con ≤4 colores.\n"
+            "Fue el PRIMER teorema demostrado por computadora.\n"
+            "📡 En redes: asignacion de canales WiFi sin interferencias.\n"
+            "🧮 Numero cromatico = problema NP-duro.");
     ImGui::Spacing();
 
-    if (ImGui::Button(self.mostrar_coloreo
-        ? ICON_FA_EYE_SLASH " Ocultar Coloreo"
-        : ICON_FA_PAINT_ROLLER " Aplicar Coloreo", ImVec2(-1, 36)))
+    // ── Boton principal toggle ────────────────────────────────────────────
+    if (ImGui::Button(self.estado_grafos.mostrar_coloreo
+        ? ICON_FA_EYE_SLASH " Ocultar Color"
+        : ICON_FA_PAINT_ROLLER " Aplicar Color", ImVec2(-1, 32)))
     {
-        self.mostrar_coloreo = !self.mostrar_coloreo;
-        if (self.mostrar_coloreo) {
-            self.resultado_coloreo = Algoritmos::coloreoGreedy(red);
-            self.colores_nodos = self.resultado_coloreo.colores;
-            self.registrarLog("[OK] Coloreo: " + std::to_string(self.resultado_coloreo.num_colores) +
-                " colores usados (numero cromatico greedy)");
+        self.estado_grafos.mostrar_coloreo = !self.estado_grafos.mostrar_coloreo;
+        if (self.estado_grafos.mostrar_coloreo) {
+            self.estado_grafos.resultado_coloreo = Algoritmos::coloreoGreedy(red);
+            self.estado_grafos.resultado_welsh_powell = Algoritmos::coloreoWelshPowell(red);
+            self.estado_grafos.colores_nodos = self.estado_grafos.resultado_coloreo.colores;
+            self.estado_grafos.modo_fractal = false;
+            self.estado_grafos.planar_analizado = false;
+            self.registrarLog("[OK] Coloreo greedy: " + std::to_string(self.estado_grafos.resultado_coloreo.num_colores) +
+                " colores usados");
+            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
+        }
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Aplica un coloreo greedy a los nodos o lo oculta.");
+
+    if (!self.estado_grafos.mostrar_coloreo) return;
+
+    ImGui::Separator();
+
+    // ── Info header ────────────────────────────────────────────────────────
+    auto& col = self.estado_grafos.resultado_coloreo;
+    auto& wp  = self.estado_grafos.resultado_welsh_powell;
+    ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
+        "χ(greedy)=%d  |  χ(welsh-powell)=%d  |  Nodos=%d",
+        col.num_colores, wp.num_colores, (int)red.nodos.size());
+
+    // ── Planaridad ────────────────────────────────────────────────────────
+    if (!self.estado_grafos.planar_analizado) {
+        self.estado_grafos.resultado_planaridad = Algoritmos::Planaridad::analizar(red);
+        self.estado_grafos.planar_analizado = true;
+    }
+    const auto& plan = self.estado_grafos.resultado_planaridad;
+
+    if (plan.es_planar) {
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
+            ICON_FA_CHECK " GRAFO PLANAR — 4-coloreable por teorema");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("El teorema de los 4 colores (Appel & Haken, 1976)\n"
+                "garantiza que este grafo necesita ≤4 colores.\n"
+                "χ(greedy)=%d es una cota superior.", col.num_colores);
+    } else {
+        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f),
+            ICON_FA_TRIANGLE_EXCLAMATION " NO PLANAR");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", plan.descripcion.c_str());
+        if (plan.sospecha_k5)
+            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ⚠ Posible K5 (5 nodos de alto grado)");
+        if (plan.sospecha_k33)
+            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ⚠ Posible K3,3 (6+ nodos grado >=3)");
+    }
+
+    // ── Cruces detectados ─────────────────────────────────────────────────
+    if (plan.cruces_estimadas > 0 && self.estado_grafos.mostrar_cruces) {
+        ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f),
+            "✕ %d cruces de aristas detectados", plan.cruces_estimadas);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Las aristas que se cruzan en el dibujo actual.\n"
+                "Prueba a mover nodos o usar 'Distribuir' para reducirlos.");
+    }
+
+    ImGui::Spacing();
+
+    // ── Modos de visualizacion ────────────────────────────────────────────
+    ImGui::TextDisabled("Modo de coloreo:");
+
+    bool modo_greedy = !self.estado_grafos.modo_fractal;
+
+    if (ImGui::RadioButton(ICON_FA_PALETTE " Clasico", modo_greedy)) {
+        if (!modo_greedy) {
+            self.estado_grafos.modo_fractal = false;
+            self.estado_grafos.colores_nodos = col.colores;
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton(ICON_FA_FAN " Fractal", self.estado_grafos.modo_fractal)) {
+        if (!self.estado_grafos.modo_fractal) {
+            self.estado_grafos.modo_fractal = true;
+            self.estado_grafos.fractal_tiempo = 0.0f;
+            self.estado_grafos.resultado_fractal = Algoritmos::ColorFractal::calcular(
+                red, col.colores, 0.0f);
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_PLAY " Animar", ImVec2(-1, 32))) {
+        auto pasos = Algoritmos::generarPasosColoreo(red);
+        AnimacionUI::iniciar(self, pasos);
+        self.estado_grafos.mostrar_coloreo = true;
+        self.estado_grafos.modo_fractal = false;
+        // Aplicar colores gradualmente a medida que la animacion avanza
+        auto res = Algoritmos::coloreoGreedy(red);
+        self.estado_grafos.resultado_coloreo = res;
+        self.estado_grafos.colores_nodos = res.colores;
+        self.registrarLog("[OK] Animacion de coloreo iniciada: " +
+            std::to_string(pasos.size()) + " pasos");
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Muestra como se asignan los colores nodo por nodo.");
+
+    // ── Modo fractal: actualizar morphing ──────────────────────────────────
+    if (self.estado_grafos.modo_fractal) {
+        self.estado_grafos.fractal_tiempo += ImGui::GetIO().DeltaTime;
+        self.estado_grafos.resultado_fractal = Algoritmos::ColorFractal::calcular(
+            red, col.colores, self.estado_grafos.fractal_tiempo);
+
+        // Convertir a colores_fractales fusionando fractal + base
+        auto& frac = self.estado_grafos.resultado_fractal;
+        self.estado_grafos.colores_fractales.assign(red.rangoIds(), 0);
+        for (size_t i = 0; i < red.nodos.size(); i++) {
+            int nid = red.nodos[i].id;
+            if (nid < (int)col.colores.size() && col.colores[nid] >= 0) {
+                float mod = (i < frac.modulacion_fractal.size()) ? frac.modulacion_fractal[i] : 0.5f;
+                float fase = (i < frac.morph_fase.size()) ? frac.morph_fase[i] : 0.0f;
+                self.estado_grafos.colores_fractales[nid] = Algoritmos::ColorFractal::colorFusionado(
+                    col.colores[nid], mod, fase, col.num_colores);
+            }
+        }
+
+        if (ImGui::CollapsingHeader(ICON_FA_FAN " Coloreo Fractal")) {
+            ImGui::TextWrapped(
+                "Cada nodo hereda el color base del greedy, pero su matiz, "
+                "saturacion y brillo se modulan con un fractal de Mandelbrot "
+                "adaptado a la posicion del nodo en el canvas.");
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Los parametros del fractal rotan lentamente -> colores 'respiran'.\n"
+                    "Las zonas mas profundas del fractal son mas saturadas y brillantes.\n"
+                    "Los colores base (adyacentes distintos) se preservan.");
+            ImGui::TextDisabled("Morphing activo — los colores cambian suavemente.");
         }
     }
 
-    if (self.mostrar_coloreo && !self.colores_nodos.empty()) {
-        ImGui::Separator();
-        ImGui::Text("Numero cromatico (greedy): %d", self.resultado_coloreo.num_colores);
-        ImGui::TextDisabled("Nota: greedy no garantiza el optimo.");
-        ImGui::TextDisabled("El optimo puede ser menor o igual.");
-        ImGui::Spacing();
-        ImGui::Text("Asignacion de colores:");
+    // ── Botones de accion ─────────────────────────────────────────────────
+    ImGui::Spacing();
+
+    if (ImGui::Button(ICON_FA_ARROWS_SPIN " Re-analizar planaridad", ImVec2(-1, 32))) {
+        self.estado_grafos.planar_analizado = false;
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Vuelve a evaluar si el grafo es planar y detecta cruces de aristas.");
+
+    if (ImGui::Button(ICON_FA_EYE_SLASH " Ocultar cruces", ImVec2(-1, 32))) {
+        self.estado_grafos.mostrar_cruces = !self.estado_grafos.mostrar_cruces;
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Alterna la visualizacion de los cruces de aristas detectados.");
+
+    // ── Tabla comparativa ─────────────────────────────────────────────────
+    if (ImGui::CollapsingHeader(ICON_FA_TABLE " Comparacion de algoritmos")) {
+        if (ImGui::BeginTable("tabColores", 3,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+        {
+            ImGui::TableSetupColumn("Algoritmo", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Colores", ImGuiTableColumnFlags_WidthFixed, 60);
+            ImGui::TableSetupColumn("Optimo?", ImGuiTableColumnFlags_WidthFixed, 55);
+            ImGui::TableHeadersRow();
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Greedy (orden entrada)");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", col.num_colores);
+            ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("~");
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Welsh-Powell (grado desc.)");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", wp.num_colores);
+            ImGui::TableSetColumnIndex(2);
+            if (wp.num_colores <= col.num_colores)
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), ICON_FA_CHECK);
+            else
+                ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), ICON_FA_XMARK);
+
+            ImGui::EndTable();
+        }
+        ImGui::TextDisabled("Nota: el numero cromatico optimo puede ser menor o igual.");
+        if (plan.es_planar) {
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
+                ICON_FA_CHECK " Por teorema 4-colores: χ ≤ 4");
+        }
+    }
+
+    // ── Asignacion detallada ──────────────────────────────────────────────
+    if (ImGui::CollapsingHeader(ICON_FA_LIST " Asignacion por nodo")) {
         const char* nombres_colores[] = {
             "Rojo", "Verde", "Azul", "Amarillo", "Magenta", "Cyan"
         };
         for (const auto& n : red.nodos) {
-            if (n.id < (int)self.colores_nodos.size() && self.colores_nodos[n.id] >= 0) {
-                int c = self.colores_nodos[n.id];
-                ImGui::BulletText("%s -> Color %d (%s)",
+            if (n.id < (int)self.estado_grafos.colores_nodos.size() && self.estado_grafos.colores_nodos[n.id] >= 0) {
+                int c = self.estado_grafos.colores_nodos[n.id];
+                // Si es color fractal (negativo), no mostrar detalle
+                if (c < 0) {
+                    ImGui::BulletText("%s → Color fractal", n.nombre.c_str());
+                    continue;
+                }
+                ImGui::BulletText("%s → Color %d (%s)",
                     n.nombre.c_str(), c,
-                    c < 6 ? nombres_colores[c] : "Color extra");
+                    c < 6 ? nombres_colores[c] : "Extra");
             }
         }
     }
@@ -661,15 +960,15 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
 
     ImGui::Text("Nodo raiz:");
     ImGui::SetNextItemWidth(-1);
-    if (!red.nodos.empty() && !red.obtenerNodo(self.arbol_raiz_id))
-        self.arbol_raiz_id = red.nodos[0].id;
-    if (ImGui::BeginCombo("##raiz_arbol", red.nombreNodo(self.arbol_raiz_id).c_str())) {
+    if (!red.nodos.empty() && !red.obtenerNodo(self.estado_grafos.arbol_raiz_id))
+        self.estado_grafos.arbol_raiz_id = red.nodos[0].id;
+    if (ImGui::BeginCombo("##raiz_arbol", red.nombreNodo(self.estado_grafos.arbol_raiz_id).c_str())) {
         for (const auto& n : red.nodos) {
-            bool sel = (n.id == self.arbol_raiz_id);
+            bool sel = (n.id == self.estado_grafos.arbol_raiz_id);
             if (ImGui::Selectable(n.nombre.c_str(), sel)) {
-                self.arbol_raiz_id = n.id;
-                self.arbol_analizado = false;
-                self.arbol_layout_aplicado = false;
+                self.estado_grafos.arbol_raiz_id = n.id;
+                self.estado_grafos.arbol_analizado = false;
+                self.estado_grafos.arbol_layout_aplicado = false;
             }
             if (sel) ImGui::SetItemDefaultFocus();
         }
@@ -677,46 +976,51 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
     }
     ImGui::Spacing();
 
-    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Analizar Arbol", ImVec2(-1, 36))) {
-        self.arbol_props = Algoritmos::Arbol::analizar(red, self.arbol_raiz_id);
-        self.arbol_analizado = true;
-        self.arbol_layout_aplicado = false;
-        self.registrarLog("[OK] Arbol analizado. Altura=" + std::to_string(self.arbol_props.altura) +
-            ", Grado=" + std::to_string(self.arbol_props.grado_arbol));
+    if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS " Analizar Arbol", ImVec2(-1, 32))) {
+        self.estado_grafos.arbol_props = Algoritmos::Arbol::analizar(red, self.estado_grafos.arbol_raiz_id);
+        self.estado_grafos.arbol_analizado = true;
+        self.estado_grafos.arbol_layout_aplicado = false;
+        self.registrarLog("[OK] Arbol analizado. Altura=" + std::to_string(self.estado_grafos.arbol_props.altura) +
+            ", Grado=" + std::to_string(self.estado_grafos.arbol_props.grado_arbol));
+        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
     }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Verifica si el grafo es un arbol y muestra su estructura jerarquica.");
 
-    if (self.arbol_analizado && !self.arbol_layout_aplicado) {
-        if (ImGui::Button(ICON_FA_SITEMAP " Aplicar Layout Jerarquico", ImVec2(-1, 28))) {
+    if (self.estado_grafos.arbol_analizado && !self.estado_grafos.arbol_layout_aplicado) {
+        if (ImGui::Button(ICON_FA_SITEMAP " Aplicar Layout Jerarquico", ImVec2(-1, 32))) {
             ImVec2 centro(800.0f, 400.0f);
-            aplicarLayoutArbol(red, self.arbol_props, centro);
-            self.arbol_layout_aplicado = true;
+            aplicarLayoutArbol(red, self.estado_grafos.arbol_props, centro);
+            self.estado_grafos.arbol_layout_aplicado = true;
             self.registrarLog("[OK] Layout jerarquico aplicado");
         }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Reorganiza los nodos en un arbol visual segun la jerarquia calculada.");
     }
 
-    if (self.arbol_analizado) {
+    if (self.estado_grafos.arbol_analizado) {
         ImGui::Separator();
 
-        ImGui::Text("Altura:              %d", self.arbol_props.altura);
-        ImGui::Text("Grado del arbol:     %d", self.arbol_props.grado_arbol);
-        ImGui::Text("Numero de hojas:     %d", (int)self.arbol_props.hojas.size());
+        ImGui::Text("Altura:              %d", self.estado_grafos.arbol_props.altura);
+        ImGui::Text("Grado del arbol:     %d", self.estado_grafos.arbol_props.grado_arbol);
+        ImGui::Text("Numero de hojas:     %d", (int)self.estado_grafos.arbol_props.hojas.size());
         ImGui::Spacing();
 
-        if (!self.arbol_props.rama_mas_larga.empty()) {
+        if (!self.estado_grafos.arbol_props.rama_mas_larga.empty()) {
             ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "Rama mas larga:");
             std::string rml;
-            for (size_t i = 0; i < self.arbol_props.rama_mas_larga.size(); i++) {
+            for (size_t i = 0; i < self.estado_grafos.arbol_props.rama_mas_larga.size(); i++) {
                 if (i > 0) rml += " -> ";
-                rml += red.nombreNodo(self.arbol_props.rama_mas_larga[i]);
+                rml += red.nombreNodo(self.estado_grafos.arbol_props.rama_mas_larga[i]);
             }
             ImGui::TextWrapped("%s", rml.c_str());
         }
-        if (!self.arbol_props.rama_mas_corta.empty()) {
+        if (!self.estado_grafos.arbol_props.rama_mas_corta.empty()) {
             ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.4f, 1.0f), "Rama mas corta:");
             std::string rmc;
-            for (size_t i = 0; i < self.arbol_props.rama_mas_corta.size(); i++) {
+            for (size_t i = 0; i < self.estado_grafos.arbol_props.rama_mas_corta.size(); i++) {
                 if (i > 0) rmc += " -> ";
-                rmc += red.nombreNodo(self.arbol_props.rama_mas_corta[i]);
+                rmc += red.nombreNodo(self.estado_grafos.arbol_props.rama_mas_corta[i]);
             }
             ImGui::TextWrapped("%s", rmc.c_str());
         }
@@ -742,13 +1046,13 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%s", n.nombre.c_str());
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%d", self.arbol_props.nivel.count(n.id) ? self.arbol_props.nivel.at(n.id) : -1);
+                ImGui::Text("%d", self.estado_grafos.arbol_props.nivel.count(n.id) ? self.estado_grafos.arbol_props.nivel.at(n.id) : -1);
                 ImGui::TableSetColumnIndex(2);
-                ImGui::Text("%d", self.arbol_props.hijos.count(n.id) ? (int)self.arbol_props.hijos.at(n.id).size() : 0);
+                ImGui::Text("%d", self.estado_grafos.arbol_props.hijos.count(n.id) ? (int)self.estado_grafos.arbol_props.hijos.at(n.id).size() : 0);
                 ImGui::TableSetColumnIndex(3);
-                if (n.id == self.arbol_props.raiz_id) {
+                if (n.id == self.estado_grafos.arbol_props.raiz_id) {
                     ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "Raiz");
-                } else if (std::find(self.arbol_props.hojas.begin(), self.arbol_props.hojas.end(), n.id) != self.arbol_props.hojas.end()) {
+                } else if (std::find(self.estado_grafos.arbol_props.hojas.begin(), self.estado_grafos.arbol_props.hojas.end(), n.id) != self.estado_grafos.arbol_props.hojas.end()) {
                     ImGui::TextColored(ImVec4(0.4f, 0.8f, 0.4f, 1.0f), "Hoja");
                 } else {
                     ImGui::TextDisabled("Interno");
@@ -757,29 +1061,33 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
             ImGui::EndTable();
         }
 
-        if (self.nodo_seleccionado >= 0 && self.arbol_props.nivel.count(self.nodo_seleccionado)) {
+        if (self.estado_ui.nodo_seleccionado >= 0 && self.estado_grafos.arbol_props.nivel.count(self.estado_ui.nodo_seleccionado)) {
             ImGui::Separator();
             ImGui::TextColored(ImVec4(0.0f, 0.7f, 0.8f, 1.0f),
-                "Detalles de %s:", red.nombreNodo(self.nodo_seleccionado).c_str());
+                "Detalles de %s:", red.nombreNodo(self.estado_ui.nodo_seleccionado).c_str());
 
-            int nid = self.nodo_seleccionado;
-            int pid = self.arbol_props.padre.count(nid) ? self.arbol_props.padre.at(nid) : -1;
+            int nid = self.estado_ui.nodo_seleccionado;
+            int pid = self.estado_grafos.arbol_props.padre.count(nid) ? self.estado_grafos.arbol_props.padre.at(nid) : -1;
             ImGui::Text("Padre:       %s", pid >= 0 ? red.nombreNodo(pid).c_str() : "(raiz)");
 
-            const auto& hijos = self.arbol_props.hijos.at(nid);
-            if (hijos.empty()) {
-                ImGui::Text("Hijos:       (hoja)");
-            } else {
-                std::string sh;
-                for (size_t i = 0; i < hijos.size(); i++) {
-                    if (i > 0) sh += ", ";
-                    sh += red.nombreNodo(hijos[i]);
+            if (self.estado_grafos.arbol_props.hijos.count(nid)) {
+                const auto& hijos = self.estado_grafos.arbol_props.hijos.at(nid);
+                if (hijos.empty()) {
+                    ImGui::Text("Hijos:       (hoja)");
+                } else {
+                    std::string sh;
+                    for (size_t i = 0; i < hijos.size(); i++) {
+                        if (i > 0) sh += ", ";
+                        sh += red.nombreNodo(hijos[i]);
+                    }
+                    ImGui::Text("Hijos:       %s", sh.c_str());
                 }
-                ImGui::Text("Hijos:       %s", sh.c_str());
+            } else {
+                ImGui::Text("Hijos:       (sin informacion)");
             }
 
-            if (pid >= 0 && self.arbol_props.hermanos.count(pid)) {
-                const auto& herm = self.arbol_props.hermanos.at(pid);
+            if (pid >= 0 && self.estado_grafos.arbol_props.hermanos.count(pid)) {
+                const auto& herm = self.estado_grafos.arbol_props.hermanos.at(pid);
                 std::string sh;
                 for (int h : herm) {
                     if (h == nid) continue;
@@ -789,8 +1097,8 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
                 ImGui::Text("Hermanos:    %s", sh.empty() ? "(ninguno)" : sh.c_str());
             }
 
-            if (self.arbol_props.ancestros.count(nid)) {
-                const auto& anc = self.arbol_props.ancestros.at(nid);
+            if (self.estado_grafos.arbol_props.ancestros.count(nid)) {
+                const auto& anc = self.estado_grafos.arbol_props.ancestros.at(nid);
                 std::string sa;
                 for (size_t i = 0; i < anc.size(); i++) {
                     if (i > 0) sa += " -> ";
@@ -799,13 +1107,13 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
                 ImGui::Text("Ancestros:   %s", sa.empty() ? "(raiz)" : sa.c_str());
             }
 
-            if (self.arbol_props.descendientes.count(nid)) {
+            if (self.estado_grafos.arbol_props.descendientes.count(nid)) {
                 ImGui::Text("Descendientes: %d nodos",
-                    (int)self.arbol_props.descendientes.at(nid).size());
+                    (int)self.estado_grafos.arbol_props.descendientes.at(nid).size());
             }
 
             std::vector<std::string> mis_primos;
-            for (const auto& [a, b] : self.arbol_props.primos) {
+            for (const auto& [a, b] : self.estado_grafos.arbol_props.primos) {
                 if (a == nid) mis_primos.push_back(red.nombreNodo(b));
                 else if (b == nid) mis_primos.push_back(red.nombreNodo(a));
             }
@@ -821,56 +1129,119 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
             }
         }
 
-        if (!self.arbol_props.primos.empty()) {
+        if (!self.estado_grafos.arbol_props.primos.empty()) {
             ImGui::Separator();
             if (ImGui::CollapsingHeader("Pares de primos")) {
-                for (const auto& [a, b] : self.arbol_props.primos) {
+                for (const auto& [a, b] : self.estado_grafos.arbol_props.primos) {
                     ImGui::BulletText("%s y %s (nivel %d)",
                         red.nombreNodo(a).c_str(),
                         red.nombreNodo(b).c_str(),
-                        self.arbol_props.nivel.at(a));
+                        self.estado_grafos.arbol_props.nivel.at(a));
                 }
             }
         }
     }
 }
 
-// ── Funcion principal: dibuja el panel "Herramientas de Red" completo ─────
-inline void dibujar(Interfaz& self, Grafo& red) {
-    ImGui::Begin("Herramientas de Red");
-
-    selectorModo(self, red);
-
+// -- barra lateral izquierda (delgada, informacion rapida) --
+inline void sidebarInfo(Interfaz& self, Grafo& red) {
+    ImGui::Begin("Info del Grafo");
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "MODO");
+    const char* modo_txt = (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos)
+        ? ICON_FA_DIAGRAM_PROJECT " Grafos" : ICON_FA_NETWORK_WIRED " Redes";
+    ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f), "%s", modo_txt);
     ImGui::Separator();
 
-    if (self.modo_panel != Interfaz::ModoPanel::General) {
-        if (ImGui::Button(ICON_FA_ARROW_LEFT " Volver", ImVec2(-1, 28))) {
-            self.modo_panel = Interfaz::ModoPanel::General;
-        }
-        ImGui::Separator();
-    }
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "GRAFO");
+    int aristas = (int)red.aristas.size();
+    int n_nodos = (int)red.nodos.size();
+    float densidad = (n_nodos > 1) ? (2.0f * aristas) / (n_nodos * (n_nodos - 1)) : 0;
+    ImGui::Text("%s %d nodos", ICON_FA_CIRCLE, n_nodos);
+    ImGui::Text("%s %d aristas", ICON_FA_LINK, aristas);
+    ImGui::TextDisabled("densidad %.1f%%", densidad * 100.0f);
 
-    switch (self.modo_panel) {
-        case Interfaz::ModoPanel::General:     menuGeneral(self, red);   break;
-        case Interfaz::ModoPanel::Dijkstra:    subpanelDijkstra(self, red); break;
-        case Interfaz::ModoPanel::Kruskal:     subpanelKruskal(self, red);  break;
-        case Interfaz::ModoPanel::BFS:         subpanelBFS(self, red);   break;
-        case Interfaz::ModoPanel::DFS:         subpanelDFS(self, red);   break;
-        case Interfaz::ModoPanel::Ciclos:      subpanelCiclos(self, red); break;
-        case Interfaz::ModoPanel::Coloreo:     subpanelColoreo(self, red); break;
-        case Interfaz::ModoPanel::Isomorfismo: PanelIsomorfismo::dibujar(self, red); break;
-        case Interfaz::ModoPanel::Arbol:       subpanelArbol(self, red); break;
-        default: break;
-    }
-
-    if (self.anim_estado.activa || self.anim_estado.paso_actual >= 0) {
+    if (self.estado_grafos.anim_estado.activa || self.estado_grafos.anim_estado.paso_actual >= 0) {
         ImGui::Separator();
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "ANIMACION");
         controlesAnimacion(self);
     }
 
-    propiedadesNodo(self, red);
-
     ImGui::End();
 }
+
+// -- panel contextual derecho: muestra config de herramienta activa --
+inline void panelContextual(Interfaz& self, Grafo& red) {
+    // en modo redes, el panel de red maneja sus propias ventanas
+    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
+        return;
+    }
+
+    ImGui::Begin("Algoritmos");
+    
+    // Dropdown para seleccionar herramienta
+    const char* items[] = {
+        ICON_FA_WRENCH " General",
+        ICON_FA_ROUTE " Rutas",
+        ICON_FA_TREE " Arbol",
+        ICON_FA_MAGNIFYING_GLASS " Busqueda",
+        ICON_FA_ROTATE " Ciclos",
+        ICON_FA_PAINTBRUSH " Coloreo",
+        ICON_FA_OBJECT_GROUP " Isomorfismo"
+    };
+    
+    // Mapeo inverso asumiendo que el enum EstadoUI::CategoriaHerramienta va de 0 a 6 o 7
+    // General=0, Rutas=1, Arbol=2, Busqueda=3, Ciclos=4, Coloreo=5, Isomorfismo=6
+    int current_item = 0;
+    if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas) current_item = 1;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatArbol) current_item = 2;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatBusqueda) current_item = 3;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatCiclos) current_item = 4;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatColoreo) current_item = 5;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo) current_item = 6;
+    
+    ImGui::SetNextItemWidth(-1);
+    if (ImGui::Combo("##algo_select", &current_item, items, 7)) {
+        if (current_item == 0) self.estado_ui.herramienta_activa = EstadoUI::CatGeneral;
+        else if (current_item == 1) self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
+        else if (current_item == 2) self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
+        else if (current_item == 3) self.estado_ui.herramienta_activa = EstadoUI::CatBusqueda;
+        else if (current_item == 4) self.estado_ui.herramienta_activa = EstadoUI::CatCiclos;
+        else if (current_item == 5) self.estado_ui.herramienta_activa = EstadoUI::CatColoreo;
+        else if (current_item == 6) self.estado_ui.herramienta_activa = EstadoUI::CatIsomorfismo;
+    }
+    ImGui::Separator();
+
+    switch (self.estado_ui.herramienta_activa) {
+        case EstadoUI::CatGeneral:
+            ImGui::TextWrapped("Selecciona una herramienta desde la barra superior.");
+            if (red.nodos.empty()) {
+                ImGui::Spacing();
+                ImGui::TextDisabled(ICON_FA_CIRCLE_INFO " clic derecho en el lienzo para crear nodos.");
+            }
+            break;
+        case EstadoUI::CatRutas:    subpanelDijkstra(self, red); break;
+        case EstadoUI::CatArbol:
+            subpanelKruskal(self, red);
+            ImGui::Separator();
+            subpanelArbol(self, red);
+            break;
+        case EstadoUI::CatBusqueda:
+            subpanelBFS(self, red);
+            ImGui::Separator();
+            subpanelDFS(self, red);
+            break;
+        case EstadoUI::CatCiclos:   subpanelCiclos(self, red); break;
+        case EstadoUI::CatColoreo:  subpanelColoreo(self, red); break;
+        case EstadoUI::CatIsomorfismo: PanelIsomorfismo::dibujar(self, red); break;
+        case EstadoUI::CatMatrices: Matrices::dibujar(red, self); break;
+        default: break;
+    }
+
+    propiedadesNodo(self, red);
+    ImGui::End();
+}
+
+// -- funcion para dibujar el menu de herramientas en modo grafos dentro del toolbar area --
+// ya no se usa menuGeneral, ahora se usa el toolbar con categorias
 
 } // namespace PanelGrafos

@@ -19,139 +19,43 @@
 #include "audio/Sonidos.h"
 #include "interfaz/util/Animacion.h"
 #include <GLFW/glfw3.h>
+#include "estado/EstadoGrafos.h"
+#include "estado/EstadoRedes.h"
+#include "estado/EstadoUI.h"
 
 extern Sonidos g_sonidos;
 
-// Clase interfaz
+// clase interfaz
 class Interfaz {
 public:
-    // Estado de navegacion del panel de herramientas
-    enum class ModoPanel {
-        General,
-        Dijkstra,
-        Kruskal,
-        BFS,
-        DFS,
-        Ciclos,
-        Coloreo,
-        Isomorfismo,
-        Arbol       // Fase 3
-    };
-    ModoPanel modo_panel = ModoPanel::General;
+    using ModoPanel = EstadoGrafos::ModoPanel;
+    using ModoApp   = EstadoUI::ModoApp;
 
-    // --- Modo de aplicacion ---
-    enum class ModoApp { Grafos, Redes };
-    ModoApp modo_actual = ModoApp::Grafos;
+    // -- estado modular --
+    EstadoGrafos estado_grafos;
+    EstadoRedes  estado_redes;
+    EstadoUI     estado_ui;
 
-    bool               dijkstra_usar_latencia = false;
-    std::vector<float> dijkstra_tabla_dist;   // se llena durante la animacion
+    // -- workspace tracking --
+    ModoApp ultimo_modo_workspace = ModoApp::Grafos;
 
-    int                         bfs_nodo_inicio = 0;
-    Algoritmos::BFS::ResultadoBFS bfs_resultado;
+    void dibujar(Grafo& red, GLFWwindow* ventana);
+    void construirLayout(ImGuiID dock_id, ImVec2 tamano);
 
-    int                          dfs_nodo_inicio = 0;
-    Algoritmos::DFS::ResultadoDFS dfs_resultado;
-
-    Algoritmos::ResultadoCiclos resultado_ciclos;
-
-    Algoritmos::ResultadoColoreo resultado_coloreo;
-
-    Grafo                                       grafo_iso_g2;
-    Algoritmos::Isomorfismo::ResultadoIsomorfismo resultado_iso;
-    bool                                        iso_analizado  = false;
-    bool                                        iso_editando_g2 = false;  // true = editar G2
+    void registrarLog(const std::string& msg) {
+        estado_ui.registrarLog(msg);
+    }
 
     void resetGrafoIsomorfismo() {
-        grafo_iso_g2.limpiar();
-        resultado_iso = {};
-        iso_analizado  = false;
-        iso_editando_g2 = false;
+        estado_grafos.resetGrafoIsomorfismo();
     }
+};
 
-    // --- Arbol ---
-    Algoritmos::Arbol::PropiedadesArbol arbol_props;
-    bool        arbol_analizado       = false;
-    int         arbol_raiz_id         = 0;
-    bool        arbol_layout_aplicado = false;
-
-    // --- Simulador ---
-    SimuladorRed simulador;
-    bool         sim_inicializada = false;
-    bool         mostrar_modal_inicio = false;
-
-    // Flujo pendiente
-    int          flujo_origen  = 0;
-    int          flujo_destino = 1;
-    float        flujo_mbps    = 10.0f;
-    int          flujo_tipo    = 0;  // 0=HTTP, 1=VIDEO, 2=PING, 3=DDoS
-    float        flujo_dur     = 10.0f;
-
-    // Nodo/arista seleccionado para fallo
-    int          fallo_nodo_id     = -1;
-    int          fallo_arista_org  = -1;
-    int          fallo_arista_dst  = -1;
-
-    // --- Seleccion ---
-    int nodo_seleccionado = -1;
-    int nodo_hover = -1;
-    bool arrastrando = false;
-
-    // --- Algoritmos instantaneos ---
-    int dijkstra_origen = 0;
-    int dijkstra_destino = 1;
-    std::vector<int> ruta_optima;
-    std::vector<Arista> aristas_mst;
-    bool mostrar_mst = false;
-    std::vector<int> colores_nodos;
-    bool mostrar_coloreo = false;
-    bool tiene_ciclo = false;
-    bool ciclo_analizado = false;
-
-    // --- Animacion paso a paso ---
-    Animacion::EstadoAnimacion anim_estado;
-
-    // --- Simulacion ---
-    bool simulacion_jitter = false;
-    float jitter_porcentaje = 0.15f;
-
-    // --- Logs ---
-    std::vector<std::string> system_logs;
-
-    // --- Creacion pendiente ---
-    ImVec2 pos_click_derecho = ImVec2(0, 0);
-    int pendiente_arista_origen = -1;
-    int pendiente_arista_destino = -1;
-    float pendiente_arista_peso = 1.0f;
-    char buffer_nombre[64] = {};
-
-    // --- Fuentes ---
-    ImFont* fontMono = nullptr;
-
-    // --- Panning ---
-    ImVec2 offset_lienzo = ImVec2(0, 0);
-
-    // FUNCION PRINCIPAL (declaracion — cuerpo definido al final del archivo)
-    void dibujar(Grafo& red, GLFWwindow* ventana);
-
-    // ── Utilidades publicas (necesarias para modulos externos) ──────────────
-    void registrarLog(const std::string& msg) {
-        system_logs.push_back("[SYS] " + msg);
-        if (system_logs.size() > 100) system_logs.erase(system_logs.begin());
-    }
-
-    // Nota: los wrappers de animacion (iniciar/aplicarPaso/reset)
-    // se movieron a AnimacionUI.h (con side effects de log/sonido)
-
-        // LIENZO DE RED — extraido a LienzoRed.h (namespace LienzoRed)
-
-        // MATRICES, LOG PANEL — extraidos a Matrices.h y LogPanel.h
-
-    };  // class Interfaz
-
-// ── Includes de modulos de UI (despues de la definicion de Interfaz) ──────
-#include "interfaz/componentes/StatusBar.h"
+// includes de modulos de ui
 #include "interfaz/componentes/MenuPrincipal.h"
+#include "interfaz/componentes/StatusBar.h"
 #include "interfaz/componentes/Dialogos.h"
+#include "interfaz/componentes/Toolbar.h"
 #include "interfaz/paneles/PanelHardware.h"
 #include "interfaz/paneles/PanelRed.h"
 #include "interfaz/paneles/PanelIsomorfismo.h"
@@ -161,62 +65,176 @@ public:
 #include "interfaz/paneles/Matrices.h"
 #include "interfaz/componentes/LogPanel.h"
 
-// ── Cuerpo de dibujar() — definido aqui para que los modulos esten visibles ─
+// -- layout: izq info, centro (lienzo + matrices + log como tabs), der herramientas --
+inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
+    ImGuiID main = dock_id;
+
+    // split izquierdo (info del grafo) - compacto
+    ImGuiID izq = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, 0.13f, nullptr, &main);
+
+    // split derecho (solo herramientas)
+    ImGuiID der = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, 0.25f, nullptr, &main);
+
+    // El centro tiene todo: Lienzo (activo), Matrices y Log como pestanas
+    ImGui::DockBuilderDockWindow("Info del Grafo", izq);
+    ImGui::DockBuilderDockWindow("Algoritmos", der);
+    ImGui::DockBuilderDockWindow("Lienzo de Red", main);
+    ImGui::DockBuilderDockWindow("Matrices", main);           // pestana centro
+    ImGui::DockBuilderDockWindow("Registro del Kernel", main); // pestana centro
+
+    // Asegurar que Lienzo sea la pestana activa por defecto
+    ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
+
+    // en modo redes, agregar panel de red como pestana en herramientas
+    if (estado_ui.modo_actual == ModoApp::Redes) {
+        ImGui::DockBuilderDockWindow("Panel de Red", der);
+    }
+}
+
+// -- aplica tema moderno, elegante y vibrante --
+inline void aplicarTemaCisco() {
+    auto& style = ImGui::GetStyle();
+    style.FrameRounding = 8.0f;
+    style.GrabRounding  = 8.0f;
+    style.WindowRounding = 12.0f;
+    style.ChildRounding  = 8.0f;
+    style.PopupRounding  = 8.0f;
+    style.ScrollbarRounding = 8.0f;
+    style.FramePadding = ImVec2(12, 8);
+    style.ItemSpacing  = ImVec2(10, 8);
+    style.ItemInnerSpacing = ImVec2(6, 6);
+    style.WindowPadding = ImVec2(12, 12);
+    style.CellPadding  = ImVec2(8, 6);
+    style.IndentSpacing = 20.0f;
+    style.ScrollbarSize = 12.0f;
+    style.GrabMinSize  = 12.0f;
+    style.WindowBorderSize = 0.0f;
+    style.ChildBorderSize  = 1.0f;
+    style.PopupBorderSize  = 1.0f;
+    style.FrameBorderSize  = 0.0f;
+    style.TabBorderSize    = 0.0f;
+
+    ImVec4* colors = style.Colors;
+    // Paleta moderna oscura con acentos cian y morado
+    colors[ImGuiCol_Text]           = ImVec4(0.92f, 0.92f, 0.95f, 1.00f);
+    colors[ImGuiCol_TextDisabled]   = ImVec4(0.50f, 0.50f, 0.55f, 1.00f);
+    colors[ImGuiCol_WindowBg]       = ImVec4(0.09f, 0.09f, 0.12f, 0.98f);
+    colors[ImGuiCol_ChildBg]        = ImVec4(0.12f, 0.12f, 0.15f, 0.95f);
+    colors[ImGuiCol_PopupBg]        = ImVec4(0.11f, 0.11f, 0.15f, 0.98f);
+    colors[ImGuiCol_Border]         = ImVec4(0.25f, 0.25f, 0.35f, 0.50f);
+    colors[ImGuiCol_BorderShadow]   = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_FrameBg]        = ImVec4(0.16f, 0.16f, 0.21f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.22f, 0.22f, 0.28f, 1.00f);
+    colors[ImGuiCol_FrameBgActive]  = ImVec4(0.28f, 0.28f, 0.35f, 1.00f);
+    colors[ImGuiCol_TitleBg]        = ImVec4(0.09f, 0.09f, 0.12f, 1.00f);
+    colors[ImGuiCol_TitleBgActive]  = ImVec4(0.12f, 0.12f, 0.16f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed]= ImVec4(0.09f, 0.09f, 0.12f, 0.80f);
+    colors[ImGuiCol_MenuBarBg]      = ImVec4(0.14f, 0.14f, 0.18f, 1.00f);
+    colors[ImGuiCol_ScrollbarBg]    = ImVec4(0.12f, 0.12f, 0.16f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrab]  = ImVec4(0.25f, 0.25f, 0.32f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabHovered]= ImVec4(0.35f, 0.35f, 0.45f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabActive]= ImVec4(0.45f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_CheckMark]      = ImVec4(0.00f, 0.90f, 0.70f, 1.00f);
+    colors[ImGuiCol_SliderGrab]     = ImVec4(0.00f, 0.70f, 0.60f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive]= ImVec4(0.00f, 0.90f, 0.70f, 1.00f);
+    colors[ImGuiCol_Button]         = ImVec4(0.18f, 0.18f, 0.24f, 1.00f);
+    colors[ImGuiCol_ButtonHovered]  = ImVec4(0.24f, 0.24f, 0.32f, 1.00f);
+    colors[ImGuiCol_ButtonActive]   = ImVec4(0.32f, 0.32f, 0.42f, 1.00f);
+    colors[ImGuiCol_Header]         = ImVec4(0.00f, 0.60f, 0.50f, 0.35f);
+    colors[ImGuiCol_HeaderHovered]  = ImVec4(0.00f, 0.75f, 0.65f, 0.50f);
+    colors[ImGuiCol_HeaderActive]   = ImVec4(0.00f, 0.90f, 0.75f, 0.65f);
+    colors[ImGuiCol_Separator]      = ImVec4(0.20f, 0.20f, 0.28f, 1.00f);
+    colors[ImGuiCol_SeparatorHovered]= ImVec4(0.30f, 0.30f, 0.40f, 1.00f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.00f, 0.85f, 0.70f, 1.00f);
+    colors[ImGuiCol_ResizeGrip]     = ImVec4(0.25f, 0.25f, 0.35f, 0.50f);
+    colors[ImGuiCol_ResizeGripHovered]= ImVec4(0.00f, 0.75f, 0.65f, 0.60f);
+    colors[ImGuiCol_ResizeGripActive]= ImVec4(0.00f, 0.90f, 0.75f, 0.80f);
+    colors[ImGuiCol_Tab]            = ImVec4(0.14f, 0.14f, 0.18f, 1.00f);
+    colors[ImGuiCol_TabHovered]     = ImVec4(0.00f, 0.65f, 0.55f, 0.60f);
+    colors[ImGuiCol_TabActive]      = ImVec4(0.00f, 0.75f, 0.65f, 0.80f);
+    colors[ImGuiCol_TabUnfocused]   = ImVec4(0.10f, 0.10f, 0.14f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive]= ImVec4(0.14f, 0.14f, 0.18f, 1.00f);
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.00f, 0.85f, 0.70f, 0.40f);
+    colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.09f, 0.09f, 0.12f, 1.00f);
+    colors[ImGuiCol_PlotLines]      = ImVec4(0.00f, 0.90f, 0.70f, 1.00f);
+    colors[ImGuiCol_PlotLinesHovered]= ImVec4(0.00f, 1.00f, 0.85f, 1.00f);
+    colors[ImGuiCol_PlotHistogram]  = ImVec4(0.00f, 0.75f, 0.65f, 1.00f);
+    colors[ImGuiCol_PlotHistogramHovered]= ImVec4(0.00f, 0.90f, 0.70f, 1.00f);
+    colors[ImGuiCol_TableHeaderBg]  = ImVec4(0.14f, 0.14f, 0.18f, 1.00f);
+    colors[ImGuiCol_TableBorderStrong]= ImVec4(0.20f, 0.20f, 0.28f, 1.00f);
+    colors[ImGuiCol_TableBorderLight] = ImVec4(0.16f, 0.16f, 0.21f, 1.00f);
+    colors[ImGuiCol_TableRowBg]     = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_TableRowBgAlt]  = ImVec4(0.18f, 0.18f, 0.24f, 0.30f);
+    colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.85f, 0.70f, 0.35f);
+    colors[ImGuiCol_DragDropTarget] = ImVec4(0.00f, 0.90f, 0.75f, 0.60f);
+    colors[ImGuiCol_NavHighlight]   = ImVec4(0.00f, 0.85f, 0.70f, 0.60f);
+    colors[ImGuiCol_NavWindowingHighlight]= ImVec4(0.00f, 0.85f, 0.70f, 0.60f);
+    colors[ImGuiCol_NavWindowingDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
+    colors[ImGuiCol_ModalWindowDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.60f);
+}
+
+// -- cuerpo principal de dibujar() --
 inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
-    // Tick de simulacion de red
-    if (modo_actual == ModoApp::Redes && sim_inicializada) {
-        simulador.tick(red, ImGui::GetIO().DeltaTime);
+    // aplicar tema una vez
+    static bool theme_set = false;
+    if (!theme_set) { aplicarTemaCisco(); theme_set = true; }
+
+    // tick de simulacion de red
+    if (estado_ui.modo_actual == ModoApp::Redes && estado_redes.sim_inicializada) {
+        estado_redes.simulador.tick(red, ImGui::GetIO().DeltaTime);
     }
 
-    // Avanzar animacion
-    if (anim_estado.activa && !anim_estado.pausada) {
+    // avanzar animacion
+    if (estado_grafos.anim_estado.activa && !estado_grafos.anim_estado.pausada) {
         float dt = ImGui::GetIO().DeltaTime;
-        anim_estado.timer_paso += dt;
-
-        // Actualizar particula en movimiento
-        if (anim_estado.particula.activa) {
-            anim_estado.particula.progreso += dt / anim_estado.particula.duracion;
-            if (anim_estado.particula.progreso >= 1.0f) {
-                anim_estado.particula.progreso = 1.0f;
-                anim_estado.particula.activa  = false;
+        estado_grafos.anim_estado.timer_paso += dt;
+        if (estado_grafos.anim_estado.particula.activa) {
+            estado_grafos.anim_estado.particula.progreso += dt / estado_grafos.anim_estado.particula.duracion;
+            if (estado_grafos.anim_estado.particula.progreso >= 1.0f) {
+                estado_grafos.anim_estado.particula.progreso = 1.0f;
+                estado_grafos.anim_estado.particula.activa  = false;
             }
         }
-
-        // Avanzar al siguiente paso cuando el timer vence
-        if (anim_estado.timer_paso >= anim_estado.velocidad_paso && anim_estado.activa) {
-            anim_estado.timer_paso -= anim_estado.velocidad_paso;
-            anim_estado.paso_actual++;
-            if (anim_estado.paso_actual >= (int)anim_estado.pasos.size()) {
-                anim_estado.activa = false;
+        if (estado_grafos.anim_estado.timer_paso >= estado_grafos.anim_estado.velocidad_paso && estado_grafos.anim_estado.activa) {
+            estado_grafos.anim_estado.timer_paso -= estado_grafos.anim_estado.velocidad_paso;
+            estado_grafos.anim_estado.paso_actual++;
+            if (estado_grafos.anim_estado.paso_actual >= (int)estado_grafos.anim_estado.pasos.size()) {
+                estado_grafos.anim_estado.activa = false;
+                AnimacionUI::finalizar(*this);
+                if (estado_ui.herramienta_activa == EstadoUI::CatRutas) {
+                    auto res = Algoritmos::dijkstra(red, estado_grafos.dijkstra_origen, estado_grafos.dijkstra_destino, estado_grafos.dijkstra_usar_latencia);
+                    estado_grafos.ruta_optima = res.ruta;
+                    estado_grafos.mostrar_mst = false;
+                } else if (estado_ui.herramienta_activa == EstadoUI::CatArbol) {
+                    auto res = Algoritmos::Kruskal::kruskal(red);
+                    estado_grafos.aristas_mst = res.aristas_mst;
+                    estado_grafos.mostrar_mst = true;
+                    estado_grafos.ruta_optima.clear();
+                } else if (estado_ui.herramienta_activa == EstadoUI::CatBusqueda) {
+                    estado_grafos.bfs_resultado = Algoritmos::BFS::bfs(red, estado_grafos.bfs_nodo_inicio);
+                    estado_grafos.dfs_resultado = Algoritmos::DFS::dfs(red, estado_grafos.dfs_nodo_inicio);
+                }
             } else {
-                const PasoAnimacion& paso = anim_estado.pasos[anim_estado.paso_actual];
+                const PasoAnimacion& paso = estado_grafos.anim_estado.pasos[estado_grafos.anim_estado.paso_actual];
                 AnimacionUI::aplicarPaso(*this, paso);
-
-                // Lanzar particula si el paso involucra una arista
                 if (paso.arista_origen >= 0 && paso.arista_destino >= 0) {
                     Nodo* o = red.obtenerNodo(paso.arista_origen);
                     Nodo* d = red.obtenerNodo(paso.arista_destino);
                     if (o && d) {
-                        anim_estado.particula.activa     = true;
-                        anim_estado.particula.pos_inicio = o->posicion;
-                        anim_estado.particula.pos_fin    = d->posicion;
-                        anim_estado.particula.progreso   = 0.0f;
-                        anim_estado.particula.duracion   = anim_estado.velocidad_paso * 0.8f;
-
-                        // Color segun tipo de paso
+                        estado_grafos.anim_estado.particula.activa     = true;
+                        estado_grafos.anim_estado.particula.pos_inicio = o->posicion;
+                        estado_grafos.anim_estado.particula.pos_fin    = d->posicion;
+                        estado_grafos.anim_estado.particula.progreso   = 0.0f;
+                        estado_grafos.anim_estado.particula.duracion   = estado_grafos.anim_estado.velocidad_paso * 0.8f;
                         switch (paso.accion) {
                             case PasoAnimacion::EXPLORAR:
-                                anim_estado.particula.color = IM_COL32(0, 200, 255, 255);
-                                break;
+                                estado_grafos.anim_estado.particula.color = IM_COL32(0, 200, 255, 255); break;
                             case PasoAnimacion::CONFIRMAR:
-                                anim_estado.particula.color = IM_COL32(255, 180, 0, 255);
-                                break;
+                                estado_grafos.anim_estado.particula.color = IM_COL32(255, 180, 0, 255); break;
                             case PasoAnimacion::DESCARTAR:
-                                anim_estado.particula.color = IM_COL32(255, 60, 60, 200);
-                                break;
+                                estado_grafos.anim_estado.particula.color = IM_COL32(255, 60, 60, 200); break;
                             default:
-                                anim_estado.particula.color = IM_COL32(0, 255, 180, 255);
-                                break;
+                                estado_grafos.anim_estado.particula.color = IM_COL32(0, 255, 180, 255); break;
                         }
                     }
                 }
@@ -224,19 +242,62 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         }
     }
 
-    // Jitter
-    if (simulacion_jitter && modo_actual == ModoApp::Redes) {
-        red.aplicarJitter(jitter_porcentaje);
+    // jitter
+    if (estado_redes.simulacion_jitter && estado_ui.modo_actual == ModoApp::Redes) {
+        red.aplicarJitter(estado_redes.jitter_porcentaje);
     } else {
         red.resetearPesos();
     }
 
-    MenuPrincipal::dibujar(*this, red, ventana);
-
-    // DockSpace manual (deja 30px para StatusBar)
+    // -- toolbar unica: menu + categorias + modo, todo en una linea --
     ImGuiViewport* vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(vp->WorkPos);
-    ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
+    bool en_modo_redes = (estado_ui.modo_actual == ModoApp::Redes);
+    float toolbar_h = 40.0f;
+
+    ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x, vp->WorkPos.y));
+    ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x, toolbar_h));
+    ImGui::SetNextWindowViewport(vp->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6, 5));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.08f, 0.08f, 0.11f, 1.0f));
+    ImGui::Begin("##toolbar", nullptr,
+        ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor();
+
+    // Boton Archivo como popup (NO MenuBar)
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
+    if (ImGui::Button(ICON_FA_BARS, ImVec2(30, 28))) {
+        ImGui::OpenPopup("popup_archivo");
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Archivo");
+    if (ImGui::BeginPopup("popup_archivo")) {
+        MenuPrincipal::contenido(*this, red, ventana);
+        ImGui::EndPopup();
+    }
+    ImGui::PopStyleVar();
+
+    ImGui::SameLine(0, 6);
+    ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.4f, 1.0f), "|");
+    ImGui::SameLine(0, 6);
+
+    // Categorias + modo
+    Toolbar::dibujar(estado_ui, en_modo_redes);
+
+    ImGui::End();
+
+    // -- layout dockspace --
+    float status_h  = 26.0f;
+    ImVec2 dock_pos(vp->WorkPos.x, vp->WorkPos.y + toolbar_h);
+    ImVec2 dock_size(vp->WorkSize.x, vp->WorkSize.y - toolbar_h - status_h);
+
+    ImGui::SetNextWindowPos(dock_pos);
+    ImGui::SetNextWindowSize(dock_size);
     ImGui::SetNextWindowViewport(vp->ID);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -251,41 +312,44 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     ImGuiID dock_id = ImGui::GetID("GraphCoreDock");
     ImGui::DockSpace(dock_id);
 
+    // reconstruir layout al cambiar modo
+    if (estado_ui.modo_actual != ultimo_modo_workspace) {
+        ultimo_modo_workspace = estado_ui.modo_actual;
+        ImGui::DockBuilderRemoveNode(dock_id);
+        ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
+        construirLayout(dock_id, dock_size);
+        ImGui::DockBuilderFinish(dock_id);
+    }
+
+    // primer layout
     static bool layout_init = false;
     if (!layout_init) {
         layout_init = true;
-        std::ifstream ini_check("imgui.ini");
-        if (!ini_check.good()) {
-            ImGui::DockBuilderRemoveNode(dock_id);
-            ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
-            ImGui::DockBuilderSetNodeSize(dock_id, ImVec2(vp->WorkSize.x, vp->WorkSize.y - 30));
-
-            ImGuiID main_id = dock_id;
-            ImGuiID izq_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Left, 0.22f, nullptr, &main_id);
-            ImGuiID der_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Right, 0.28f, nullptr, &main_id);
-            ImGuiID abajo_id = ImGui::DockBuilderSplitNode(main_id, ImGuiDir_Down, 0.25f, nullptr, &main_id);
-
-            ImGuiID redes_id = ImGui::DockBuilderSplitNode(izq_id, ImGuiDir_Down, 0.5f, nullptr, &izq_id);
-            ImGui::DockBuilderDockWindow("Panel de Red", redes_id);
-
-            ImGui::DockBuilderDockWindow("Herramientas de Red", izq_id);
-            ImGui::DockBuilderDockWindow("Matrices", der_id);
-            ImGui::DockBuilderDockWindow("Registro del Kernel", abajo_id);
-            ImGui::DockBuilderDockWindow("Lienzo de Red", main_id);
-            ImGui::DockBuilderFinish(dock_id);
-        }
+        // Forzar estructura predefinida siempre en el primer frame
+        ImGui::DockBuilderRemoveNode(dock_id);
+        ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
+        construirLayout(dock_id, dock_size);
+        ImGui::DockBuilderFinish(dock_id);
     }
     ImGui::End();
 
-    PanelGrafos::dibujar(*this, red);
-    if (modo_actual == ModoApp::Redes) {
+    // -- ventanas acoplables --
+    PanelGrafos::sidebarInfo(*this, red);
+    PanelGrafos::panelContextual(*this, red);
+    if (estado_ui.modo_actual == ModoApp::Redes) {
         PanelRed::dibujar(*this, red);
     }
     LienzoRed::dibujar(red, *this);
     Matrices::dibujar(red, *this);
     LogPanel::dibujar(*this);
 
-    // Dialogos modales
+    // dialogos modales - abrir desde main context usando flags
+    if (estado_ui.mostrar_acerca_de) {
+        ImGui::OpenPopup("Acerca de");
+        estado_ui.mostrar_acerca_de = false;
+    }
     Dialogos::acercaDe();
     Dialogos::fallbackCargar(*this, red);
     Dialogos::fallbackGuardar(*this, red);

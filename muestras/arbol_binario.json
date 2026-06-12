@@ -1,0 +1,21 @@
+{
+    "version": "3.0",
+    "contador_ids": 8,
+    "nodos": [
+        {"id": 0, "nombre": "Raiz",   "x": 300, "y": 60,  "tipo": 0},
+        {"id": 1, "nombre": "Hijo I", "x": 140, "y": 180, "tipo": 0},
+        {"id": 2, "nombre": "Hijo D", "x": 460, "y": 180, "tipo": 0},
+        {"id": 3, "nombre": "A",      "x": 50,  "y": 300, "tipo": 0},
+        {"id": 4, "nombre": "B",      "x": 230, "y": 300, "tipo": 0},
+        {"id": 5, "nombre": "C",      "x": 370, "y": 300, "tipo": 0},
+        {"id": 6, "nombre": "D",      "x": 550, "y": 300, "tipo": 0}
+    ],
+    "aristas": [
+        {"origen": 0, "destino": 1, "peso": 1.0, "dirigida": true},
+        {"origen": 0, "destino": 2, "peso": 1.0, "dirigida": true},
+        {"origen": 1, "destino": 3, "peso": 1.0, "dirigida": true},
+        {"origen": 1, "destino": 4, "peso": 1.0, "dirigida": true},
+        {"origen": 2, "destino": 5, "peso": 1.0, "dirigida": true},
+        {"origen": 2, "destino": 6, "peso": 1.0, "dirigida": true}
+    ]
+}

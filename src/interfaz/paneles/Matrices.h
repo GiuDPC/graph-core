@@ -34,13 +34,9 @@ inline void dibujarAdyacencia(Grafo& red, ImFont* fontMono) {
         }
 
         // Header
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextDisabled("\\");
-        for (size_t c = 0; c < red.nodos.size(); c++) {
-            ImGui::TableSetColumnIndex((int)c + 1);
-            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.83f, 1.0f), "%s", red.nodos[c].nombre.c_str());
-        }
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.72f, 0.83f, 1.0f));
+        ImGui::TableHeadersRow();
+        ImGui::PopStyleColor();
 
         // Rows
         for (size_t f = 0; f < red.nodos.size(); f++) {
@@ -64,15 +60,38 @@ inline void dibujarAdyacencia(Grafo& red, ImFont* fontMono) {
                     }
                 }
 
-                if (peso >= 0) {
-                    ImVec4 col;
+                bool has_edge = (peso >= 0);
+                ImVec4 col;
+                if (has_edge) {
                     if (peso <= 3.0f) col = ImVec4(0.0f, 0.9f, 0.5f, 1.0f);
                     else if (peso <= 10.0f) col = ImVec4(1.0f, 0.85f, 0.0f, 1.0f);
                     else col = ImVec4(1.0f, 0.3f, 0.3f, 1.0f);
-                    ImGui::TextColored(col, "%.0f", peso);
                 } else {
-                    ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.35f, 1.0f), "-");
+                    col = ImVec4(0.3f, 0.3f, 0.35f, 1.0f);
                 }
+
+                ImGui::PushStyleColor(ImGuiCol_Text, col);
+                char label[32];
+                if (has_edge) snprintf(label, sizeof(label), "%.0f##%zu_%zu", peso, f, c);
+                else snprintf(label, sizeof(label), "-##%zu_%zu", f, c);
+                
+                if (ImGui::Selectable(label, has_edge, 0, ImVec2(col_w_data, 0))) {
+                    if (has_edge) {
+                        auto it = std::remove_if(red.aristas.begin(), red.aristas.end(), [&](const Arista& a) {
+                            return (a.origen_id == red.nodos[f].id && a.destino_id == red.nodos[c].id) ||
+                                   (!a.es_dirigida && a.origen_id == red.nodos[c].id && a.destino_id == red.nodos[f].id);
+                        });
+                        red.aristas.erase(it, red.aristas.end());
+                    } else {
+                        red.agregarArista(red.nodos[f].id, red.nodos[c].id, 1.0f);
+                    }
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Clic para %s arista %s - %s", 
+                        has_edge ? "eliminar" : "crear", 
+                        red.nodos[f].nombre.c_str(), red.nodos[c].nombre.c_str());
+                }
+                ImGui::PopStyleColor();
             }
         }
         ImGui::EndTable();
@@ -108,13 +127,9 @@ inline void dibujarIncidencia(Grafo& red, ImFont* fontMono) {
             ImGui::TableSetupColumn(hdr, ImGuiTableColumnFlags_WidthFixed, col_w_data);
         }
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextDisabled("\\");
-        for (int e = 0; e < (int)red.aristas.size(); e++) {
-            ImGui::TableSetColumnIndex(e + 1);
-            ImGui::TextColored(ImVec4(0.8f, 0.5f, 0.2f, 1.0f), "e%d", e);
-        }
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.5f, 0.2f, 1.0f));
+        ImGui::TableHeadersRow();
+        ImGui::PopStyleColor();
 
         for (size_t f = 0; f < red.nodos.size(); f++) {
             ImGui::TableNextRow();
@@ -140,22 +155,22 @@ inline void dibujarIncidencia(Grafo& red, ImFont* fontMono) {
 inline void dibujar(Grafo& red, Interfaz& self) {
     (void)self;
     ImGui::Begin("Matrices");
-    if (self.fontMono) ImGui::PushFont(self.fontMono);
+    if (self.estado_ui.fontMono) ImGui::PushFont(self.estado_ui.fontMono);
 
     if (ImGui::BeginTabBar("MatricesTabs")) {
         if (ImGui::BeginTabItem(ICON_FA_TABLE_CELLS " Adyacencia")) {
-            dibujarAdyacencia(red, self.fontMono);
+            dibujarAdyacencia(red, self.estado_ui.fontMono);
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(ICON_FA_TABLE_LIST " Incidencia")) {
-            dibujarIncidencia(red, self.fontMono);
+            dibujarIncidencia(red, self.estado_ui.fontMono);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
     }
 
-    if (self.fontMono) ImGui::PopFont();
+    if (self.estado_ui.fontMono) ImGui::PopFont();
     ImGui::End();
 }
 
-} // namespace Matrices
+} 

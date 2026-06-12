@@ -8,12 +8,68 @@ namespace Dialogos {
 
 // ── Modal "Acerca de" ─────────────────────────────────────────────────────
 void acercaDe() {
-    if (ImGui::BeginPopupModal("Acerca de", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("graph-core v1.0");
-        ImGui::Text("Motor avanzado de visualizacion de grafos");
-        ImGui::Text("Con audio y simulacion mejorada");
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Appearing);
+    
+    if (ImGui::BeginPopupModal("Acerca de", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+        ImGui::Spacing();
+        
+        // Titulo
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.9f, 0.7f, 1.0f));
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("OptiClusters").x) * 0.5f);
+        ImGui::Text("OptiClusters");
+        ImGui::PopStyleColor();
+        
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v2.0").x) * 0.5f);
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.7f, 1.0f), "graph-core v2.0");
+        
+        ImGui::Spacing();
         ImGui::Separator();
-        if (ImGui::Button("Cerrar")) ImGui::CloseCurrentPopup();
+        ImGui::Spacing();
+        
+        // Descripcion
+        ImGui::TextWrapped(
+            "Motor avanzado de visualizacion y analisis de grafos y redes. "
+            "Incluye algoritmos de caminos minimos, arboles de expansion, "
+            "busqueda, ciclos, coloreo, isomorfismo, simulacion de redes "
+            "y mas.");
+        
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        // Tecnologias
+        ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.65f, 1.0f), ICON_FA_MICROCHIP " Stack tecnologico:");
+        ImGui::BulletText("C++17 con ImGui (Docking)");
+        ImGui::BulletText("OpenGL 3.3 + GLFW");
+        ImGui::BulletText("miniaudio (sistema de audio)");
+        ImGui::BulletText("GoogleTest (testing)");
+        
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        // Algoritmos
+        ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.65f, 1.0f), ICON_FA_GEARS " Algoritmos implementados:");
+        ImGui::BulletText("Dijkstra, BFS, DFS");
+        ImGui::BulletText("Kruskal, Prim (MST)");
+        ImGui::BulletText("Deteccion de ciclos");
+        ImGui::BulletText("Coloreo de grafos");
+        ImGui::BulletText("Isomorfismo (VF2)");
+        
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        // Boton cerrar centrado
+        float btn_w = 120.0f;
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - btn_w) * 0.5f);
+        if (ImGui::Button(ICON_FA_CHECK " Cerrar", ImVec2(btn_w, 32))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::Spacing();
+        
         ImGui::EndPopup();
     }
 }
@@ -30,8 +86,8 @@ inline void fallbackCargar(Interfaz& self, Grafo& red) {
         if (ImGui::Button("Cargar", ImVec2(120, 0))) {
             if (strlen(ruta_cargar) > 0) {
                 Persistencia::cargar(red, std::string(ruta_cargar));
-                Animacion::reset(self.anim_estado);
-                self.ruta_optima.clear(); self.aristas_mst.clear(); self.mostrar_mst = false;
+                Animacion::reset(self.estado_grafos.anim_estado);
+                self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
                 self.registrarLog("[OK] Cargado desde ruta manual: " + std::string(ruta_cargar));
                 memset(ruta_cargar, 0, sizeof(ruta_cargar));
                 ImGui::CloseCurrentPopup();

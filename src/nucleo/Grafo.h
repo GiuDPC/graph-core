@@ -82,7 +82,9 @@ public:
     // ── Simulacion ────────────────────────────────────────────────────────────
 
     void aplicarJitter(float porcentaje) {
-        static std::mt19937 gen(42);
+        // Usar referencia a generador global (unico por programa)
+        // definido al final de este archivo
+        static std::mt19937& gen = obtenerGeneradorAleatorio();
         for (auto& a : aristas) {
             std::uniform_real_distribution<float> dist(-porcentaje, porcentaje);
             a.peso_actual = a.peso * (1.0f + dist(gen));
@@ -124,5 +126,11 @@ public:
                 return &a;
         }
         return nullptr;
+    }
+
+    // ── Generador aleatorio global (unico por programa) ───────────────────
+    static std::mt19937& obtenerGeneradorAleatorio() {
+        static std::mt19937 gen(42);
+        return gen;
     }
 };
