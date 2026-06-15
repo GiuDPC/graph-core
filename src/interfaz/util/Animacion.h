@@ -9,20 +9,20 @@
 #include <cmath>
 #include <algorithm>
 
-// ── Particular animada que viaja entre nodos ──────────────────────────────
+// Particular animada que viaja entre nodos
 struct ParticulaAnimacion {
     bool   activa     = false;
     ImVec2 pos_inicio;
     ImVec2 pos_fin;
-    float  progreso   = 0.0f;   // 0.0 → 1.0
-    float  duracion   = 0.3f;   // segundos para cruzar la arista
+    float  progreso   = 0.0f;
+    float  duracion   = 0.3f;
     ImU32  color      = IM_COL32(0, 255, 200, 255);
     float  radio      = 6.0f;
 };
 
 namespace Animacion {
 
-// ── Estado completo de animación ──────────────────────────────────────────
+// Estado completo de animación
 struct EstadoAnimacion {
     std::vector<PasoAnimacion> pasos;
     int         paso_actual       = -1;
@@ -41,7 +41,7 @@ struct EstadoAnimacion {
     std::map<int, float> tiempo_visita_nodo;
 };
 
-// ── Resetear animación por completo ───────────────────────────────────────
+// Resetear animación por completo
 inline void reset(EstadoAnimacion& est) {
     est.pasos.clear();
     est.paso_actual = -1;
@@ -57,7 +57,7 @@ inline void reset(EstadoAnimacion& est) {
     est.tiempo_visita_nodo.clear();
 }
 
-// ── Iniciar una nueva animación ───────────────────────────────────────────
+// Iniciar una nueva animación
 inline void iniciar(EstadoAnimacion& est, std::vector<PasoAnimacion> pasos) {
     reset(est);
     est.pasos = std::move(pasos);
@@ -67,7 +67,7 @@ inline void iniciar(EstadoAnimacion& est, std::vector<PasoAnimacion> pasos) {
     est.timer_paso = 0.0f;
 }
 
-// ── Aplicar un paso de animación (solo estado, sin sonido) ────────────────
+// Aplicar un paso de animación
 inline void aplicarPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     switch (p.accion) {
         case PasoAnimacion::VISITAR:
@@ -98,9 +98,9 @@ inline void aplicarPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     }
 }
 
-// ── Pausar/reanudar animación ─────────────────────────────────────────────
+// Pausar/reanudar animación
 inline void pausar(EstadoAnimacion& est) {
     est.pausada = !est.pausada;
 }
 
-} // namespace Animacion
+} 

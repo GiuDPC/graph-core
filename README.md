@@ -1,6 +1,6 @@
 # GraphCore: Simulador y Visualizador de Grafos y Redes
 
-Version 2.0.0. Aplicacion de escritorio para la visualizacion interactiva de algoritmos sobre
+Version 2.1.0. Aplicacion de escritorio para la visualizacion interactiva de algoritmos sobre
 grafos y la simulacion de trafico de red a nivel de paquetes. Construida con C++17, Dear ImGui,
 GLFW y OpenGL 3.3.
 

@@ -28,6 +28,9 @@ ResultadoKruskal kruskal(const Grafo& g) {
 
     UnionFind uf(g.rangoIds());
     for (const auto& a : ordenadas) {
+        // Kruskal solo funciona para grafos no-dirigidos (MST no tiene sentido en digrafos).
+        // Las aristas dirigidas se omiten.
+        if (a.es_dirigida) { resultado.aristas_rechazadas++; continue; }
         if (uf.unir(a.origen_id, a.destino_id)) {
             resultado.aristas_mst.push_back(a);
             resultado.peso_total += a.peso;
@@ -52,6 +55,9 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g) {
     int aceptadas = 0;
 
     for (const auto& a : ordenadas) {
+        // Kruskal solo funciona para grafos no-dirigidos (MST no tiene sentido en digrafos).
+        // Las aristas dirigidas se omiten.
+        if (a.es_dirigida) continue;
         pasos.push_back({PasoAnimacion::EXPLORAR, -1, a.origen_id, a.destino_id,
             "Evaluando " + g.nombreNodo(a.origen_id) + " - " + g.nombreNodo(a.destino_id) +
             " (peso=" + std::to_string((int)a.peso) + ")"});

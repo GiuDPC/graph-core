@@ -70,17 +70,111 @@ TEST(GrafoTest, NoDuplicateEdges) {
     g.agregarNodo(ImVec2(10, 10));
 
     g.agregarArista(0, 1, 2.0f);
-    g.agregarArista(1, 0, 3.0f);  // duplicado (no dirigida)
+    g.agregarArista(1, 0, 3.0f);  // paralelo opuesto (ahora permitido para multicurvas)
+    g.agregarArista(0, 1, 5.0f);  // duplicado exacto (rechazado)
 
-    EXPECT_EQ(g.aristas.size(), 1);
+    EXPECT_EQ(g.aristas.size(), 2);
 }
 
 TEST(GrafoTest, NoSelfEdge) {
     Grafo g;
     g.agregarNodo(ImVec2(0, 0));
 
-    g.agregarArista(0, 0, 1.0f);  // self-loop
+    g.agregarArista(0, 0, 1.0f);  // self-loop sin flag dirigida → legacy, se rechaza
     EXPECT_EQ(g.aristas.size(), 0);
+
+    // mismo test pero con dirigida=false explicito
+    g.agregarArista(0, 0, 1.0f, false);
+    EXPECT_EQ(g.aristas.size(), 0);
+}
+
+TEST(GrafoTest, DirigidaSelfEdge) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+
+    g.agregarArista(0, 0, 1.0f, true);  // self-loop dirigida → permitido
+    EXPECT_EQ(g.aristas.size(), 1);
+
+    const Arista* a = g.obtenerArista(0, 0);
+    ASSERT_NE(a, nullptr);
+    EXPECT_TRUE(a->es_dirigida);
+}
+
+TEST(GrafoTest, DirigidaEdge) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+    g.agregarNodo(ImVec2(10, 10));
+
+    g.agregarArista(0, 1, 2.0f, true);
+    EXPECT_EQ(g.aristas.size(), 1);
+
+    const Arista* a01 = g.obtenerArista(0, 1);
+    ASSERT_NE(a01, nullptr);
+    EXPECT_TRUE(a01->es_dirigida);
+    EXPECT_FLOAT_EQ(a01->peso, 2.0f);
+}
+
+TEST(GrafoTest, DirigidaBidirectional) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+    g.agregarNodo(ImVec2(10, 10));
+
+    g.agregarArista(0, 1, 2.0f, true);  // 0→1 (dirigida)
+    g.agregarArista(1, 0, 3.0f, true);  // 1→0 (dirigida) — NO es duplicado
+
+    EXPECT_EQ(g.aristas.size(), 2);
+
+    const Arista* a01 = g.obtenerArista(0, 1);
+    ASSERT_NE(a01, nullptr);
+    EXPECT_TRUE(a01->es_dirigida);
+    EXPECT_FLOAT_EQ(a01->peso, 2.0f);
+
+    const Arista* a10 = g.obtenerArista(1, 0);
+    ASSERT_NE(a10, nullptr);
+    EXPECT_TRUE(a10->es_dirigida);
+    EXPECT_FLOAT_EQ(a10->peso, 3.0f);
+}
+
+TEST(GrafoTest, DirigidaNoSelfLoopLegacy) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+
+    g.agregarArista(0, 0, 1.0f);  // self-loop sin flag dirigida
+    EXPECT_EQ(g.aristas.size(), 0);
+}
+
+TEST(GrafoTest, DirigidaMixedDirections) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+    g.agregarNodo(ImVec2(10, 10));
+
+    g.agregarArista(0, 1, 2.0f, true);   // 0→1 (dirigida)
+    g.agregarArista(1, 0, 3.0f, false);  // 1→0 (no-dirigida)
+
+    EXPECT_EQ(g.aristas.size(), 2);
+
+    const Arista* a01 = g.obtenerArista(0, 1);
+    ASSERT_NE(a01, nullptr);
+    EXPECT_TRUE(a01->es_dirigida);
+
+    const Arista* a10 = g.obtenerArista(1, 0);
+    ASSERT_NE(a10, nullptr);
+    EXPECT_FALSE(a10->es_dirigida);
+}
+
+TEST(GrafoTest, DirigidaDuplicate) {
+    Grafo g;
+    g.agregarNodo(ImVec2(0, 0));
+    g.agregarNodo(ImVec2(10, 10));
+
+    g.agregarArista(0, 1, 2.0f, true);   // 0→1 (dirigida)
+    g.agregarArista(0, 1, 5.0f, true);   // 0→1 (dirigida) — duplicado exacto, se rechaza
+
+    EXPECT_EQ(g.aristas.size(), 1);  // solo la primera se creó
+
+    const Arista* a01 = g.obtenerArista(0, 1);
+    ASSERT_NE(a01, nullptr);
+    EXPECT_FLOAT_EQ(a01->peso, 2.0f);  // peso del primer intento
 }
 
 TEST(GrafoTest, EdgeDeletionWithNode) {

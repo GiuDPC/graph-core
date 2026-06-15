@@ -49,10 +49,34 @@ struct Toolbar {
         // -- categorias segun modo --
         if (ui.modo_actual == EstadoUI::ModoApp::Grafos) {
             // Los algoritmos ahora estan en un desplegable dentro del panel derecho "Algoritmos"
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " Selecciona algoritmos en el panel derecho");
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para algoritmos");
         } else {
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " Utiliza el Panel de Red para simular trafico y fallos");
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para simulacion");
         }
+
+        // -- boton de enciclopedia (wiki) --
+        ImGui::SameLine(avail - 300);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.25f, 0.9f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.4f, 1.0f));
+        if (ImGui::Button(ICON_FA_BOOK_OPEN " Enciclopedia", ImVec2(130, 28))) {
+            ui.mostrar_ventana_ayuda = true;
+        }
+        ImGui::PopStyleColor(2);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Abre la documentacion completa del programa");
+
+        // -- boton de fisicas (derecha) --
+        ImGui::SameLine(avail - 150);
+        bool fisicas_pushed = false;
+        if (ui.fisicas_activas) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.3f, 0.8f, 0.8f));
+            fisicas_pushed = true;
+        }
+        if (ImGui::Button(ui.fisicas_activas ? ICON_FA_MAGNET " Fisicas (ON)" : ICON_FA_MAGNET " Fisicas (OFF)", ImVec2(145, 28))) {
+            ui.fisicas_activas = !ui.fisicas_activas;
+            ui.fisicas_estado_cambiado = true;
+        }
+        if (fisicas_pushed) ImGui::PopStyleColor();
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Activa la simulacion de fuerzas (Fruchterman-Reingold) para ordenar el grafo automaticamente");
 
         ImGui::PopStyleVar(3);
         return cambio;

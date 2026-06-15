@@ -7,7 +7,7 @@
 class Interfaz;
 class Grafo;
 
-// Panel de despliegue de hardware — iconos por tipo y popup "Crear Equipo"
+// Panel de despliegue de hardware
 namespace PanelHardware {
 
 inline const char* icono(TipoHardware tipo) {
@@ -40,4 +40,4 @@ inline void desplegar(Interfaz& self, Grafo& red, const ImVec2& pos_click) {
     }
 }
 
-} // namespace PanelHardware
+}

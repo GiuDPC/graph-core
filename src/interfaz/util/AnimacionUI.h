@@ -7,7 +7,7 @@
 
 class Interfaz;
 
-// Wrappers de animación que agregan sonido + log + efectos visuales
+// Wrappers de animación que agregan sonido y log y efectos visuales
 namespace AnimacionUI {
 
 inline void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
@@ -20,7 +20,6 @@ inline void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
 }
 
 inline void finalizar(Interfaz& self) {
-    // Sonido exclusivo Dijkstra si aplica; sino fanfarria general
     if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)
         g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
     else
@@ -32,9 +31,7 @@ inline void finalizar(Interfaz& self) {
 inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
     Animacion::aplicarPaso(self.estado_grafos.anim_estado, p);
 
-    // Sonidos según tipo de paso y modo
     if (self.estado_grafos.anim_estado.velocidad_paso < 0.15f) {
-        // Alta velocidad -> solo sonidos esenciales para no saturar
         if (p.accion == PasoAnimacion::CONFIRMAR)
             g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
         else if (p.accion == PasoAnimacion::DESCARTAR)
@@ -67,7 +64,6 @@ inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
         }
     }
 
-    // Log con descripción del paso si tiene
     if (!p.descripcion.empty()) self.registrarLog(p.descripcion);
 }
 
@@ -76,4 +72,4 @@ inline void reset(Interfaz& self) {
     self.registrarLog("⏹ Animación reiniciada");
 }
 
-} // namespace AnimacionUI
+}

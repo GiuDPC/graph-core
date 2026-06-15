@@ -3,6 +3,10 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -20,7 +24,6 @@ inline void setWindowIcon(GLFWwindow* window, const char* filename) {
         images[0].width = width;
         images[0].height = height;
         images[0].pixels = pixels;
-        // Wayland no soporta iconos de ventana, ignorar error silenciosamente
         auto prev_cb = glfwSetErrorCallback(nullptr);
         glfwSetWindowIcon(window, 1, images);
         glfwSetErrorCallback(prev_cb);

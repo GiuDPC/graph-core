@@ -2,11 +2,13 @@
 # graph-core .gitignore
 # ============================================================================
 
-# Build output
+# Carpetas de compilación y distribución
 build*/
 _build*/
+dist/
+release/
 
-# CMake generated files
+# Archivos generados por CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
@@ -15,8 +17,9 @@ Testing/
 _deps/
 compile_commands.json
 *.cmake
+!mingw-toolchain.cmake
 
-# IDE and editor
+# IDE y editores
 .vscode/
 .idea/
 *.swp
@@ -25,7 +28,7 @@ compile_commands.json
 .history/
 .cache/
 
-# Compiled artifacts and binaries
+# Archivos compilados y binarios
 *.o
 *.exe
 *.out
@@ -34,18 +37,23 @@ compile_commands.json
 *.dylib
 graph-core
 
-# OS files
+# Archivos del SO
 .DS_Store
 Thumbs.db
 
-# Dev tooling (opencode, atl, etc.)
+# Herramientas de desarrollo (opencode, atl, etc.)
 openspec/
 .atl/
 .opencode/
 
-# User documentation (not part of build)
-MANUAL_USUARIO.md
-
-# Runtime configuration
+# Configuración en tiempo de ejecución
 imgui.ini
 *.log
+
+# ============================================================================
+# Excepciones explícitas (SI deben ir al repo)
+# ============================================================================
+!muestras/
+!recursos/
+!graph-core-logo.png
+!build-all.sh

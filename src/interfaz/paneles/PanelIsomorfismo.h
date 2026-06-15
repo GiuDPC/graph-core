@@ -160,4 +160,4 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     }
 }
 
-} // namespace PanelIsomorfismo
+}

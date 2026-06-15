@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 
+#include <functional>
+
 #include "../Grafo.h"
 #include "../tipos/PasoAnimacion.h"
 #include "../tipos/TipoHardware.h"
@@ -22,7 +24,9 @@ struct ResultadoDijkstra {
 };
 
 ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
-                            bool aplicar_latencia = false) {
+                           bool aplicar_latencia = false,
+                           std::function<bool(int)> nodo_valido = nullptr,
+                           std::function<bool(int, int)> arista_valida = nullptr) {
     ResultadoDijkstra resultado;
     if (id_origen == id_destino || g.estaVacio()) return resultado;
 
@@ -46,6 +50,9 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
             if (a.origen_id == u) v = a.destino_id;
             else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
             if (v == -1 || v >= rango) continue;
+
+            if (nodo_valido && !nodo_valido(v)) continue;
+            if (arista_valida && !arista_valida(u, v)) continue;
 
             float costo = a.peso_actual;
             if (aplicar_latencia) {
@@ -77,7 +84,9 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
 
 // Genera los pasos para animacion
 std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_destino,
-                                         bool aplicar_latencia = false) {
+                                         bool aplicar_latencia = false,
+                                         std::function<bool(int)> nodo_valido = nullptr,
+                                         std::function<bool(int, int)> arista_valida = nullptr) {
     std::vector<PasoAnimacion> pasos;
     if (id_origen == id_destino || g.estaVacio()) return pasos;
 
@@ -110,6 +119,9 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
             if (a.origen_id == u) v = a.destino_id;
             else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
             if (v == -1 || v >= rango) continue;
+
+            if (nodo_valido && !nodo_valido(v)) continue;
+            if (arista_valida && !arista_valida(u, v)) continue;
 
             float costo = a.peso_actual;
             if (aplicar_latencia) {

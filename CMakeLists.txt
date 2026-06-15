@@ -138,6 +138,7 @@ if(BUILD_TESTS)
         ${CMAKE_SOURCE_DIR}/src/nucleo
         ${CMAKE_SOURCE_DIR}/src/nucleo/tipos
         ${CMAKE_SOURCE_DIR}/src/nucleo/algoritmos
+        ${CMAKE_SOURCE_DIR}/src/audio
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
     )
@@ -160,9 +161,31 @@ if(BUILD_TESTS)
     target_include_directories(test_unionfind PRIVATE ${TEST_INCLUDE_DIRS})
     target_link_libraries(test_unionfind PRIVATE GTest::gtest_main)
 
+    add_executable(test_bfs
+        tests/test_bfs.cpp
+    )
+    target_include_directories(test_bfs PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_bfs PRIVATE GTest::gtest_main)
+
+    add_executable(test_ciclos
+        tests/test_ciclos.cpp
+    )
+    target_include_directories(test_ciclos PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_ciclos PRIVATE GTest::gtest_main)
+
+    add_executable(test_simulador
+        tests/test_simulador.cpp
+        src/audio/miniaudio_impl.cpp
+    )
+    target_include_directories(test_simulador PRIVATE ${TEST_INCLUDE_DIRS})
+    target_link_libraries(test_simulador PRIVATE GTest::gtest_main)
+
     # Habilitar descubrimiento automatico de tests con CTest
     include(GoogleTest)
     gtest_discover_tests(test_grafo)
     gtest_discover_tests(test_dijkstra)
     gtest_discover_tests(test_unionfind)
+    gtest_discover_tests(test_bfs)
+    gtest_discover_tests(test_ciclos)
+    gtest_discover_tests(test_simulador)
 endif()

@@ -10,7 +10,7 @@ class Interfaz;
 // Panel de matrices de adyacencia e incidencia
 namespace Matrices {
 
-inline void dibujarAdyacencia(Grafo& red, ImFont* fontMono) {
+inline void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMono) {
     if (red.nodos.empty()) { ImGui::TextDisabled("Grafo vacio."); return; }
 
     ImVec2 region = ImGui::GetContentRegionAvail();
@@ -47,7 +47,38 @@ inline void dibujarAdyacencia(Grafo& red, ImFont* fontMono) {
             for (size_t c = 0; c < red.nodos.size(); c++) {
                 ImGui::TableSetColumnIndex((int)c + 1);
                 if (f == c) {
-                    ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.35f, 1.0f), "x");
+                    float peso_loop = -1;
+                    for (const auto& a : red.aristas) {
+                        if (a.origen_id == red.nodos[f].id && a.destino_id == red.nodos[f].id) {
+                            peso_loop = a.peso_actual;
+                            break;
+                        }
+                    }
+                    if (peso_loop >= 0) {
+                        char label[32];
+                        snprintf(label, sizeof(label), "%.0f##%zu_%zu", peso_loop, f, c);
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.9f, 0.5f, 1.0f));
+                        if (ImGui::Selectable(label, true, 0, ImVec2(col_w_data, 0))) {
+                            int nid = red.nodos[f].id;
+                            auto it = std::remove_if(red.aristas.begin(), red.aristas.end(), [nid](const Arista& a) {
+                                return a.origen_id == nid && a.destino_id == nid;
+                            });
+                            red.aristas.erase(it, red.aristas.end());
+                        }
+                        if (ImGui::IsItemHovered())
+                            ImGui::SetTooltip("Clic para eliminar bucle de %s", red.nodos[f].nombre.c_str());
+                        ImGui::PopStyleColor();
+                    } else {
+                        char label[32];
+                        snprintf(label, sizeof(label), "x##%zu_%zu", f, c);
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.35f, 1.0f));
+                        if (ImGui::Selectable(label, false, 0, ImVec2(col_w_data, 0))) {
+                            red.agregarArista(red.nodos[f].id, red.nodos[f].id, 1.0f, true);
+                        }
+                        if (ImGui::IsItemHovered())
+                            ImGui::SetTooltip("Clic para crear bucle en %s", red.nodos[f].nombre.c_str());
+                        ImGui::PopStyleColor();
+                    }
                     continue;
                 }
 
@@ -83,7 +114,7 @@ inline void dibujarAdyacencia(Grafo& red, ImFont* fontMono) {
                         });
                         red.aristas.erase(it, red.aristas.end());
                     } else {
-                        red.agregarArista(red.nodos[f].id, red.nodos[c].id, 1.0f);
+                        red.agregarArista(red.nodos[f].id, red.nodos[c].id, 1.0f, aristas_dirigidas);
                     }
                 }
                 if (ImGui::IsItemHovered()) {
@@ -159,7 +190,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
 
     if (ImGui::BeginTabBar("MatricesTabs")) {
         if (ImGui::BeginTabItem(ICON_FA_TABLE_CELLS " Adyacencia")) {
-            dibujarAdyacencia(red, self.estado_ui.fontMono);
+            dibujarAdyacencia(red, self.estado_ui.aristas_dirigidas, self.estado_ui.fontMono);
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(ICON_FA_TABLE_LIST " Incidencia")) {

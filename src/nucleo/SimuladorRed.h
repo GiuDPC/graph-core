@@ -41,9 +41,7 @@ class SimuladorRed {
 public:
     EstadoSimulacion estado;
 
-    // Configurable
     bool eventos_automaticos = true;
-    float probabilidad_evento = 0.005f;
     float probabilidad_spike  = 0.002f;
 
     void inicializar(const Grafo& g) {
@@ -73,7 +71,6 @@ public:
         estado.activa = true;
         estado.tiempo = 0.0f;
         cache_rutas.clear();
-        timer_eventos = 0.0f;
         timer_stats = 0.0f;
     }
 
@@ -184,15 +181,14 @@ public:
     }
 
     void simularFalloArista(int origen, int destino, Grafo& g) {
-        auto key  = std::make_pair(origen, destino);
-        auto key2 = std::make_pair(destino, origen);
-        if (estado.aristas.count(key))  estado.aristas[key].activa  = false;
-        if (estado.aristas.count(key2)) estado.aristas[key2].activa = false;
+        auto key = std::make_pair(origen, destino);
+        if (estado.aristas.count(key)) estado.aristas[key].activa = false;
+        // NO desactivar key2 (destino, origen) — en modo dirigido son enlaces separados
         estado.registrarTimeline(estado.tiempo,
-            g.nombreNodo(origen) + "-" + g.nombreNodo(destino) + " caido",
+            g.nombreNodo(origen) + "->" + g.nombreNodo(destino) + " caido",
             0xFFFF3333, TimelineEvent::CORTE);
         estado.registrarEvento(estado.tiempo,
-            "Enlace " + g.nombreNodo(origen) + " <-> " + g.nombreNodo(destino) + " CAIDO",
+            "Enlace " + g.nombreNodo(origen) + " -> " + g.nombreNodo(destino) + " CAIDO",
             EventoRed::ERROR_RED);
         cache_rutas.clear();
         g_sonidos.reproducir(Sonidos::NODO_CAIDO);
@@ -210,15 +206,14 @@ public:
     }
 
     void restaurarArista(int origen, int destino, Grafo& g) {
-        auto key  = std::make_pair(origen, destino);
-        auto key2 = std::make_pair(destino, origen);
-        if (estado.aristas.count(key))  estado.aristas[key].activa  = true;
-        if (estado.aristas.count(key2)) estado.aristas[key2].activa = true;
+        auto key = std::make_pair(origen, destino);
+        if (estado.aristas.count(key)) estado.aristas[key].activa = true;
+        // NO restaurar key2 — en modo dirigido son enlaces separados
         estado.registrarTimeline(estado.tiempo,
-            g.nombreNodo(origen) + "-" + g.nombreNodo(destino) + " restaurado",
+            g.nombreNodo(origen) + "->" + g.nombreNodo(destino) + " restaurado",
             0xFF4CAF50, TimelineEvent::RESTAURACION);
         estado.registrarEvento(estado.tiempo,
-            "Enlace " + g.nombreNodo(origen) + " <-> " + g.nombreNodo(destino) + " restaurado",
+            "Enlace " + g.nombreNodo(origen) + " -> " + g.nombreNodo(destino) + " restaurado",
             EventoRed::INFO);
         cache_rutas.clear();
     }
@@ -289,7 +284,6 @@ public:
 private:
     std::mt19937 gen{42};
     std::unordered_map<std::string, std::vector<int>> cache_rutas;
-    float timer_eventos = 0.0f;
     float timer_paquetes = 0.0f;
     float timer_stats = 0.0f;
     int contador_paquetes = 0;
@@ -306,7 +300,18 @@ private:
         auto it = cache_rutas.find(key);
         if (it != cache_rutas.end()) return it->second;
 
-        auto res = Algoritmos::dijkstra(g, origen, destino);
+        auto filtro_nodo = [&](int id) {
+            return estado.nodos.count(id) && estado.nodos.at(id).activo;
+        };
+        auto filtro_arista = [&](int u, int v) {
+            auto k1 = std::make_pair(u, v);
+            if (estado.aristas.count(k1) && !estado.aristas.at(k1).activa) return false;
+            // NO checkear k2 — en modo dirigido la direccion opuesta es un enlace separado
+            return true;
+        };
+
+        // Nota: Dijkstra ya respeta es_dirigida internamente (Dijkstra.h line 51)
+        auto res = Algoritmos::dijkstra(g, origen, destino, false, filtro_nodo, filtro_arista);
         if (res.hay_ruta) {
             cache_rutas[key] = res.ruta;
             return res.ruta;
@@ -460,6 +465,18 @@ private:
 
             int u = it->ruta[it->paso_actual];
             int v = it->ruta[it->paso_actual + 1];
+            
+            if (estado.nodos.count(u) && !estado.nodos.at(u).activo) {
+                total_paquetes_perdidos++;
+                it = paquetes_activos.erase(it);
+                continue;
+            }
+            if (estado.nodos.count(v) && !estado.nodos.at(v).activo) {
+                total_paquetes_perdidos++;
+                it = paquetes_activos.erase(it);
+                continue;
+            }
+
             auto key = std::make_pair(u, v);
 
             float velocidad = 1.0f;
@@ -498,8 +515,6 @@ private:
     }
 
     void generarEventos(Grafo& g, float dt) {
-        timer_eventos += dt;
-
         if (uniformeF(0, 1) < probabilidad_spike * dt * 10) {
             if (!g.nodos.empty() && estado.flujos.size() < 6) {
                 int intentos = 0;

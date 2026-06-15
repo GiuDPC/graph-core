@@ -64,6 +64,7 @@ public:
 #include "interfaz/lienzo/LienzoRed.h"
 #include "interfaz/paneles/Matrices.h"
 #include "interfaz/componentes/LogPanel.h"
+#include "interfaz/ventanas/VentanaAyuda.h"
 
 // -- layout: izq info, centro (lienzo + matrices + log como tabs), der herramientas --
 inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
@@ -173,18 +174,16 @@ inline void aplicarTemaCisco() {
     colors[ImGuiCol_ModalWindowDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.60f);
 }
 
-// -- cuerpo principal de dibujar() --
+
 inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
-    // aplicar tema una vez
+
     static bool theme_set = false;
     if (!theme_set) { aplicarTemaCisco(); theme_set = true; }
 
-    // tick de simulacion de red
     if (estado_ui.modo_actual == ModoApp::Redes && estado_redes.sim_inicializada) {
         estado_redes.simulador.tick(red, ImGui::GetIO().DeltaTime);
     }
 
-    // avanzar animacion
     if (estado_grafos.anim_estado.activa && !estado_grafos.anim_estado.pausada) {
         float dt = ImGui::GetIO().DeltaTime;
         estado_grafos.anim_estado.timer_paso += dt;
@@ -242,14 +241,12 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         }
     }
 
-    // jitter
     if (estado_redes.simulacion_jitter && estado_ui.modo_actual == ModoApp::Redes) {
         red.aplicarJitter(estado_redes.jitter_porcentaje);
     } else {
         red.resetearPesos();
     }
 
-    // -- toolbar unica: menu + categorias + modo, todo en una linea --
     ImGuiViewport* vp = ImGui::GetMainViewport();
     bool en_modo_redes = (estado_ui.modo_actual == ModoApp::Redes);
     float toolbar_h = 40.0f;
@@ -270,7 +267,6 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor();
 
-    // Boton Archivo como popup (NO MenuBar)
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
     if (ImGui::Button(ICON_FA_BARS, ImVec2(30, 28))) {
         ImGui::OpenPopup("popup_archivo");
@@ -286,12 +282,11 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.4f, 1.0f), "|");
     ImGui::SameLine(0, 6);
 
-    // Categorias + modo
+    // Categorias  y modos
     Toolbar::dibujar(estado_ui, en_modo_redes);
 
     ImGui::End();
 
-    // -- layout dockspace --
     float status_h  = 26.0f;
     ImVec2 dock_pos(vp->WorkPos.x, vp->WorkPos.y + toolbar_h);
     ImVec2 dock_size(vp->WorkSize.x, vp->WorkSize.y - toolbar_h - status_h);
@@ -322,22 +317,19 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         ImGui::DockBuilderFinish(dock_id);
     }
 
-    // primer layout
     static bool layout_init = false;
     if (!layout_init) {
         layout_init = true;
-        // Forzar estructura predefinida siempre en el primer frame
         ImGui::DockBuilderRemoveNode(dock_id);
         ImGui::DockBuilderAddNode(dock_id, ImGuiDockNodeFlags_DockSpace);
         ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
         construirLayout(dock_id, dock_size);
         ImGui::DockBuilderFinish(dock_id);
-        // Asegurar que quede activa de entrada
         ImGui::SetWindowFocus("Lienzo de Red");
     }
     ImGui::End();
 
-    // -- ventanas acoplables --
+    // ventanas acoplables
     PanelGrafos::sidebarInfo(*this, red);
     PanelGrafos::panelContextual(*this, red);
     if (estado_ui.modo_actual == ModoApp::Redes) {
@@ -347,7 +339,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     Matrices::dibujar(red, *this);
     LogPanel::dibujar(*this);
 
-    // dialogos modales - abrir desde main context usando flags
+    // dialogos modales 
     if (estado_ui.mostrar_acerca_de) {
         ImGui::OpenPopup("Acerca de");
         estado_ui.mostrar_acerca_de = false;
@@ -355,6 +347,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     Dialogos::acercaDe();
     Dialogos::fallbackCargar(*this, red);
     Dialogos::fallbackGuardar(*this, red);
+    VentanaAyuda::dibujar(estado_ui);
 
     StatusBar::dibujar(*this);
 }

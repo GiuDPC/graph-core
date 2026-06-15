@@ -70,13 +70,22 @@ public:
 
     // ── CRUD aristas ──────────────────────────────────────────────────────────
 
-    void agregarArista(int id1, int id2, float peso = 1.0f) {
-        if (id1 == id2) return;
+    // Overload con flag dirigida (nuevo)
+    // dirigida=true:  permite self-loops, A→B y B→A NO son duplicados
+    // dirigida=false: rechaza self-loops, A→B y B→A SÍ son duplicados (legacy)
+    void agregarArista(int id1, int id2, float peso, bool dirigida) {
+        if (!dirigida && id1 == id2) return;
         for (const auto& a : aristas) {
-            if ((a.origen_id == id1 && a.destino_id == id2) ||
-                (a.origen_id == id2 && a.destino_id == id1)) return; // ya existe
+            if (a.origen_id == id1 && a.destino_id == id2) return; // duplicado exacto
+            // Eliminado el check de duplicado simétrico para permitir aristas paralelas
+            // en grafos no dirigidos (se renderizarán como curvas en el lienzo)
         }
-        aristas.push_back(Arista(id1, id2, peso));
+        aristas.push_back(Arista(id1, id2, peso, dirigida));
+    }
+
+    // Overload legacy — delega al nuevo con dirigida=false (backward compat)
+    void agregarArista(int id1, int id2, float peso = 1.0f) {
+        agregarArista(id1, id2, peso, false);
     }
 
     // ── Simulacion ────────────────────────────────────────────────────────────
