@@ -203,6 +203,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
                 if (estado_ui.herramienta_activa == EstadoUI::CatRutas) {
                     auto res = Algoritmos::dijkstra(red, estado_grafos.dijkstra_origen, estado_grafos.dijkstra_destino, estado_grafos.dijkstra_usar_latencia);
                     estado_grafos.ruta_optima = res.ruta;
+                    estado_grafos.dijkstra_costo_total = res.costo_total;
                     estado_grafos.mostrar_mst = false;
                 } else if (estado_ui.herramienta_activa == EstadoUI::CatArbol) {
                     auto res = Algoritmos::Kruskal::kruskal(red);

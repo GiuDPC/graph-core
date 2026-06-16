@@ -12,12 +12,11 @@
 #include "../tipos/PasoAnimacion.h"
 #include "../tipos/TipoHardware.h"
 
-// Algoritmo de dijkstra
 namespace Algoritmos {
 
 struct ResultadoDijkstra {
-    std::vector<int>   ruta;           // secuencia de IDs de nodos
-    std::vector<float> distancias;     // dist[id] = distancia minima desde origen
+    std::vector<int>   ruta;           
+    std::vector<float> distancias;     
     bool               hay_ruta = false;
     float              costo_total = 0.0f;
     int                saltos = 0;
@@ -82,7 +81,6 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
     return resultado;
 }
 
-// Genera los pasos para animacion
 std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_destino,
                                          bool aplicar_latencia = false,
                                          std::function<bool(int)> nodo_valido = nullptr,
@@ -156,4 +154,4 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
     return pasos;
 }
 
-} // namespace Algoritmos
+}

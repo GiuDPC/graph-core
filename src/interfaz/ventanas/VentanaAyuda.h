@@ -163,7 +163,7 @@ private:
         titulo(ICON_FA_KEYBOARD " Controles y Atajos de Teclado");
         
         subtitulo("Mouse");
-        ImGui::BulletText("Clic Izquierdo sobre un nodo: Selecciona el nodo. Si clicas en otro nodo, se abre el menu de conexion.");
+        ImGui::BulletText("Clic Izquierdo sobre un nodo: Selecciona el nodo. Por si haces click en otro nodo, se abre el menu de conexion.");
         ImGui::BulletText("Clic Izquierdo + Arrastrar: Mueve un nodo existente por el lienzo.");
         ImGui::BulletText("Clic Derecho (en espacio vacio): Crea un nuevo nodo en esa posicion.");
         ImGui::BulletText("Clic Derecho + Arrastrar (desde un nodo): Activa el laser neon para conectar dos nodos visualmente. Suelta sobre otro nodo para crear la arista.");
@@ -347,7 +347,7 @@ private:
         ImGui::BulletText("Mismo numero de nodos.");
         ImGui::BulletText("Mismo numero de aristas.");
         ImGui::BulletText("Misma secuencia de grados (ordenados).");
-        ImGui::BulletText("Existencia de un mapeo bijectivo que preserve las conexiones.");
+        ImGui::BulletText("Existencia de un mapeo biyectivo que preserve las conexiones.");
         ImGui::Spacing();
         
         subtitulo("Como usarlo en la app");
@@ -375,7 +375,7 @@ private:
         ImGui::Text("1. Se marca el nodo origen con distancia 0 y todos los demas con distancia infinita.");
         ImGui::Text("2. Se visita el nodo con menor distancia acumulada.");
         ImGui::Text("3. Para cada vecino del nodo actual, se calcula: distancia_actual + peso_arista.");
-        ImGui::Text("4. Si ese valor es menor que la distancia registrada del vecino, se actualiza (relajacion).");
+        ImGui::Text("4. Si ese nuevo costo es menor que la distancia que ya tenia, se actualiza (relajacion: reemplazar un camino por uno mas optimo).");
         ImGui::Text("5. Se repite hasta llegar al destino o visitar todos los nodos.");
         ImGui::Spacing();
         

@@ -111,5 +111,5 @@ ResultadoIsomorfismo verificar(const Grafo& g1, const Grafo& g2) {
     return resultado;
 }
 
-} // namespace Isomorfismo
-} // namespace Algoritmos
+}
+}

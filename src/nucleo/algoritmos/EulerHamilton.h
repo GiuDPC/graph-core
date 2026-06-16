@@ -11,7 +11,7 @@ namespace Algoritmos {
 
 struct EulerHamilton {
 
-    // --- Algoritmo de Fleury para Circuito/Camino Euleriano ---
+    // Algoritmo de Fleury para Circuito/Camino Euleriano 
     // Devuelve los indices de los nodos en orden. Si esta vacio, no hay.
     static std::vector<int> buscarCaminoEuleriano(Grafo& g) {
         std::vector<int> camino;
