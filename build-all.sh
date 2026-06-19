@@ -29,10 +29,9 @@ info "Building for Linux..."
 cmake -B "$PROJ_DIR/build-linux" \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_TESTS=OFF \
-  -S "$PROJ_DIR" \
-  > /dev/null 2>&1
+  -S "$PROJ_DIR"
 
-cmake --build "$PROJ_DIR/build-linux" -j"$JOBS" 2>&1 | tail -3
+cmake --build "$PROJ_DIR/build-linux" -j"$JOBS"
 
 if [ ! -f "$PROJ_DIR/build-linux/graph-core" ]; then
   fail "Linux build failed — graph-core binary not found"
@@ -62,10 +61,9 @@ if command -v x86_64-w64-mingw32-g++ &> /dev/null; then
     -DCMAKE_TOOLCHAIN_FILE="$PROJ_DIR/mingw-toolchain.cmake" \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_TESTS=OFF \
-    -S "$PROJ_DIR" \
-    > /dev/null 2>&1
+    -S "$PROJ_DIR"
 
-  cmake --build "$PROJ_DIR/build-windows" -j"$JOBS" 2>&1 | tail -3
+  cmake --build "$PROJ_DIR/build-windows" -j"$JOBS"
 
   if [ ! -f "$PROJ_DIR/build-windows/graph-core.exe" ]; then
     fail "Windows build failed — graph-core.exe not found"
