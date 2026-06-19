@@ -19,9 +19,10 @@ info()  { echo -e "${CYAN}[INFO]${NC} $*"; }
 ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
 fail()  { echo -e "${RED}[FAIL]${NC} $*"; exit 1; }
 
-# ── Clean dist ──────────────────────────────────────────────────────────────
+# ── Clean dist and builds ───────────────────────────────────────────────────
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
+rm -rf "$PROJ_DIR/build-linux" "$PROJ_DIR/build-windows"
 
 # ── Build Linux ─────────────────────────────────────────────────────────────
 info "Building for Linux..."
