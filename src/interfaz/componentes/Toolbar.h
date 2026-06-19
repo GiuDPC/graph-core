@@ -10,7 +10,7 @@
 
 struct Toolbar {
     // retorna true si se cambio de categoria
-    static bool dibujar(EstadoUI& ui, bool en_modo_redes) {
+    static bool dibujar(EstadoUI& ui, bool en_modo_aero) {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(3, 2));
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
@@ -31,14 +31,14 @@ struct Toolbar {
 
             ImGui::SameLine(0, 2);
 
-            bool en_r = (ui.modo_actual == EstadoUI::ModoApp::Redes);
-            if (en_r) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
-            if (ImGui::Button(ICON_FA_NETWORK_WIRED " Redes", ImVec2(0, 28))) {
-                ui.modo_actual = EstadoUI::ModoApp::Redes;
+            bool en_a = (ui.modo_actual == EstadoUI::ModoApp::AeroGrafos);
+            if (en_a) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
+            if (ImGui::Button(ICON_FA_PLANE " AeroGrafos", ImVec2(0, 28))) {
+                ui.modo_actual = EstadoUI::ModoApp::AeroGrafos;
                 ui.herramienta_activa = EstadoUI::CatGeneral;
                 cambio = true;
             }
-            if (en_r) ImGui::PopStyleColor();
+            if (en_a) ImGui::PopStyleColor();
         }
 
         // -- separador vertical visual --
@@ -48,10 +48,9 @@ struct Toolbar {
 
         // -- categorias segun modo --
         if (ui.modo_actual == EstadoUI::ModoApp::Grafos) {
-            // Los algoritmos ahora estan en un desplegable dentro del panel derecho "Algoritmos"
             ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para algoritmos");
         } else {
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para simulacion");
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para AeroGrafos");
         }
 
         // -- boton de enciclopedia (wiki) --

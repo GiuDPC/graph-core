@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 struct EstadoUI {
-    enum class ModoApp { Grafos, Redes };
+    enum class ModoApp { Grafos, AeroGrafos };
     ModoApp modo_actual = ModoApp::Grafos;
 
     enum Categoria {

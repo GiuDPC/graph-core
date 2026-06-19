@@ -173,13 +173,6 @@ if(BUILD_TESTS)
     target_include_directories(test_ciclos PRIVATE ${TEST_INCLUDE_DIRS})
     target_link_libraries(test_ciclos PRIVATE GTest::gtest_main)
 
-    add_executable(test_simulador
-        tests/test_simulador.cpp
-        src/audio/miniaudio_impl.cpp
-    )
-    target_include_directories(test_simulador PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_simulador PRIVATE GTest::gtest_main)
-
     # Habilitar descubrimiento automatico de tests con CTest
     include(GoogleTest)
     gtest_discover_tests(test_grafo)
@@ -187,5 +180,4 @@ if(BUILD_TESTS)
     gtest_discover_tests(test_unionfind)
     gtest_discover_tests(test_bfs)
     gtest_discover_tests(test_ciclos)
-    gtest_discover_tests(test_simulador)
 endif()

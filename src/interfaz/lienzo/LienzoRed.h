@@ -171,7 +171,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         if (self.estado_ui.nodo_seleccionado != -1) self.estado_ui.arrastrando = true;
 
         // Detectar click en paquete modo red
-        if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes && self.estado_redes.sim_inicializada) {
+        if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_redes.sim_inicializada) {
             int pkt_id = -1;
             float dist_min = 20.0f;
             for (const auto& pkt : self.estado_redes.simulador.obtenerPaquetes()) {
@@ -416,7 +416,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 grafo_actual.nodos.back().nombre = "U" + std::to_string(grafo_actual.nodos.back().id);
                 grafo_actual.nodos.back().radio = current_radius;
                 self.estado_grafos.iso_analizado = false;
-            } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
+            } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
                 ImGui::OpenPopup("CrearEquipo");
             } else {
                 grafo_actual.agregarNodo(mouse);
@@ -426,7 +426,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
             }
         } else if (self.estado_ui.nodo_hover != -1) {
-            if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes && self.estado_ui.nodo_seleccionado == -1) {
+            if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_ui.nodo_seleccionado == -1) {
                 self.estado_ui.nodo_seleccionado = self.estado_ui.nodo_hover;
                 ImGui::OpenPopup("MenuNodo");
             } else if (self.estado_ui.nodo_seleccionado != -1) {
@@ -538,7 +538,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         grafos_a_dibujar.push_back(&self.estado_grafos.grafo_iso_g2);
 
     // recorrer grafos
-    bool modo_red = (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes && self.estado_redes.sim_inicializada);
+    bool modo_red = (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_redes.sim_inicializada);
     for (Grafo* ptr_g : grafos_a_dibujar) {
         Grafo& g_dib = *ptr_g;
         bool es_g2 = (&g_dib == &self.estado_grafos.grafo_iso_g2);
@@ -971,7 +971,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     colorFondo = IM_COL32(40, 40, 48, 255);
                     colorBorde = IM_COL32(100, 100, 100, 200);
                 }
-            } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
+            } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
                 colorFondo = IM_COL32(30, 35, 45, 255); // Oscuro en vez de blanco
                 switch (n.tipo) {
                     case TipoHardware::Servidor: colorBorde = IM_COL32(41, 128, 185, 255); break;
@@ -1084,7 +1084,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             }
 
             // texto del nodo
-            if (!es_g2 && self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
+            if (!es_g2 && self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
                 const char* icono = iconoHardware(n.tipo);
                 ImVec2 is = ImGui::CalcTextSize(icono);
                 dl->AddText(ImVec2(n.posicion.x - is.x * 0.5f, n.posicion.y - is.y * 0.5f), colorBorde, icono);

@@ -28,7 +28,7 @@ namespace Matrices {
 
 namespace PanelGrafos {
 
-// Selector de modo Grafos / Redes
+// Selector de modo Grafos / AeroGrafos
 inline void selectorModo(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "MODO DE OPERACION");
     float ancho = ImGui::GetContentRegionAvail().x;
@@ -44,13 +44,13 @@ inline void selectorModo(Interfaz& self, Grafo& red) {
 
     ImGui::SameLine();
 
-    bool en_redes = (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes);
-    if (en_redes) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
-    if (ImGui::Button(ICON_FA_NETWORK_WIRED " REDES", btnSize)) {
-        self.estado_ui.modo_actual = Interfaz::ModoApp::Redes;
-        self.registrarLog("Modo cambiado: Redes");
+    bool en_aero = (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos);
+    if (en_aero) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
+    if (ImGui::Button(ICON_FA_PLANE " AEROGRAFOS", btnSize)) {
+        self.estado_ui.modo_actual = Interfaz::ModoApp::AeroGrafos;
+        self.registrarLog("Modo cambiado: AeroGrafos");
     }
-    if (en_redes) ImGui::PopStyleColor();
+    if (en_aero) ImGui::PopStyleColor();
 }
 
 // Controles de animacion
@@ -137,16 +137,6 @@ inline void propiedadesNodo(Interfaz& self, Grafo& red) {
             snprintf(self.estado_ui.buffer_nombre, sizeof(self.estado_ui.buffer_nombre), "%s", n->nombre.c_str());
             if (ImGui::InputText("Nombre", self.estado_ui.buffer_nombre, sizeof(self.estado_ui.buffer_nombre))) {
                 n->nombre = self.estado_ui.buffer_nombre;
-            }
-
-            if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
-                int tipo_int = (int)n->tipo;
-                const char* tipos[] = {"Servidor", "Router", "Switch", "Firewall", "Terminal"};
-                if (ImGui::Combo("Tipo", &tipo_int, tipos, 5)) {
-                    n->tipo = (TipoHardware)tipo_int;
-                    self.registrarLog("Tipo cambiado: " + n->nombre + " -> " + tipos[tipo_int]);
-                }
-                ImGui::Text("Latencia: +%.0f ms", latenciaHardware(n->tipo));
             }
 
             ImGui::Spacing();
@@ -295,21 +285,6 @@ inline void menuGeneral(Interfaz& self, Grafo& red) {
             "Un arbol con n nodos debe tener exactamente n-1 aristas y ser conexo.");
     ImGui::PopStyleColor();
 
-    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f),
-            ICON_FA_WAVE_SQUARE " SIMULACION");
-        ImGui::Checkbox("Activar Jitter", &self.estado_redes.simulacion_jitter);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Simula inestabilidad en la red: variacion aleatoria de latencia.\n"
-                "Comun en redes WiFi y enlaces satelitales.");
-        if (self.estado_redes.simulacion_jitter) {
-            ImGui::SliderFloat("Intensidad##jitter", &self.estado_redes.jitter_porcentaje, 0.01f, 0.50f, "%.0f%%");
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Porcentaje de variacion sobre el peso original de cada arista.");
-        }
-    }
-
     // Estadisticas rapidas del grafo actual
     ImGui::Spacing();
     ImGui::Separator();
@@ -364,12 +339,6 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
         ImGui::EndCombo();
     }
 
-    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
-        ImGui::Checkbox("Incluir latencia de hardware", &self.estado_grafos.dijkstra_usar_latencia);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Suma la latencia de cada tipo de equipo al costo de la ruta.\n"
-                "Servidor=1ms, Router=3ms, Switch=5ms, Firewall=10ms, Terminal=2ms.");
-    }
     ImGui::Spacing();
 
     if (ImGui::Button(ICON_FA_PLAY " Animacion", ImVec2(-1, 32))) {
@@ -1129,7 +1098,7 @@ inline void sidebarInfo(Interfaz& self, Grafo& red) {
     ImGui::Begin("Info del Grafo");
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "MODO");
     const char* modo_txt = (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos)
-        ? ICON_FA_DIAGRAM_PROJECT " Grafos" : ICON_FA_NETWORK_WIRED " Redes";
+        ? ICON_FA_DIAGRAM_PROJECT " Grafos" : ICON_FA_PLANE " AeroGrafos";
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f), "%s", modo_txt);
     ImGui::Separator();
 
@@ -1203,8 +1172,8 @@ inline void sidebarInfo(Interfaz& self, Grafo& red) {
 // panel donde estan las herramientas   que se estan usando es ese momento
 inline void panelContextual(Interfaz& self, Grafo& red) {
     // en modo, maneja su propio panl aparte
-    if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
-        return;
+    if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
+        return; // AeroGrafos tiene su propio panel
     }
 
     ImGui::Begin("Algoritmos");

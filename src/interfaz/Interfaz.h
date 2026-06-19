@@ -4,7 +4,6 @@
 #include "imgui_internal.h"
 #include "nucleo/Grafo.h"
 #include "nucleo/tipos/PasoAnimacion.h"
-#include "nucleo/tipos/TipoHardware.h"
 #include "nucleo/algoritmos/Dijkstra.h"
 #include "nucleo/algoritmos/Kruskal.h"
 #include "nucleo/algoritmos/BFS.h"
@@ -13,8 +12,6 @@
 #include "nucleo/algoritmos/Coloreo.h"
 #include "nucleo/algoritmos/Isomorfismo.h"
 #include "nucleo/algoritmos/Arbol.h"
-#include "nucleo/tipos/EstadoRed.h"
-#include "nucleo/SimuladorRed.h"
 #include "IconsFontAwesome6.h"
 #include "audio/Sonidos.h"
 #include "interfaz/util/Animacion.h"
@@ -56,8 +53,6 @@ public:
 #include "interfaz/componentes/StatusBar.h"
 #include "interfaz/componentes/Dialogos.h"
 #include "interfaz/componentes/Toolbar.h"
-#include "interfaz/paneles/PanelHardware.h"
-#include "interfaz/paneles/PanelRed.h"
 #include "interfaz/paneles/PanelIsomorfismo.h"
 #include "interfaz/util/AnimacionUI.h"
 #include "interfaz/paneles/PanelGrafos.h"
@@ -86,9 +81,9 @@ inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     // Asegurar que Lienzo sea la pestana activa por defecto
     ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
 
-    // en modo redes, agregar panel de red como pestana en herramientas
-    if (estado_ui.modo_actual == ModoApp::Redes) {
-        ImGui::DockBuilderDockWindow("Panel de Red", der);
+    // Espacio reservado para futuro panel AeroGrafos
+    if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
+        // PanelAeroGrafos se agregara en fase posterior
     }
 }
 
@@ -180,10 +175,6 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     static bool theme_set = false;
     if (!theme_set) { aplicarTemaCisco(); theme_set = true; }
 
-    if (estado_ui.modo_actual == ModoApp::Redes && estado_redes.sim_inicializada) {
-        estado_redes.simulador.tick(red, ImGui::GetIO().DeltaTime);
-    }
-
     if (estado_grafos.anim_estado.activa && !estado_grafos.anim_estado.pausada) {
         float dt = ImGui::GetIO().DeltaTime;
         estado_grafos.anim_estado.timer_paso += dt;
@@ -242,14 +233,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         }
     }
 
-    if (estado_redes.simulacion_jitter && estado_ui.modo_actual == ModoApp::Redes) {
-        red.aplicarJitter(estado_redes.jitter_porcentaje);
-    } else {
-        red.resetearPesos();
-    }
-
     ImGuiViewport* vp = ImGui::GetMainViewport();
-    bool en_modo_redes = (estado_ui.modo_actual == ModoApp::Redes);
     float toolbar_h = 40.0f;
 
     ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x, vp->WorkPos.y));
@@ -284,7 +268,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     ImGui::SameLine(0, 6);
 
     // Categorias  y modos
-    Toolbar::dibujar(estado_ui, en_modo_redes);
+    Toolbar::dibujar(estado_ui, false);
 
     ImGui::End();
 
@@ -333,9 +317,6 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     // ventanas acoplables
     PanelGrafos::sidebarInfo(*this, red);
     PanelGrafos::panelContextual(*this, red);
-    if (estado_ui.modo_actual == ModoApp::Redes) {
-        PanelRed::dibujar(*this, red);
-    }
     LienzoRed::dibujar(red, *this);
     Matrices::dibujar(red, *this);
     LogPanel::dibujar(*this);

@@ -45,8 +45,8 @@ inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
                 g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
                 break;
             case PasoAnimacion::EXPLORAR:
-                if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes)
-                    g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO);
+                if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos)
+                    g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO); // Placeholder, se reemplazara
                 else
                     g_sonidos.reproducir(Sonidos::VISITAR_NODO);
                 break;

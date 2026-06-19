@@ -24,25 +24,16 @@ inline void dibujar(Interfaz& self) {
     // Modo actual
     const char* modo_txt = (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos)
         ? ICON_FA_DIAGRAM_PROJECT " GRAFOS"
-        : ICON_FA_NETWORK_WIRED " REDES";
+        : ICON_FA_PLANE " AEROGRAFOS";
     ImGui::TextColored(ImVec4(0.0f, 0.85f, 0.65f, 1.0f), "%s", modo_txt);
 
-    // Estado de simulacion / animacion
+    // Estado de animacion
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.4f, 1.0f), "|");
     ImGui::SameLine();
 
     if (self.estado_grafos.anim_estado.activa) {
         ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.0f, 1.0f), ICON_FA_SPINNER " Animando");
-    } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::Redes && self.estado_redes.sim_inicializada) {
-        if (self.estado_redes.simulador.estado.activa) {
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
-                ICON_FA_PLAY " x%.1f", self.estado_redes.simulador.estado.velocidad);
-        } else {
-            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PAUSE " Pausada");
-        }
-    } else if (self.estado_redes.simulacion_jitter && self.estado_ui.modo_actual == Interfaz::ModoApp::Redes) {
-        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), ICON_FA_WAVE_SQUARE " Jitter");
     } else {
         ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.5f, 1.0f), ICON_FA_CIRCLE_CHECK " OK");
     }
