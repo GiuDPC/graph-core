@@ -18,6 +18,7 @@
 #include <GLFW/glfw3.h>
 #include "estado/EstadoGrafos.h"
 #include "estado/EstadoRedes.h"
+#include "estado/EstadoAeroGrafos.h"
 #include "estado/EstadoUI.h"
 
 extern Sonidos g_sonidos;
@@ -29,9 +30,10 @@ public:
     using ModoApp   = EstadoUI::ModoApp;
 
     // -- estado modular --
-    EstadoGrafos estado_grafos;
-    EstadoRedes  estado_redes;
-    EstadoUI     estado_ui;
+    EstadoGrafos      estado_grafos;
+    EstadoRedes       estado_redes;
+    EstadoAeroGrafos  estado_aerografos;
+    EstadoUI          estado_ui;
 
     // -- workspace tracking --
     ModoApp ultimo_modo_workspace = ModoApp::Grafos;
@@ -56,7 +58,9 @@ public:
 #include "interfaz/paneles/PanelIsomorfismo.h"
 #include "interfaz/util/AnimacionUI.h"
 #include "interfaz/paneles/PanelGrafos.h"
+#include "interfaz/paneles/PanelAeroGrafos.h"
 #include "interfaz/lienzo/LienzoRed.h"
+#include "interfaz/lienzo/LienzoAeroGrafos.h"
 #include "interfaz/paneles/Matrices.h"
 #include "interfaz/componentes/LogPanel.h"
 #include "interfaz/ventanas/VentanaAyuda.h"
@@ -81,9 +85,14 @@ inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     // Asegurar que Lienzo sea la pestana activa por defecto
     ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
 
-    // Espacio reservado para futuro panel AeroGrafos
+    // Layout para AeroGrafos: mapa mundial ocupa el centro, panel de control a la derecha
     if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
-        // PanelAeroGrafos se agregara en fase posterior
+        ImGui::DockBuilderDockWindow("Info del Grafo", izq);
+        ImGui::DockBuilderDockWindow("AeroGrafos", der);
+        ImGui::DockBuilderDockWindow("Lienzo AeroGrafos", main);
+        ImGui::DockBuilderDockWindow("Matrices", main);
+        ImGui::DockBuilderDockWindow("Registro del Kernel", main);
+        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo AeroGrafos");
     }
 }
 
@@ -315,9 +324,14 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     ImGui::End();
 
     // ventanas acoplables
-    PanelGrafos::sidebarInfo(*this, red);
-    PanelGrafos::panelContextual(*this, red);
-    LienzoRed::dibujar(red, *this);
+    if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
+        PanelAeroGrafos::dibujar(*this, red);
+        LienzoAeroGrafos::dibujar(red, *this);
+    } else {
+        PanelGrafos::sidebarInfo(*this, red);
+        PanelGrafos::panelContextual(*this, red);
+        LienzoRed::dibujar(red, *this);
+    }
     Matrices::dibujar(red, *this);
     LogPanel::dibujar(*this);
 

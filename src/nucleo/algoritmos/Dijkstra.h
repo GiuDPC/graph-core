@@ -24,6 +24,7 @@ struct ResultadoDijkstra {
 
 ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
                            bool aplicar_latencia = false,
+                           bool aplicar_escala = false,
                            std::function<bool(int)> nodo_valido = nullptr,
                            std::function<bool(int, int)> arista_valida = nullptr) {
     ResultadoDijkstra resultado;
@@ -53,10 +54,14 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
             if (nodo_valido && !nodo_valido(v)) continue;
             if (arista_valida && !arista_valida(u, v)) continue;
 
+            const float COSTO_ESCALA_KM = 1500.0f;
             float costo = a.peso_actual;
             if (aplicar_latencia) {
                 const Nodo* nv = g.obtenerNodo(v);
                 if (nv) costo += latenciaHardware(nv->tipo);
+            }
+            if (aplicar_escala && u != id_origen) {
+                costo += COSTO_ESCALA_KM;
             }
             float nd = d + costo;
             if (nd < dist[v]) {
@@ -83,6 +88,7 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
 
 std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_destino,
                                          bool aplicar_latencia = false,
+                                         bool aplicar_escala = false,
                                          std::function<bool(int)> nodo_valido = nullptr,
                                          std::function<bool(int, int)> arista_valida = nullptr) {
     std::vector<PasoAnimacion> pasos;
@@ -121,10 +127,14 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
             if (nodo_valido && !nodo_valido(v)) continue;
             if (arista_valida && !arista_valida(u, v)) continue;
 
+            const float COSTO_ESCALA_KM = 1500.0f;
             float costo = a.peso_actual;
             if (aplicar_latencia) {
                 const Nodo* nv = g.obtenerNodo(v);
                 if (nv) costo += latenciaHardware(nv->tipo);
+            }
+            if (aplicar_escala && u != id_origen) {
+                costo += COSTO_ESCALA_KM;
             }
             pasos.push_back({PasoAnimacion::EXPLORAR, -1, u, v,
                 "Evaluando " + nombre(u) + " -> " + nombre(v) +

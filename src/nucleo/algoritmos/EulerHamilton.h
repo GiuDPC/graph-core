@@ -11,11 +11,10 @@ namespace Algoritmos {
 
 struct EulerHamilton {
 
-    static std::vector<int> buscarCaminoEuleriano(Grafo& g) {
+    static std::vector<int> buscarCaminoEuleriano(Grafo& g, int origen_sugerido = 0) {
         std::vector<int> camino;
         if (g.nodos.empty()) return camino;
 
-        // primero verificamos si es euleriano todos grados pares o si tiene camino exactamente 2 impares
         std::vector<int> grados(g.nodos.size(), 0);
         for (const auto& arista : g.aristas) {
             grados[arista.origen_id]++;
@@ -23,16 +22,24 @@ struct EulerHamilton {
         }
 
         int impares = 0;
-        int start_node = 0;
+        int nodo_impar = -1;
         for (size_t i = 0; i < grados.size(); i++) {
             if (grados[i] % 2 != 0) {
                 impares++;
-                start_node = i;
+                nodo_impar = i;
             }
         }
 
         if (impares != 0 && impares != 2) {
             return camino;
+        }
+
+        int start_node = origen_sugerido >= 0 ? origen_sugerido : 0;
+        if (impares == 2) {
+            // Si hay 2 impares, DEBE empezar en uno de ellos
+            if (grados[start_node] % 2 == 0) {
+                start_node = nodo_impar;
+            }
         }
 
         std::unordered_map<int, std::vector<int>> adj;
@@ -64,6 +71,22 @@ struct EulerHamilton {
 
         std::reverse(camino.begin(), camino.end());
         return camino;
+    }
+
+    static std::vector<PasoAnimacion> generarPasosEuler(Grafo& g, int origen_sugerido = 0) {
+        std::vector<PasoAnimacion> pasos;
+        auto camino = buscarCaminoEuleriano(g, origen_sugerido);
+        if (camino.empty()) return pasos;
+
+        for (size_t i = 1; i < camino.size(); i++) {
+            PasoAnimacion paso;
+            paso.accion = PasoAnimacion::CONFIRMAR;
+            paso.arista_origen = camino[i-1];
+            paso.arista_destino = camino[i];
+            paso.descripcion = "Recorriendo (" + std::to_string(i+1) + "/" + std::to_string(camino.size()) + "): " + g.nodos[camino[i-1]].nombre + " -> " + g.nodos[camino[i]].nombre;
+            pasos.push_back(paso);
+        }
+        return pasos;
     }
 
     static bool hamiltonianoRecursivo(int v, int num_nodos, const std::unordered_map<int, std::vector<int>>& adj, 
@@ -110,6 +133,65 @@ struct EulerHamilton {
         }
 
         return {};
+    }
+
+    struct ResultadoHamilton {
+        std::vector<int> ruta;
+        float distancia_total;
+    };
+
+    static ResultadoHamilton buscarCaminoHamiltonianoHeuristico(const Grafo& g, int origen_sugerido = 0) {
+        ResultadoHamilton res;
+        res.distancia_total = 0;
+        if (g.nodos.empty()) return res;
+
+        int actual = origen_sugerido >= 0 ? origen_sugerido : 0;
+        res.ruta.push_back(actual);
+        std::vector<bool> visitado(g.nodos.size(), false);
+        visitado[actual] = true;
+
+        for (size_t paso = 1; paso < g.nodos.size(); paso++) {
+            int mejor = -1;
+            float mejor_dist = 1e9f;
+            for (const auto& a : g.aristas) {
+                int v = -1;
+                if (a.origen_id == actual && !visitado[a.destino_id]) v = a.destino_id;
+                else if (!a.es_dirigida && a.destino_id == actual && !visitado[a.origen_id]) v = a.origen_id;
+                if (v >= 0 && a.peso < mejor_dist) { mejor_dist = a.peso; mejor = v; }
+            }
+            if (mejor < 0) break;
+            res.ruta.push_back(mejor);
+            visitado[mejor] = true;
+            res.distancia_total += mejor_dist;
+            actual = mejor;
+        }
+
+        // Volver al inicio si es posible
+        for (const auto& a : g.aristas) {
+            if ((a.origen_id == actual && a.destino_id == res.ruta[0]) ||
+                (!a.es_dirigida && a.destino_id == actual && a.origen_id == res.ruta[0])) {
+                res.distancia_total += a.peso;
+                res.ruta.push_back(res.ruta[0]);
+                break;
+            }
+        }
+        return res;
+    }
+
+    static std::vector<PasoAnimacion> generarPasosHamiltonHeuristico(const Grafo& g, int origen_sugerido = 0) {
+        std::vector<PasoAnimacion> pasos;
+        auto res = buscarCaminoHamiltonianoHeuristico(g, origen_sugerido);
+        if (res.ruta.empty()) return pasos;
+
+        for (size_t i = 1; i < res.ruta.size(); i++) {
+            PasoAnimacion paso;
+            paso.accion = PasoAnimacion::CONFIRMAR;
+            paso.arista_origen = res.ruta[i-1];
+            paso.arista_destino = res.ruta[i];
+            paso.descripcion = "Viajando (" + std::to_string(i+1) + "/" + std::to_string(res.ruta.size()) + "): " + g.nodos[res.ruta[i-1]].nombre + " -> " + g.nodos[res.ruta[i]].nombre;
+            pasos.push_back(paso);
+        }
+        return pasos;
     }
 };
 

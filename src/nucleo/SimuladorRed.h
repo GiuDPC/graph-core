@@ -389,7 +389,7 @@ private:
         };
 
         // Nota: Dijkstra ya respeta es_dirigida internamente (Dijkstra.h line 51)
-        auto res = Algoritmos::dijkstra(g, origen, destino, false, filtro_nodo, filtro_arista);
+        auto res = Algoritmos::dijkstra(g, origen, destino, false, false, filtro_nodo, filtro_arista);
         if (res.hay_ruta) {
             cache_rutas[key] = res.ruta;
             return res.ruta;

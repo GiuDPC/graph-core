@@ -32,18 +32,18 @@ struct VentanaAyuda {
                     { ICON_FA_HOUSE,            "Introduccion"         },
                     { ICON_FA_KEYBOARD,         "Controles y Atajos"   },
                     { ICON_FA_DIAGRAM_PROJECT,  "Modo Grafos"          },
-                    { ICON_FA_NETWORK_WIRED,    "Modo Redes"           },
+                    { ICON_FA_PLANE,            "Modo AeroGrafos"      },
                     { ICON_FA_MAGNET,           "Fisicas (FR)"         },
                     { ICON_FA_PAINTBRUSH,       "Coloreo de Grafos"    },
                     { ICON_FA_CLONE,            "Isomorfismo"          },
                     { ICON_FA_ROUTE,            "Dijkstra"             },
                     { ICON_FA_SITEMAP,          "Kruskal (MST)"        },
-                    { ICON_FA_CIRCLE_NODES,     "Euler"                },
+                    { ICON_FA_CIRCLE_NODES,     "Euler y Hamilton"     },
                     { ICON_FA_MAGNIFYING_GLASS, "BFS y DFS"            },
                     { ICON_FA_CIRCLE_HALF_STROKE, "Bipartito"          },
                     { ICON_FA_TABLE_CELLS,      "Matrices"             },
                     { ICON_FA_SLIDERS,          "Panel de Info"        },
-                    { ICON_FA_CHART_LINE,       "Simulacion de Red"    },
+                    { ICON_FA_CHART_LINE,       "Dashboard y Extras"   },
                 };
                 int total = IM_ARRAYSIZE(secciones);
 
@@ -145,8 +145,8 @@ private:
         ImGui::Spacing();
         
         subtitulo("Dos modos de trabajo");
-        ImGui::BulletText("Modo Grafos: Analisis matematico puro. Las aristas no tienen peso por defecto. Ideal para estudiar propiedades topologicas (isomorfismo, coloreo, ciclos).");
-        ImGui::BulletText("Modo Redes: Simulacion de infraestructura. Cada arista tiene un peso (latencia, costo). Ideal para Dijkstra, Kruskal y simulacion de trafico.");
+        ImGui::BulletText("Modo Grafos: Analisis matematico puro en un lienzo libre. Ideal para estudiar propiedades topologicas (isomorfismo, coloreo, ciclos).");
+        ImGui::BulletText("Modo AeroGrafos: Simulacion global del espacio aereo. 63 hubs mundiales reales con distancias haversine. Ideal para Dijkstra, Kruskal y analisis de densidad.");
         ImGui::Spacing();
         
         subtitulo("Arquitectura del programa");
@@ -212,42 +212,38 @@ private:
         ImGui::Text("4. Para eliminar: selecciona un nodo con clic izquierdo y presiona Supr.");
         ImGui::Spacing();
         
-        subtitulo("Diferencia con Modo Redes");
-        ImGui::Text("En Modo Grafos las aristas no tienen peso (o todas pesan 1.0). El interes es puramente topologico: la FORMA de las conexiones, no su costo.");
+        subtitulo("Diferencia con Modo AeroGrafos");
+        ImGui::Text("En Modo Grafos el interes es puramente topologico. En AeroGrafos el interes es geografico y analitico sobre datos fijos mundiales.");
         ImGui::Spacing();
         
         tip("El panel izquierdo te muestra en tiempo real si tu grafo es Conexo, Bipartito o Euleriano.");
     }
 
     static void secRedes() {
-        titulo(ICON_FA_NETWORK_WIRED " Modo Redes: Fundamentos");
+        titulo(ICON_FA_PLANE " Modo AeroGrafos: Simulador Geopolitico");
         
-        ImGui::Text("En este modo, el grafo actua como un mapa topologico de una red informatica o logistica. Cada nodo representa un equipo (router, switch, servidor) y cada arista tiene un peso que puede significar:");
-        ImGui::BulletText("Latencia en milisegundos (ms)");
-        ImGui::BulletText("Costo monetario de un enlace");
-        ImGui::BulletText("Distancia en kilometros");
+        ImGui::Text("En este modo, el motor grafico despliega un mapa equirectangular mundial con 63 de los hubs aereos mas importantes del planeta (aeropuertos principales). Las aristas son rutas comerciales reales.");
         ImGui::Spacing();
         
-        subtitulo("Conceptos clave de redes");
-        ImGui::BulletText("Latencia: Tiempo que tarda un paquete de datos en ir de un punto a otro. Menor = mejor.");
-        ImGui::BulletText("Jitter: Variacion aleatoria de la latencia. Simula condiciones reales de red.");
-        ImGui::BulletText("Topologia: La disposicion fisica/logica de los equipos (estrella, anillo, malla).");
-        ImGui::BulletText("Backbone: El enlace principal de alta capacidad en una red.");
+        subtitulo("Conceptos clave");
+        ImGui::BulletText("Distancia Haversine: Las distancias entre aeropuertos se calculan tomando en cuenta la curvatura de la Tierra (kilometros reales).");
+        ImGui::BulletText("Rutas Ortodromicas: Las lineas en el mapa se curvan naturalmente simulando las rutas de vuelo optimas (Great Circle).");
         ImGui::Spacing();
         
-        subtitulo("Como crear una red en la app");
-        ImGui::Text("1. Cambia a modo Redes (boton superior).");
-        ImGui::Text("2. Haz clic derecho para crear un equipo (te pedira nombre y tipo).");
-        ImGui::Text("3. Conecta equipos arrastrando con clic derecho (se abre un popup para definir el peso/latencia).");
-        ImGui::Text("4. Usa el Panel de Red (derecha) para activar el simulador de trafico.");
+        subtitulo("Como usarlo");
+        ImGui::Text("1. Cambia a modo AeroGrafos (boton superior).");
+        ImGui::Text("2. Selecciona un algoritmo en el panel derecho.");
+        ImGui::Text("3. Elige los aeropuertos de origen y destino.");
+        ImGui::Text("4. Haz clic en 'Ejecutar' (con o sin animacion).");
         ImGui::Spacing();
         
-        subtitulo("Algoritmos disponibles en este modo");
-        ImGui::BulletText("Dijkstra: Encuentra la ruta con menor latencia total entre dos nodos.");
-        ImGui::BulletText("Kruskal: Encuentra el arbol de expansion minima (menor costo para conectar todo).");
+        subtitulo("Algoritmos disponibles");
+        ImGui::BulletText("Dijkstra: Encuentra la ruta con menor kilometraje real.");
+        ImGui::BulletText("Kruskal: Conecta todos los aeropuertos mundiales gastando la menor cantidad de asfalto/combustible.");
+        ImGui::BulletText("Coloreo: Asigna aerolineas (colores) evitando monopolios locales.");
         ImGui::Spacing();
         
-        tip("Activa el Jitter en el Panel de Red para simular condiciones reales. Veras como los pesos fluctuan aleatoriamente.");
+        tip("En modo AeroGrafos, la interaccion manual es de visualizacion (pan y zoom). Los nodos son fijos y representan la base de datos mundial.");
     }
 
     static void secFisicas() {
@@ -276,7 +272,6 @@ private:
         ImGui::BulletText("Desenredar grafos desordenados automaticamente.");
         ImGui::BulletText("Descubrir simetrias ocultas en la estructura.");
         ImGui::BulletText("Revelar clusters y comunidades.");
-        ImGui::BulletText("En modo Redes: las latencias altas alejan los nodos, las bajas los acercan (mapa de latencias visual).");
         ImGui::Spacing();
         
         subtitulo("Como probarlo paso a paso");
@@ -392,11 +387,10 @@ private:
         ImGui::Spacing();
         
         subtitulo("Como usarlo en la app");
-        ImGui::Text("1. Crea una red con pesos (modo Redes recomendado).");
-        ImGui::Text("2. Selecciona 'Rutas' en el panel derecho.");
-        ImGui::Text("3. Elige nodo de origen y destino en los selectores.");
-        ImGui::Text("4. Haz clic en 'Calcular Ruta'. La ruta optima se resalta en verde.");
-        ImGui::Text("5. Puedes activar la animacion para ver paso a paso como el algoritmo explora.");
+        ImGui::Text("1. En AeroGrafos, selecciona 'Dijkstra' en el panel derecho.");
+        ImGui::Text("2. Elige el aeropuerto de origen y destino.");
+        ImGui::Text("3. Haz clic en 'Ejecutar'. La ruta optima se resalta y la camara viaja automaticamente (Auto-encuadre).");
+        ImGui::Text("4. Revisa la comparativa academica con BFS en el Dashboard de Resultado.");
         ImGui::Spacing();
         
         aviso("Si no existe camino entre origen y destino (grafo no conexo), el algoritmo lo indicara.");
@@ -436,32 +430,29 @@ private:
     }
 
     static void secEuler() {
-        titulo(ICON_FA_CIRCLE_NODES " Camino y Ciclo Euleriano");
+        titulo(ICON_FA_CIRCLE_NODES " Caminos de Euler y Hamilton");
         
-        ImGui::Text("Un Camino Euleriano recorre TODAS las aristas del grafo exactamente una vez. Si ademas comienza y termina en el mismo nodo, es un Ciclo Euleriano. Esto viene del famoso problema de los 7 Puentes de Konigsberg (Euler, 1736).");
+        ImGui::Text("Son dos de los recorridos mas famosos en la teoria de grafos. Aunque suenan parecidos, sus requisitos matematicos son drasticamente diferentes.");
         ImGui::Spacing();
         
-        subtitulo("Condiciones de existencia");
-        ImGui::Text("Ciclo Euleriano (vuelve al inicio):");
-        ImGui::BulletText("El grafo debe ser conexo.");
-        ImGui::BulletText("TODOS los nodos deben tener grado par.");
-        ImGui::Spacing();
-        ImGui::Text("Camino Euleriano (NO vuelve al inicio):");
-        ImGui::BulletText("El grafo debe ser conexo.");
-        ImGui::BulletText("Exactamente 2 nodos deben tener grado impar (seran el inicio y fin del camino).");
+        subtitulo("Camino Euleriano (Ruta de Mantenimiento)");
+        ImGui::Text("Recorre TODAS las ARISTAS (rutas) exactamente una vez.");
+        ImGui::Text("Requisito estricto: El grafo debe ser conexo y tener EXACTAMENTE 0 o 2 nodos con cantidad impar de conexiones.");
+        ImGui::Text("Por que falla en AeroGrafos? En el mundo real, los aeropuertos tienen cantidades caoticas de conexiones (unos tienen 1 vuelo, otros 20). Cumplir la regla de '0 o 2 nodos impares' en un mapa mundial real es practicamente imposible.");
         ImGui::Spacing();
         
-        subtitulo("Aplicaciones");
-        ImGui::BulletText("Rutas de carteros: recorrer todas las calles de un barrio sin repetir ninguna.");
-        ImGui::BulletText("Secuenciacion de ADN: el ensamblaje de genomas usa caminos Eulerianos sobre grafos de De Bruijn.");
-        ImGui::BulletText("Circuitos electronicos: trazar PCBs sin levantar el plotter.");
+        subtitulo("Camino Hamiltoniano (Vuelta al Mundo)");
+        ImGui::Text("Recorre TODOS los NODOS (ciudades) exactamente una vez.");
+        ImGui::Text("Requisito estricto: No existe formula rapida (es NP-Completo), pero si hay 'callejones sin salida' (ciudades con solo 1 conexion), es imposible recorrer el grafo sin quedar atrapado y tener que repetir ciudad para salir.");
+        ImGui::Text("Por que falla en AeroGrafos? El mapa contiene aeropuertos remotos (ej. Isla de Pascua o hubs secundarios) que actuan como callejones sin salida. Si entras a ellos, debes salir por la misma ruta, repitiendo nodos y violando la regla de Hamilton.");
         ImGui::Spacing();
         
-        subtitulo("Como verificarlo en la app");
-        ImGui::Text("El panel izquierdo (Info del Grafo) te muestra automaticamente si tu grafo es Euleriano. Tambien indica cuantos nodos tienen grado impar.");
+        subtitulo("Aplicaciones Reales");
+        ImGui::BulletText("Euler: Rutas de camiones de basura, inspeccion de vias ferreas, barrido de nieve (importan las calles, no las esquinas).");
+        ImGui::BulletText("Hamilton: Problema del Agente Viajero (TSP), logistica de entregas (importan los destinos, no el asfalto).");
         ImGui::Spacing();
         
-        tip("Si un nodo tiene grado impar, intenta agregarle una arista extra. Eso puede convertir tu grafo en Euleriano.");
+        tip("En modo Grafos (lienzo libre) puedes dibujar a mano un poligono perfecto o un moño para probar que estos algoritmos si funcionan cuando la topologia es matematicamente perfecta.");
     }
 
     static void secBFSDFS() {
@@ -538,7 +529,7 @@ private:
         
         ImGui::Text("El panel izquierdo muestra informacion en tiempo real sobre el estado actual del grafo:");
         ImGui::Spacing();
-        ImGui::BulletText("Modo actual: Grafos o Redes.");
+        ImGui::BulletText("Modo actual: Grafos o AeroGrafos.");
         ImGui::BulletText("Cantidad de nodos y aristas.");
         ImGui::BulletText("Densidad del grafo (aristas existentes / aristas posibles).");
         ImGui::BulletText("Propiedades automaticas:");
@@ -551,28 +542,26 @@ private:
     }
 
     static void secSimulacion() {
-        titulo(ICON_FA_CHART_LINE " Simulacion de Red");
+        titulo(ICON_FA_CHART_LINE " Dashboard y Extras AeroGrafos");
         
-        ImGui::Text("En modo Redes, el Panel de Red (derecha) ofrece herramientas para simular condiciones reales de una infraestructura:");
+        ImGui::Text("En modo AeroGrafos, el panel inferior derecho contiene el Dashboard Analitico y controles de visualizacion:");
         ImGui::Spacing();
         
-        subtitulo("Simulador de Trafico");
-        ImGui::Text("Genera paquetes de datos que viajan entre nodos aleatorios. Puedes ver como el trafico se acumula en ciertos enlaces (cuellos de botella).");
+        subtitulo("Dashboard Analitico");
+        ImGui::BulletText("Densidad: Mide la cantidad de rutas existentes vs el maximo teorico.");
+        ImGui::BulletText("Top Hubs: Identifica los 3 aeropuertos con mas conexiones del mundo.");
         ImGui::Spacing();
         
-        subtitulo("Jitter");
-        ImGui::Text("Aplica una variacion aleatoria a los pesos de las aristas en cada frame. Simula la inestabilidad real de una red donde las latencias fluctuan constantemente.");
-        ImGui::BulletText("Un jitter del 10%% significa que una arista de peso 100 oscilara entre 90 y 110.");
+        subtitulo("Visualizacion");
+        ImGui::Text("Puedes desactivar el Grid, ocultar las rutas no activas, o los nombres de las ciudades para ver mejor las rutas dibujadas por los algoritmos.");
         ImGui::Spacing();
         
-        subtitulo("Equipos de Red");
-        ImGui::Text("Al crear nodos en modo Redes, puedes elegir tipo de equipo (Router, Switch, Servidor, PC). Cada tipo tiene un icono distintivo para facilitar la lectura visual de la topologia.");
+        subtitulo("Restriccion Geopolitica (Rusia)");
+        ImGui::Text("Puedes simular el cierre del espacio aereo ruso (ej. Moscu SVO) marcando la casilla de restricciones geopoliticas. Al hacer esto:");
+        ImGui::BulletText("Las rutas de transito que tocan Moscu se invalidan automaticamente.");
+        ImGui::BulletText("Los algoritmos como Dijkstra o Kruskal buscaran vias alternas (ej. conectando occidente y oriente via Dubai o Estambul).");
         ImGui::Spacing();
         
-        subtitulo("Menu Contextual Interactivo");
-        ImGui::Text("Haz clic derecho sobre cualquier nodo en el lienzo para abrir su menu rapido. Desde alli puedes:");
-        ImGui::BulletText("Derribar o Restaurar el nodo para simular fallos y ver como se reconfigura la red.");
-        ImGui::BulletText("Ver la tabla de ruteo local del nodo.");
-        ImGui::BulletText("Enviar trafico originado en ese nodo.");
+        tip("Activa la restriccion y luego ejecuta Dijkstra de Madrid a Tokio para comparar la nueva ruta y el costo extra en kilometros.");
     }
 };

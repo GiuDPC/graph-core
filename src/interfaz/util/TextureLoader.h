@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 
 #ifndef GL_CLAMP_TO_EDGE
@@ -39,7 +40,7 @@ inline TextureInfo cargarTextura(const std::string& ruta) {
 
     glGenTextures(1, &ti.id);
     glBindTexture(GL_TEXTURE_2D, ti.id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -48,6 +49,14 @@ inline TextureInfo cargarTextura(const std::string& ruta) {
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ti.width, ti.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
+    // Generar mipmaps dinámicamente para que al hacer zoom out (alejar) no se pixele feo
+    typedef void (*PFNGLGENERATEMIPMAPPROC) (GLenum target);
+    PFNGLGENERATEMIPMAPPROC my_glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)glfwGetProcAddress("glGenerateMipmap");
+    if (my_glGenerateMipmap) {
+        my_glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
     stbi_image_free(data);
 
     return ti;

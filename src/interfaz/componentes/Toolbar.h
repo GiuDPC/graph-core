@@ -64,18 +64,20 @@ struct Toolbar {
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Abre la documentacion completa del programa");
 
         // -- boton de fisicas (derecha) --
-        ImGui::SameLine(avail - 150);
-        bool fisicas_pushed = false;
-        if (ui.fisicas_activas) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.3f, 0.8f, 0.8f));
-            fisicas_pushed = true;
+        if (ui.modo_actual == EstadoUI::ModoApp::Grafos) {
+            ImGui::SameLine(avail - 150);
+            bool fisicas_pushed = false;
+            if (ui.fisicas_activas) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.3f, 0.8f, 0.8f));
+                fisicas_pushed = true;
+            }
+            if (ImGui::Button(ui.fisicas_activas ? ICON_FA_MAGNET " Fisicas (ON)" : ICON_FA_MAGNET " Fisicas (OFF)", ImVec2(145, 28))) {
+                ui.fisicas_activas = !ui.fisicas_activas;
+                ui.fisicas_estado_cambiado = true;
+            }
+            if (fisicas_pushed) ImGui::PopStyleColor();
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Activa la simulacion de fuerzas (Fruchterman-Reingold) para ordenar el grafo automaticamente");
         }
-        if (ImGui::Button(ui.fisicas_activas ? ICON_FA_MAGNET " Fisicas (ON)" : ICON_FA_MAGNET " Fisicas (OFF)", ImVec2(145, 28))) {
-            ui.fisicas_activas = !ui.fisicas_activas;
-            ui.fisicas_estado_cambiado = true;
-        }
-        if (fisicas_pushed) ImGui::PopStyleColor();
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Activa la simulacion de fuerzas (Fruchterman-Reingold) para ordenar el grafo automaticamente");
 
         ImGui::PopStyleVar(3);
         return cambio;

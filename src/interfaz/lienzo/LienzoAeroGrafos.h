@@ -1,0 +1,1041 @@
+#pragma once
+
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "IconsFontAwesome6.h"
+#include "nucleo/Grafo.h"
+#include "nucleo/datos/DatosMundo.h"
+#include "interfaz/estado/EstadoAeroGrafos.h"
+#include "interfaz/util/TextureLoader.h"
+#include <cmath>
+#include <algorithm>
+#include <string>
+#include <cstdio>
+#include "audio/Sonidos.h"
+#include "interfaz/util/Easing.h"
+
+extern Sonidos g_sonidos;
+
+class Interfaz;
+
+namespace LienzoAeroGrafos {
+
+// ── Textura del mundo ──────────────────────────────────────────────────────
+inline void cargarTexturaMundo(EstadoAeroGrafos& estado) {
+    if (estado.textura_cargada) return;
+    TextureInfo tex = cargarTextura("recursos/texturas/mundo_equirectangular.png");
+    if (tex.id == 0)
+        tex = cargarTextura("recursos/texturas/mundo_equirectangular.jpg");
+    if (tex.id != 0) {
+        estado.id_textura_mundo = tex.id;
+        estado.ancho_textura = tex.width;
+        estado.alto_textura = tex.height;
+        estado.textura_cargada = true;
+    }
+}
+
+// ── Proyección ─────────────────────────────────────────────────────────────
+inline ImVec2 virtualAPantalla(ImVec2 v, ImVec2 centro, float zoom, ImVec2 tam) {
+    return ImVec2(
+        (v.x - centro.x) * zoom + tam.x * 0.5f,
+        (v.y - centro.y) * zoom + tam.y * 0.5f
+    );
+}
+
+inline ImVec2 pantallaAVirtual(ImVec2 s, ImVec2 centro, float zoom, ImVec2 tam) {
+    return ImVec2(
+        (s.x - tam.x * 0.5f) / zoom + centro.x,
+        (s.y - tam.y * 0.5f) / zoom + centro.y
+    );
+}
+
+// ── Océano ─────────────────────────────────────────────────────────────────
+inline void dibujarOcean(ImDrawList* dl, ImVec2 pos, ImVec2 sz, bool noche) {
+    if (noche) {
+        // Noche: azul profundo casi negro con gradiente sutil
+        dl->AddRectFilledMultiColor(pos,
+            ImVec2(pos.x + sz.x, pos.y + sz.y),
+            IM_COL32(1, 3, 12, 255),
+            IM_COL32(1, 3, 12, 255),
+            IM_COL32(2, 6, 20, 255),
+            IM_COL32(2, 6, 20, 255));
+    } else {
+        dl->AddRectFilledMultiColor(pos,
+            ImVec2(pos.x + sz.x, pos.y + sz.y),
+            IM_COL32(3, 12, 30, 255),
+            IM_COL32(3, 12, 30, 255),
+            IM_COL32(6, 22, 50, 255),
+            IM_COL32(6, 22, 50, 255));
+    }
+}
+
+// ── Textura ────────────────────────────────────────────────────────────────
+inline void dibujarTexturaMundo(ImDrawList* dl, EstadoAeroGrafos& estado,
+                                 ImVec2 pos, ImVec2 sz) {
+    if (!estado.textura_cargada) return;
+    ImU32 col = estado.modo_noche ? IM_COL32(60, 70, 100, 255) : IM_COL32_WHITE;
+    
+    ImVec2 p_min = virtualAPantalla(ImVec2(0, 0), estado.centro_mapa, estado.zoom_mapa, sz);
+    ImVec2 p_max = virtualAPantalla(ImVec2(DatosMundo::ANCHO_VIRTUAL, DatosMundo::ALTO_VIRTUAL), estado.centro_mapa, estado.zoom_mapa, sz);
+    
+    dl->AddImage((ImTextureID)(intptr_t)estado.id_textura_mundo,
+                 ImVec2(pos.x + p_min.x, pos.y + p_min.y), 
+                 ImVec2(pos.x + p_max.x, pos.y + p_max.y),
+                 ImVec2(0, 0), ImVec2(1, 1), col);
+}
+
+// ── Grid adaptativo ────────────────────────────────────────────────────────
+inline void dibujarGrid(ImDrawList* dl, EstadoAeroGrafos& estado,
+                         ImVec2 pos, ImVec2 sz) {
+    if (!estado.mostrar_grid) return;
+
+    // Espaciado dinámico según zoom: a menos zoom, menos líneas
+    float paso = (estado.zoom_mapa < 0.3f) ? 60.0f :
+                 (estado.zoom_mapa < 0.8f) ? 30.0f : 15.0f;
+    if (estado.zoom_mapa < 0.15f) return; // no dibujar grid si muy alejado
+
+    ImU32 col, col_resaltado;
+    if (estado.modo_noche) {
+        col = IM_COL32(30, 50, 80, 30);
+        col_resaltado = IM_COL32(50, 80, 120, 50);
+    } else {
+        col = IM_COL32(50, 70, 110, 50);
+        col_resaltado = IM_COL32(70, 110, 170, 80);
+    }
+    float grosor = 1.0f;
+
+    ImVec2 p_min = virtualAPantalla(ImVec2(0, 0), estado.centro_mapa, estado.zoom_mapa, sz);
+    ImVec2 p_max = virtualAPantalla(ImVec2(DatosMundo::ANCHO_VIRTUAL, DatosMundo::ALTO_VIRTUAL), estado.centro_mapa, estado.zoom_mapa, sz);
+    
+    float min_y = std::max(pos.y, pos.y + p_min.y);
+    float max_y = std::min(pos.y + sz.y, pos.y + p_max.y);
+    float min_x = std::max(pos.x, pos.x + p_min.x);
+    float max_x = std::min(pos.x + sz.x, pos.x + p_max.x);
+
+    // Meridianos (longitud constante)
+    for (float lon = -180.0f; lon <= 180.0f; lon += paso) {
+        ImVec2 v = DatosMundo::latLonAVirtual(0, lon);
+        ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+        float sx = pos.x + s.x;
+        if (sx >= min_x - 5 && sx <= max_x + 5) {
+            bool resaltado = (fmodf(lon, 90.0f) < 0.1f);
+            dl->AddLine(ImVec2(sx, min_y), ImVec2(sx, max_y),
+                        resaltado ? col_resaltado : col, resaltado ? 1.5f : grosor);
+        }
+    }
+
+    // Paralelos (latitud constante)
+    for (float lat = -90.0f; lat <= 90.0f; lat += paso) {
+        ImVec2 v = DatosMundo::latLonAVirtual(lat, 0);
+        ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+        float sy = pos.y + s.y;
+        if (sy >= min_y - 5 && sy <= max_y + 5) {
+            bool resaltado = (fmodf(fabsf(lat), 90.0f) < 0.1f);
+            dl->AddLine(ImVec2(min_x, sy), ImVec2(max_x, sy),
+                        resaltado ? col_resaltado : col, resaltado ? 1.5f : grosor);
+        }
+    }
+}
+
+// ── Ruta ortodrómica  ─────────────────────────────────────────
+// Genera N puntos intermedios a lo largo del arco de círculo máximo entre
+// dos puntos (lat1,lon1) y (lat2,lon2) usando Slerp esférico.
+inline std::vector<ImVec2> generarRutaOrtodromica(float lat1, float lon1,
+                                                    float lat2, float lon2,
+                                                    int num_puntos = 30) {
+    std::vector<ImVec2> puntos;
+    puntos.reserve(num_puntos);
+
+    float lat1_r = lat1 * (M_PI / 180.0f);
+    float lon1_r = lon1 * (M_PI / 180.0f);
+    float lat2_r = lat2 * (M_PI / 180.0f);
+    float lon2_r = lon2 * (M_PI / 180.0f);
+
+    float dlon = lon2_r - lon1_r;
+    float cos_lat1 = cosf(lat1_r), sin_lat1 = sinf(lat1_r);
+    float cos_lat2 = cosf(lat2_r), sin_lat2 = sinf(lat2_r);
+
+    float d = acosf(sin_lat1 * sin_lat2 + cos_lat1 * cos_lat2 * cosf(dlon));
+    if (d < 0.001f) {
+        puntos.emplace_back(lon1, lat1);
+        puntos.emplace_back(lon2, lat2);
+        return puntos;
+    }
+
+    float sin_d = sinf(d);
+    float inv_sin_d = 1.0f / sin_d;
+
+    for (int i = 0; i < num_puntos; i++) {
+        float t = (float)i / (float)(num_puntos - 1);
+        float A = sinf((1.0f - t) * d) * inv_sin_d;
+        float B = sinf(t * d) * inv_sin_d;
+
+        float x = A * cos_lat1 * cosf(lon1_r) + B * cos_lat2 * cosf(lon2_r);
+        float y = A * cos_lat1 * sinf(lon1_r) + B * cos_lat2 * sinf(lon2_r);
+        float z = A * sin_lat1 + B * sin_lat2;
+
+        float lat_r = atan2f(z, sqrtf(x * x + y * y));
+        float lon_r = atan2f(y, x);
+
+        puntos.emplace_back(lon_r * (180.0f / M_PI), lat_r * (180.0f / M_PI));
+    }
+    return puntos;
+}
+
+inline void dibujarPolylineSegura(ImDrawList* dl, const std::vector<ImVec2>& puntos_pantalla, ImU32 color, float grosor, float zoom) {
+    ImVector<ImVec2> linea_actual;
+    float umbral_salto = (DatosMundo::ANCHO_VIRTUAL * zoom) / 2.0f;
+    for (size_t i = 0; i < puntos_pantalla.size(); ++i) {
+        linea_actual.push_back(puntos_pantalla[i]);
+        if (i < puntos_pantalla.size() - 1) {
+            float dif_x = std::abs(puntos_pantalla[i].x - puntos_pantalla[i+1].x);
+            if (dif_x > umbral_salto) {
+                if (linea_actual.Size > 1) {
+                    dl->AddPolyline(linea_actual.Data, linea_actual.Size, color, false, grosor);
+                }
+                linea_actual.clear();
+            }
+        }
+    }
+    if (linea_actual.Size > 1) {
+        dl->AddPolyline(linea_actual.Data, linea_actual.Size, color, false, grosor);
+    }
+}
+
+// ── Rutas aéreas ───────────────────────────────────────────────────────────
+inline void dibujarRutas(ImDrawList* dl, EstadoAeroGrafos& estado,
+                          ImVec2 pos, ImVec2 sz) {
+    const auto& ciudades = DatosMundo::obtenerCiudades();
+    const auto& rutas = DatosMundo::obtenerRutas();
+
+    ImU32 col_normal, col_sel, col_glow;
+    if (estado.modo_noche) {
+        col_normal = IM_COL32(40, 100, 160, 40);
+        col_sel    = IM_COL32(80, 180, 255, 160);
+        col_glow   = IM_COL32(80, 180, 255, 20);
+    } else {
+        col_normal = IM_COL32(60, 140, 210, 65);
+        col_sel    = IM_COL32(100, 200, 255, 180);
+        col_glow   = IM_COL32(100, 200, 255, 30);
+    }
+    
+    // Ocultar base cuando hay animación activa para destacar los neones
+    if (estado.animacion.activa) {
+        col_normal = (col_normal & 0x00FFFFFF) | (15 << 24); 
+    }
+    float grosor_base = 1.5f * std::min(1.0f, estado.zoom_mapa);
+
+    int sel = -1;
+    if (!estado.animacion.activa && !estado.algoritmo_ejecutado) {
+        sel = (estado.ciudad_destino >= 0) ? estado.ciudad_destino : estado.ciudad_origen;
+    }
+
+    for (size_t i = 0; i < rutas.size(); i++) {
+        const auto& r = rutas[i];
+        const Ciudad& c1 = ciudades[r.origen_id];
+        const Ciudad& c2 = ciudades[r.destino_id];
+
+        ImVec2 v1 = DatosMundo::latLonAVirtual(c1.latitud, c1.longitud);
+        ImVec2 v2 = DatosMundo::latLonAVirtual(c2.latitud, c2.longitud);
+        ImVec2 s1 = virtualAPantalla(v1, estado.centro_mapa, estado.zoom_mapa, sz);
+        ImVec2 s2 = virtualAPantalla(v2, estado.centro_mapa, estado.zoom_mapa, sz);
+
+        // Culling: skip if both endpoints off screen
+        float m = 60.0f;
+        bool off1 = (s1.x + pos.x < pos.x - m || s1.x + pos.x > pos.x + sz.x + m ||
+                     s1.y + pos.y < pos.y - m || s1.y + pos.y > pos.y + sz.y + m);
+        bool off2 = (s2.x + pos.x < pos.x - m || s2.x + pos.x > pos.x + sz.x + m ||
+                     s2.y + pos.y < pos.y - m || s2.y + pos.y > pos.y + sz.y + m);
+        if (off1 && off2) continue;
+
+        bool resaltada = (sel >= 0 && (r.origen_id == sel || r.destino_id == sel));
+        if (!resaltada && !estado.mostrar_todas_rutas) continue;
+
+        // Ruta ortodrómica (Great Circle): curvas realistas via Slerp
+        auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud,
+                                                  c2.latitud, c2.longitud, 30);
+        size_t n_visibles = 0;
+        for (const auto& p : pts_latlon) {
+            ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x); // (lon, lat)
+            ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+            if (s.x >= -5000 && s.x <= 5000 && s.y >= -5000 && s.y <= 5000)
+                n_visibles++;
+        }
+        if (n_visibles < 2) continue;
+
+        // Convertir todos a pantalla y dibujar
+        int n_total = (int)pts_latlon.size();
+        std::vector<ImVec2> pts_pantalla;
+        pts_pantalla.reserve(n_total);
+        for (const auto& p : pts_latlon) {
+            ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x);
+            ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+            pts_pantalla.emplace_back(pos.x + s.x, pos.y + s.y);
+        }
+
+        if (resaltada) {
+            // Glow (más grueso, más transparente)
+            dibujarPolylineSegura(dl, pts_pantalla, col_glow, grosor_base * 5.0f, estado.zoom_mapa);
+            // Línea principal
+            dibujarPolylineSegura(dl, pts_pantalla, col_sel, grosor_base * 2.0f, estado.zoom_mapa);
+        } else {
+            dibujarPolylineSegura(dl, pts_pantalla, col_normal, grosor_base, estado.zoom_mapa);
+        }
+    }
+}
+
+// ── Ciudades ───────────────────────────────────────────────────────────────
+inline int dibujarCiudades(ImDrawList* dl, EstadoAeroGrafos& estado,
+                            ImVec2 pos, ImVec2 sz) {
+    const auto& ciudades = DatosMundo::obtenerCiudades();
+    ImVec2 raton = ImGui::GetIO().MousePos;
+    float t = estado.tiempo_reloj; // para animaciones
+
+    int hover = -1;
+
+    for (const auto& c : ciudades) {
+        ImVec2 v = DatosMundo::latLonAVirtual(c.latitud, c.longitud);
+        ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+        float sx = pos.x + s.x, sy = pos.y + s.y;
+
+        // Culling
+        if (sx < pos.x - 60 || sx > pos.x + sz.x + 60 ||
+            sy < pos.y - 60 || sy > pos.y + sz.y + 60) continue;
+
+        float radio = 4.0f + (float)c.poblacion_millones * 0.5f;
+        radio = std::max(2.5f, std::min(radio * std::min(1.0f, estado.zoom_mapa), 18.0f));
+
+        // Hover
+        float d = sqrtf((raton.x - sx) * (raton.x - sx) + (raton.y - sy) * (raton.y - sy));
+        bool sobre = (d < radio + 12.0f);
+        bool selec = (c.id == estado.ciudad_origen || c.id == estado.ciudad_destino);
+        if (sobre) hover = c.id;
+
+        // Pulso para ciudad seleccionada
+        float pulso = 0.0f;
+        if (selec) pulso = sinf(t * 2.5f) * 0.15f + 0.15f; // 0.0–0.3
+
+        ImU32 fill, glow_c, circle;
+        if (estado.modo_noche) {
+            if (selec) {
+                fill   = IM_COL32(255, 200, 50, 255);
+                glow_c = IM_COL32(255, 200, 50, (int)(80 + pulso * 200));
+                circle = IM_COL32(255, 220, 100, 60);
+            } else if (sobre) {
+                fill   = IM_COL32(255, 230, 80, 255);
+                glow_c = IM_COL32(255, 230, 80, 80);
+                circle = IM_COL32(255, 240, 120, 50);
+            } else {
+                // City lights: amarillo brillante con halo
+                float brillo = 0.6f + sinf(t * 1.7f + c.id * 3.1f) * 0.2f;
+                fill   = IM_COL32((int)(220*brillo), (int)(200*brillo), (int)(80*brillo), 220);
+                glow_c = IM_COL32(255, 220, 80, (int)(30 * brillo));
+                circle = IM_COL32(255, 255, 200, (int)(30 * brillo));
+            }
+        } else {
+            if (selec) {
+                fill   = IM_COL32(0, 230, 180, 255);
+                glow_c = IM_COL32(0, 230, 180, (int)(100 + pulso * 200));
+                circle = IM_COL32(0, 255, 200, 70);
+            } else if (sobre) {
+                fill   = IM_COL32(255, 230, 80, 255);
+                glow_c = IM_COL32(255, 230, 80, 80);
+                circle = IM_COL32(255, 240, 120, 50);
+            } else {
+                fill   = IM_COL32(190, 210, 240, 230);
+                glow_c = IM_COL32(80, 140, 220, 45);
+                circle = IM_COL32(255, 255, 255, 40);
+            }
+        }
+
+        float radio_glow = radio * (2.8f + (selec ? pulso : 0.0f));
+
+        // Glow
+        dl->AddCircleFilled(ImVec2(sx, sy), radio_glow, glow_c, 24);
+        // Círculo base
+        dl->AddCircleFilled(ImVec2(sx, sy), radio, fill, 24);
+        // Borde
+        dl->AddCircle(ImVec2(sx, sy), radio, circle, 24, 1.5f);
+        // Punto central (más brillante en noche)
+        ImU32 centro_col = estado.modo_noche && !selec && !sobre
+            ? IM_COL32(255, 255, 220, 220)
+            : IM_COL32(255, 255, 255, 200);
+        dl->AddCircleFilled(ImVec2(sx, sy), std::max(1.8f, radio * 0.3f),
+                            centro_col, 8);
+
+        // Etiqueta
+        bool mostrar_label = (sobre || selec || estado.zoom_mapa > 0.8f);
+        if (mostrar_label) {
+            char buf[64];
+            snprintf(buf, sizeof(buf), "%s (%s)", c.nombre, c.codigo_iata);
+            ImVec2 tam = ImGui::CalcTextSize(buf);
+            float tx = sx - tam.x * 0.5f;
+            float ty = sy - radio - tam.y - 6.0f;
+            // Ajustar si se sale del canvas
+            if (tx < pos.x + 4) tx = pos.x + 4;
+            if (tx + tam.x + 4 > pos.x + sz.x) tx = pos.x + sz.x - tam.x - 4;
+
+            ImU32 fondo;
+            ImU32 tcol;
+            if (estado.modo_noche) {
+                fondo = selec ? IM_COL32(40, 30, 0, 210) :
+                        sobre ? IM_COL32(20, 20, 30, 210) :
+                                IM_COL32(0, 0, 0, 180);
+                tcol  = selec ? IM_COL32(255, 220, 80, 255) :
+                        sobre ? IM_COL32(255, 255, 200, 255) :
+                                IM_COL32(220, 200, 180, 230);
+            } else {
+                fondo = selec ? IM_COL32(0, 40, 30, 200) :
+                        sobre ? IM_COL32(40, 30, 0, 200) :
+                                IM_COL32(0, 0, 0, 170);
+                tcol  = selec ? IM_COL32(0, 255, 200, 255) :
+                        sobre ? IM_COL32(255, 255, 200, 255) :
+                                IM_COL32(210, 220, 240, 220);
+            }
+            dl->AddRectFilled(ImVec2(tx - 4, ty - 2),
+                              ImVec2(tx + tam.x + 4, ty + tam.y + 2),
+                              fondo, 3.0f);
+            dl->AddText(ImVec2(tx, ty), tcol, buf);
+        }
+    }
+    return hover;
+}
+
+// ── Resultados de algoritmos ────────────────────────────────────────────────
+inline void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
+                                       ImVec2 pos, ImVec2 sz) {
+    if (!estado.algoritmo_ejecutado) return;
+    const auto& ciudades = DatosMundo::obtenerCiudades();
+
+    auto ciudadAPantalla = [&](int id) -> ImVec2 {
+        if (id < 0 || id >= (int)ciudades.size()) return ImVec2(0,0);
+        const auto& c = ciudades[id];
+        ImVec2 v = DatosMundo::latLonAVirtual(c.latitud, c.longitud);
+        ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+        return ImVec2(pos.x + s.x, pos.y + s.y);
+    };
+    auto dibujarAristaResultado = [&](int id1, int id2, ImU32 color, float grosor) {
+        if (id1 < 0 || id2 < 0 || id1 >= (int)ciudades.size() || id2 >= (int)ciudades.size()) return;
+        const auto& c1 = ciudades[id1];
+        const auto& c2 = ciudades[id2];
+        auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud,
+                                                  c2.latitud, c2.longitud, 30);
+        int n = (int)pts_latlon.size();
+        std::vector<ImVec2> pts_scr;
+        pts_scr.reserve(n);
+        for (const auto& p : pts_latlon) {
+            ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x);
+            ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+            pts_scr.emplace_back(pos.x + s.x, pos.y + s.y);
+        }
+        dibujarPolylineSegura(dl, pts_scr, color, grosor, estado.zoom_mapa);
+    };
+
+    switch (estado.algoritmo_activo) {
+        case EstadoAeroGrafos::Algoritmo::RutaMasCorta:
+            if (estado.ruta_resultado.size() < 2) break;
+            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(0, 255, 100, 200), 4.0f);
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(0, 255, 100, 50), 10.0f);
+            }
+            {   auto p1 = ciudadAPantalla(estado.ruta_resultado.front());
+                auto p2 = ciudadAPantalla(estado.ruta_resultado.back());
+                dl->AddCircleFilled(p1, 10.0f, IM_COL32(0,255,100,120), 16);
+                dl->AddCircleFilled(p2, 10.0f, IM_COL32(255,80,80,120), 16);
+                dl->AddCircle(p1, 10.0f, IM_COL32(0,255,100,255), 16, 2.0f);
+                dl->AddCircle(p2, 10.0f, IM_COL32(255,80,80,255), 16, 2.0f);
+            }
+            break;
+        case EstadoAeroGrafos::Algoritmo::ConectarTodo:
+            for (const auto& a : estado.aristas_mst) {
+                dibujarAristaResultado(a.first, a.second,
+                    IM_COL32(0, 220, 255, 180), 3.0f);
+                dibujarAristaResultado(a.first, a.second,
+                    IM_COL32(0, 220, 255, 40), 8.0f);
+            }
+            break;
+        case EstadoAeroGrafos::Algoritmo::ExplorarNiveles:
+        case EstadoAeroGrafos::Algoritmo::ExplorarTodo:
+            if (estado.orden_visita.empty()) break;
+            for (size_t i = 0; i < estado.orden_visita.size(); i++) {
+                int id = estado.orden_visita[i];
+                ImVec2 p = ciudadAPantalla(id);
+                if (p.x < pos.x - 20 || p.x > pos.x + sz.x + 20 ||
+                    p.y < pos.y - 20 || p.y > pos.y + sz.y + 20) continue;
+                float t = (float)i / (float)estado.orden_visita.size();
+                ImU32 col = ImLerp(IM_COL32(100,255,100,200), IM_COL32(255,200,50,200), t);
+                dl->AddCircleFilled(p, 9.0f, col, 12);
+                char num[8];
+                snprintf(num, sizeof(num), "%zu", i+1);
+                ImVec2 tam = ImGui::CalcTextSize(num);
+                dl->AddText(ImVec2(p.x - tam.x*0.5f, p.y - tam.y*0.5f),
+                    IM_COL32(0,0,0,220), num);
+            }
+            break;
+        case EstadoAeroGrafos::Algoritmo::ColorearRegiones: {
+            if (estado.colores_asignados.empty()) break;
+            ImU32 paleta[] = {
+                IM_COL32(255, 60, 60, 220),   IM_COL32(60, 220, 60, 220),
+                IM_COL32(60, 120, 255, 220),  IM_COL32(255, 220, 40, 220),
+                IM_COL32(200, 80, 255, 220),  IM_COL32(40, 230, 230, 220),
+                IM_COL32(255, 140, 40, 220),  IM_COL32(255, 80, 160, 220),
+                IM_COL32(140, 200, 80, 220),  IM_COL32(100, 100, 100, 220),
+            };
+            int num_paleta = sizeof(paleta)/sizeof(paleta[0]);
+            for (size_t i = 0; i < ciudades.size(); i++) {
+                int col_idx = (i < (size_t)estado.colores_asignados.size())
+                    ? estado.colores_asignados[i] : -1;
+                if (col_idx < 0) continue;
+                ImVec2 p = ciudadAPantalla(i);
+                if (p.x < pos.x - 20 || p.x > pos.x + sz.x + 20) continue;
+                ImU32 col = paleta[col_idx % num_paleta];
+                dl->AddCircleFilled(p, 8.0f, col, 12);
+                dl->AddCircle(p, 8.0f, IM_COL32(255,255,255,120), 12, 2.0f);
+            }
+            break;
+        }
+        case EstadoAeroGrafos::Algoritmo::RutaMantenimiento:
+            if (estado.ruta_resultado.size() < 2) break;
+            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(0, 255, 200, 200), 3.5f);
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(0, 255, 200, 40), 9.0f);
+            }
+            break;
+        case EstadoAeroGrafos::Algoritmo::VueltaAlMundo:
+            if (estado.ruta_resultado.size() < 2) break;
+            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(255, 200, 20, 200), 3.5f);
+                dibujarAristaResultado(estado.ruta_resultado[i],
+                    estado.ruta_resultado[i+1],
+                    IM_COL32(255, 200, 20, 40), 9.0f);
+            }
+            break;
+        case EstadoAeroGrafos::Algoritmo::AnalizarRed:
+            break;
+    }
+}
+
+// ── Animación paso a paso ──────────────────────────────────────────────────
+inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
+                              ImVec2 pos, ImVec2 sz) {
+    const auto& anim = estado.animacion;
+    const auto& ciudades = DatosMundo::obtenerCiudades();
+    float t = estado.tiempo_reloj;
+
+    // Lambda: ciudad ID → screen position
+    auto ciudadAPantalla = [&](int id) -> ImVec2 {
+        if (id < 0 || id >= (int)ciudades.size()) return ImVec2(0,0);
+        const auto& c = ciudades[id];
+        ImVec2 v = DatosMundo::latLonAVirtual(c.latitud, c.longitud);
+        ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+        return ImVec2(pos.x + s.x, pos.y + s.y);
+    };
+
+    // Lambda: dibujar arista animada (great circle)
+    auto dibujarAristaAnim = [&](int id1, int id2, ImU32 color, float grosor, float alpha) {
+        if (id1 < 0 || id2 < 0 || id1 >= (int)ciudades.size() || id2 >= (int)ciudades.size()) return;
+        const auto& c1 = ciudades[id1];
+        const auto& c2 = ciudades[id2];
+        auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud,
+                                                  c2.latitud, c2.longitud, 24);
+        int n = (int)pts_latlon.size();
+        std::vector<ImVec2> pts_scr;
+        pts_scr.reserve(n);
+        for (const auto& p : pts_latlon) {
+            ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x);
+            ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+            pts_scr.emplace_back(pos.x + s.x, pos.y + s.y);
+        }
+        ImU32 col_alpha = (color & 0x00FFFFFF) | ((int)(alpha * 255) << 24);
+        dibujarPolylineSegura(dl, pts_scr, col_alpha, grosor, estado.zoom_mapa);
+    };
+
+    // ── 1. Arista en exploración efímera (azul brillante) ──
+    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+        const auto& paso = anim.pasos[anim.paso_actual];
+        if (paso.accion == PasoAnimacion::EXPLORAR && paso.arista_origen >= 0 && paso.arista_destino >= 0) {
+            float pulsar = sinf(t * 10.0f) * 0.2f + 0.8f;
+            dibujarAristaAnim(paso.arista_origen, paso.arista_destino, IM_COL32(80, 160, 255, 255), 3.0f, pulsar);
+        }
+    }
+
+    // ── 2. Aristas confirmadas (verde brillante) ──
+    std::pair<int, int> ultima_confirmada = {-1, -1};
+    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+        for (int i = anim.paso_actual; i >= 0; i--) {
+            if (anim.pasos[i].accion == PasoAnimacion::CONFIRMAR && anim.pasos[i].arista_origen >= 0 && anim.pasos[i].arista_destino >= 0) {
+                ultima_confirmada = {anim.pasos[i].arista_origen, anim.pasos[i].arista_destino};
+                break;
+            }
+        }
+    }
+
+    for (const auto& par : anim.confirmadas) {
+        bool es_ultima = (par == ultima_confirmada || (par.first == ultima_confirmada.second && par.second == ultima_confirmada.first));
+        if (es_ultima) {
+            float pulso = sinf(t * 12.0f) * 0.2f + 0.8f;
+            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 255), 6.0f * pulso, 1.0f);
+            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 12.0f * pulso, 0.6f);
+        } else {
+            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 4.0f, 0.9f);
+            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 10.0f, 0.2f); // glow
+        }
+        // ── 1.5 Partícula viajera (Fluidez) ──
+        if (anim.particula.activa && anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+            float t_ease = Easing::easeInOutCubic(anim.particula.progreso);
+            int a_o = anim.pasos[anim.paso_actual].arista_origen;
+            int a_d = anim.pasos[anim.paso_actual].arista_destino;
+            if (a_o >= 0 && a_d >= 0) {
+                auto pts_latlon = generarRutaOrtodromica(ciudades[a_o].latitud, ciudades[a_o].longitud,
+                                                          ciudades[a_d].latitud, ciudades[a_d].longitud, 30);
+                if (pts_latlon.size() >= 2) {
+                    float idx_f = t_ease * (pts_latlon.size() - 1);
+                    int idx = (int)idx_f;
+                    float f = idx_f - idx;
+                    ImVec2 p_ll;
+                    if (idx >= (int)pts_latlon.size() - 1) {
+                        p_ll = pts_latlon.back();
+                    } else {
+                        p_ll.x = pts_latlon[idx].x + (pts_latlon[idx+1].x - pts_latlon[idx].x) * f;
+                        p_ll.y = pts_latlon[idx].y + (pts_latlon[idx+1].y - pts_latlon[idx].y) * f;
+                    }
+                    ImVec2 v = DatosMundo::latLonAVirtual(p_ll.y, p_ll.x);
+                    ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
+                    ImVec2 pos_particula(pos.x + s.x, pos.y + s.y);
+
+                    float halo_r = anim.particula.radio * 4.0f * (1.0f - anim.particula.progreso * 0.3f);
+                    dl->AddCircleFilled(pos_particula, halo_r, (anim.particula.color & 0x00FFFFFF) | (120 << 24), 24);
+                    dl->AddCircleFilled(pos_particula, anim.particula.radio * 1.5f, anim.particula.color, 24);
+                    dl->AddCircleFilled(pos_particula, anim.particula.radio * 0.6f, IM_COL32(255, 255, 255, 220), 16);
+                }
+            }
+        }
+    }
+
+    // ── 3. Aristas descartadas (rojo tenue) ──
+    for (const auto& par : anim.descartadas) {
+        float fade = sinf(t * 2.0f + par.first * 3.7f) * 0.1f + 0.3f;
+        dibujarAristaAnim(par.first, par.second, IM_COL32(255, 80, 80, 150), 1.5f, fade);
+    }
+
+    // ── 4. Nodos visitados/procesando ──
+    for (int id : anim.visitados) {
+        ImVec2 p = ciudadAPantalla(id);
+        if (p.x < pos.x - 30 || p.x > pos.x + sz.x + 30) continue;
+
+        bool procesando = anim.procesando.count(id) > 0;
+
+        if (procesando) {
+            // Pulso amarillo intermitente
+            float pulso = sinf(t * 4.0f) * 0.3f + 0.7f;
+            float radio = 12.0f * pulso;
+            dl->AddCircleFilled(p, radio, IM_COL32(255, 220, 50, (int)(120 * pulso)), 16);
+            dl->AddCircle(p, radio, IM_COL32(255, 220, 50, (int)(200 * pulso)), 16, 2.5f);
+        } else {
+            // Visitado: anillo verde sutil
+            float respiro = sinf(t * 2.0f + id * 1.3f) * 0.1f + 0.5f;
+            dl->AddCircle(p, 10.0f, IM_COL32(0, 255, 120, (int)(100 * respiro)), 16, 2.0f);
+            dl->AddCircle(p, 14.0f, IM_COL32(0, 255, 120, (int)(40 * respiro)), 24, 1.0f);
+        }
+    }
+
+    // ── 5. Mensaje descriptivo actual del algoritmo ──
+    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+        const auto& paso = anim.pasos[anim.paso_actual];
+        if (!paso.descripcion.empty()) {
+            ImVec2 tam = ImGui::CalcTextSize(paso.descripcion.c_str());
+            float tx = pos.x + (sz.x - tam.x) * 0.5f; // Centrado horizontal
+            float ty = pos.y + 20.0f; // Arriba
+            
+            dl->AddRectFilled(ImVec2(tx - 20, ty - 10),
+                              ImVec2(tx + tam.x + 20, ty + tam.y + 10),
+                              IM_COL32(15, 20, 30, 230), 8.0f);
+            dl->AddRect(ImVec2(tx - 20, ty - 10),
+                        ImVec2(tx + tam.x + 20, ty + tam.y + 10),
+                        IM_COL32(0, 200, 255, 180), 8.0f, 0, 2.0f);
+            
+            dl->AddText(ImVec2(tx, ty), IM_COL32(230, 245, 255, 255), paso.descripcion.c_str());
+        }
+    }
+}
+
+// ── Mensajes del canvas ───────────────────────────────────────────────────
+inline void dibujarMensajes(ImDrawList* dl, EstadoAeroGrafos& estado,
+                             ImVec2 pos, ImVec2 sz) {
+    // Mostrar solo los últimos 5 mensajes
+    int inicio = std::max(0, (int)estado.mensajes.size() - 5);
+    float y = 45.0f; // Offset para no tapar la info del zoom
+    for (int i = inicio; i < (int)estado.mensajes.size(); i++) {
+        const auto& msg = estado.mensajes[i];
+        float a = std::min(1.0f, (float)msg.tiempo_restante);
+        if (a < 0.05f) continue;
+        ImU32 col = (msg.color & 0x00FFFFFF) | ((int)(a * 255) << 24);
+        ImVec2 tam = ImGui::CalcTextSize(msg.texto.c_str());
+        // Esquina inferior izquierda
+        float tx = pos.x + 14.0f;
+        float ty = pos.y + sz.y - 14.0f - y - tam.y;
+        dl->AddRectFilled(ImVec2(tx - 10, ty - 5),
+                          ImVec2(tx + tam.x + 10, ty + tam.y + 5),
+                          IM_COL32(0, 0, 0, (int)(185 * a)), 6.0f);
+        dl->AddText(ImVec2(tx, ty), col, msg.texto.c_str());
+        y += tam.y + 6.0f;
+    }
+}
+
+// ── Tooltip ────────────────────────────────────────────────────────────────
+inline void dibujarTooltipCiudad(int hover) {
+    if (hover < 0) return;
+    const auto& ciudades = DatosMundo::obtenerCiudades();
+    if (hover >= (int)ciudades.size()) return;
+    const Ciudad& c = ciudades[hover];
+
+    // Contar conexiones únicas y destinos
+    const auto& rutas = DatosMundo::obtenerRutas();
+    int n_conexiones = 0;
+    float dist_prom = 0;
+    int dest_cercano = 99999, dest_lejano = 0;
+    for (const auto& r : rutas) {
+        if (r.origen_id == hover || r.destino_id == hover) {
+            n_conexiones++;
+            dist_prom += r.distancia_km;
+            if (r.distancia_km < dest_cercano) dest_cercano = (int)r.distancia_km;
+            if (r.distancia_km > dest_lejano) dest_lejano = (int)r.distancia_km;
+        }
+    }
+    if (n_conexiones > 0) dist_prom /= n_conexiones;
+
+    ImGui::BeginTooltip();
+    // Header con nombre y código
+    ImGui::TextColored(ImVec4(0.0f, 0.85f, 0.65f, 1.0f), "%s", c.nombre);
+    ImGui::SameLine();
+    ImGui::TextDisabled("  (%s)", c.codigo_iata);
+
+    ImGui::Separator();
+
+    // País y población
+    ImGui::TextUnformatted(ICON_FA_FLAG);
+    ImGui::SameLine();
+    ImGui::TextUnformatted(c.pais);
+
+    ImGui::TextUnformatted(ICON_FA_USERS);
+    ImGui::SameLine();
+    ImGui::Text("%d M habitantes", c.poblacion_millones);
+
+    // Coordenadas
+    ImGui::TextUnformatted(ICON_FA_LOCATION_DOT);
+    ImGui::SameLine();
+    char dir_lat = (c.latitud >= 0) ? 'N' : 'S';
+    char dir_lon = (c.longitud >= 0) ? 'E' : 'O';
+    ImGui::Text("%.2f° %c, %.2f° %c", fabsf(c.latitud), dir_lat, fabsf(c.longitud), dir_lon);
+
+    ImGui::Separator();
+
+    // Conexiones
+    ImGui::TextUnformatted(ICON_FA_ROUTE);
+    ImGui::SameLine();
+    ImGui::Text("%d rutas  |  Prom: %.0f km  |  Min: %d km  |  Max: %d km",
+        n_conexiones, dist_prom, dest_cercano, dest_lejano);
+
+    ImGui::EndTooltip();
+}
+
+// ── Clamping de cámara ───────────────────────────────────────────────────
+inline void clampaCentro(EstadoAeroGrafos& estado) {
+    estado.centro_mapa.x = std::max(0.0f, std::min((float)DatosMundo::ANCHO_VIRTUAL, estado.centro_mapa.x));
+    estado.centro_mapa.y = std::max(0.0f, std::min((float)DatosMundo::ALTO_VIRTUAL, estado.centro_mapa.y));
+}
+
+// ── Interacción principal ──────────────────────────────────────────────────
+inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
+                                ImVec2 pos, ImVec2 tam, int hover_ciudad) {
+    // Estados persistentes entre frames (estáticos dentro de la función)
+    static bool paneando = false;
+    static int  ciudad_pres = -1;
+    static bool click_candidato = false;
+    static bool se_movio = false;
+
+    // ── Click izquierdo ────────────────────────────────────────────────
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && lienzo_hovered) {
+        ciudad_pres = hover_ciudad;
+        click_candidato = true;
+        se_movio = false;
+        paneando = false;
+    }
+
+    // ── Arrastre (drag) ──────────────────────────────────────────────────
+    if (lienzo_hovered && ImGui::IsMouseDown(ImGuiMouseButton_Left) && !se_movio) {
+        float dx = ImGui::GetIO().MouseDelta.x;
+        float dy = ImGui::GetIO().MouseDelta.y;
+        if (fabsf(dx) > 3.0f || fabsf(dy) > 3.0f) {
+            se_movio = true;
+            click_candidato = false; // cancelar click candidato
+            paneando = (ciudad_pres < 0); // solo panea si no empezó en ciudad
+        }
+    }
+
+    // ── Paneo con click izquierdo ──────────────────────────────────────
+    if (lienzo_hovered && paneando && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+        estado.interpolando_camara = false;
+        estado.centro_mapa.x -= ImGui::GetIO().MouseDelta.x / estado.zoom_mapa;
+        estado.centro_mapa.y -= ImGui::GetIO().MouseDelta.y / estado.zoom_mapa;
+        clampaCentro(estado);
+        estado.target_centro = estado.centro_mapa;
+    }
+
+    // Paneo con botón medio (alternativo, siempre funciona)
+    if (lienzo_hovered && ImGui::IsMouseDragging(ImGuiMouseButton_Middle, 2.0f)) {
+        estado.interpolando_camara = false;
+        estado.centro_mapa.x -= ImGui::GetIO().MouseDelta.x / estado.zoom_mapa;
+        estado.centro_mapa.y -= ImGui::GetIO().MouseDelta.y / estado.zoom_mapa;
+        clampaCentro(estado);
+        estado.target_centro = estado.centro_mapa;
+    }
+
+    // ── Liberación del click ────────────────────────────────────────────
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (click_candidato && ciudad_pres >= 0 && !se_movio) {
+            // Seleccionar ciudad
+            const auto& ciudades = DatosMundo::obtenerCiudades();
+            if (estado.ciudad_origen < 0 || estado.ciudad_destino >= 0) {
+                estado.ciudad_origen = ciudad_pres;
+                estado.ciudad_destino = -1;
+                estado.agregarMensaje(ICON_FA_PLANE_DEPARTURE " Origen: " +
+                    std::string(ciudades[ciudad_pres].nombre),
+                    IM_COL32(100, 255, 200, 255));
+            } else if (ciudad_pres != estado.ciudad_origen) {
+                estado.ciudad_destino = ciudad_pres;
+                estado.agregarMensaje(ICON_FA_PLANE_ARRIVAL " Destino: " +
+                    std::string(ciudades[ciudad_pres].nombre),
+                    IM_COL32(100, 200, 255, 255));
+            }
+        }
+        paneando = false;
+        click_candidato = false;
+        ciudad_pres = -1;
+        se_movio = false;
+    }
+
+    // ── Zoom con scroll ─────────────────────────────────────────────────
+    if (lienzo_hovered) {
+        float scroll = ImGui::GetIO().MouseWheel;
+        if (scroll != 0.0f) {
+            estado.interpolando_camara = false;
+            ImVec2 raton = ImGui::GetMousePos();
+            float rx = raton.x - pos.x, ry = raton.y - pos.y;
+            // Punto del mundo bajo el cursor ANTES del zoom
+            float wx = estado.centro_mapa.x + (rx - tam.x * 0.5f) / estado.zoom_mapa;
+            float wy = estado.centro_mapa.y + (ry - tam.y * 0.5f) / estado.zoom_mapa;
+            float f = (scroll > 0) ? 1.2f : (1.0f / 1.2f);
+            estado.zoom_mapa = std::max(0.2f, std::min(estado.zoom_mapa * f, 15.0f));
+            estado.target_zoom = estado.zoom_mapa;
+            // Ajustar centro para mantener cursor en el mismo punto
+            estado.centro_mapa.x = wx - (rx - tam.x * 0.5f) / estado.zoom_mapa;
+            estado.centro_mapa.y = wy - (ry - tam.y * 0.5f) / estado.zoom_mapa;
+            clampaCentro(estado);
+            estado.target_centro = estado.centro_mapa;
+        }
+    }
+}
+
+// ── Controles de zoom ──────────────────────────────────────────────────────
+inline void dibujarControlesZoom(EstadoAeroGrafos& estado) {
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    float x = pos.x + ImGui::GetContentRegionAvail().x - 50.0f;
+    float y = pos.y + 8.0f;
+
+    // Botón +
+    ImGui::SetCursorScreenPos(ImVec2(x, y));
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.12f, 0.18f, 0.30f, 0.85f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,  ImVec4(0.20f, 0.28f, 0.45f, 0.95f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,   ImVec4(0.30f, 0.40f, 0.60f, 1.00f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    if (ImGui::Button("+", ImVec2(36, 30))) {
+        estado.interpolando_camara = false;
+        estado.zoom_mapa = std::min(estado.zoom_mapa * 1.4f, 15.0f);
+        estado.target_zoom = estado.zoom_mapa;
+        clampaCentro(estado);
+        estado.target_centro = estado.centro_mapa;
+    }
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(3);
+
+    // Botón -
+    ImGui::SetCursorScreenPos(ImVec2(x, y + 34));
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.12f, 0.18f, 0.30f, 0.85f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,  ImVec4(0.20f, 0.28f, 0.45f, 0.95f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,   ImVec4(0.30f, 0.40f, 0.60f, 1.00f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    if (ImGui::Button("-", ImVec2(36, 30))) {
+        estado.interpolando_camara = false;
+        estado.zoom_mapa = std::max(estado.zoom_mapa / 1.4f, 0.2f);
+        estado.target_zoom = estado.zoom_mapa;
+        clampaCentro(estado);
+        estado.target_centro = estado.centro_mapa;
+    }
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(3);
+
+    // Botón reset
+    ImGui::SetCursorScreenPos(ImVec2(x, y + 68));
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.12f, 0.18f, 0.30f, 0.85f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,  ImVec4(0.20f, 0.28f, 0.45f, 0.95f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,   ImVec4(0.30f, 0.40f, 0.60f, 1.00f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    if (ImGui::Button(ICON_FA_HOUSE, ImVec2(36, 30))) {
+        estado.interpolando_camara = false;
+        estado.centro_mapa = ImVec2(DatosMundo::ANCHO_VIRTUAL / 2.0f,
+                                    DatosMundo::ALTO_VIRTUAL / 2.0f);
+        estado.zoom_mapa = 1.0f;
+        estado.target_centro = estado.centro_mapa;
+        estado.target_zoom = estado.zoom_mapa;
+        estado.ciudad_origen = -1;
+        estado.ciudad_destino = -1;
+    }
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(3);
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Resetear vista");
+}
+
+// ── Indicador de zoom ─────────────────────────────────────────────────────
+inline void dibujarInfoZoom(ImDrawList* dl, EstadoAeroGrafos& estado,
+                             ImVec2 pos, ImVec2 sz) {
+    char buf[96];
+    const char* modo = estado.modo_noche ? "Noche" : "Dia";
+    snprintf(buf, sizeof(buf), ICON_FA_MAP " %.1fx  |  %s %s", estado.zoom_mapa,
+        estado.modo_noche ? ICON_FA_MOON : ICON_FA_SUN, modo);
+    ImVec2 tam = ImGui::CalcTextSize(buf);
+    float x = pos.x + 12.0f, y = pos.y + sz.y - tam.y - 12.0f;
+    ImU32 bg = estado.modo_noche ? IM_COL32(10, 10, 20, 180) : IM_COL32(0, 0, 0, 140);
+    ImU32 fg = estado.modo_noche ? IM_COL32(200, 180, 140, 220) : IM_COL32(180, 200, 220, 220);
+    dl->AddRectFilled(ImVec2(x - 6, y - 4), ImVec2(x + tam.x + 6, y + tam.y + 4),
+                      bg, 4.0f);
+    dl->AddText(ImVec2(x, y), fg, buf);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FUNCIÓN PRINCIPAL DE DIBUJO
+// ══════════════════════════════════════════════════════════════════════════
+inline void dibujar(Grafo& red, Interfaz& self) {
+    auto& estado = self.estado_aerografos;
+    // Actualizar reloj global para animaciones
+    float dt = ImGui::GetIO().DeltaTime;
+    estado.tiempo_reloj += dt;
+
+    // ── Cámara Cinemática (Lerp) ──
+    if (estado.interpolando_camara) {
+        // Interpolar usando dt (fijando un clamp para evitar overshoots en dt muy altos)
+        float t = std::min(dt * 5.0f, 1.0f);
+        estado.centro_mapa.x = estado.centro_mapa.x + (estado.target_centro.x - estado.centro_mapa.x) * t;
+        estado.centro_mapa.y = estado.centro_mapa.y + (estado.target_centro.y - estado.centro_mapa.y) * t;
+        estado.zoom_mapa = estado.zoom_mapa + (estado.target_zoom - estado.zoom_mapa) * t;
+        
+        // Si ya está muy cerca del target, detener la interpolación para ahorrar cálculos
+        if (fabsf(estado.centro_mapa.x - estado.target_centro.x) < 0.5f &&
+            fabsf(estado.centro_mapa.y - estado.target_centro.y) < 0.5f &&
+            fabsf(estado.zoom_mapa - estado.target_zoom) < 0.01f) {
+            estado.centro_mapa = estado.target_centro;
+            estado.zoom_mapa = estado.target_zoom;
+            estado.interpolando_camara = false;
+        }
+    }
+
+    // Avanzar animación automáticamente y reproducir sonidos
+    if (estado.animacion.activa) {
+        int paso_ant = estado.animacion.paso_actual;
+        bool completa_ant = estado.animacion.completa;
+        Animacion::avanzarAuto(estado.animacion, dt);
+        
+        if (estado.animacion.paso_actual != paso_ant && estado.animacion.paso_actual >= 0) {
+            auto accion = estado.animacion.pasos[estado.animacion.paso_actual].accion;
+            if (accion == PasoAnimacion::VISITAR) g_sonidos.reproducir(Sonidos::VISITAR_NODO);
+            else if (accion == PasoAnimacion::CONFIRMAR) g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+            else if (accion == PasoAnimacion::DESCARTAR) g_sonidos.reproducir(Sonidos::DESCARTAR);
+            else if (accion == PasoAnimacion::EXPLORAR) g_sonidos.reproducir(Sonidos::VISITAR_NODO);
+        }
+        if (!completa_ant && estado.animacion.completa) {
+            g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
+        }
+    }
+
+    cargarTexturaMundo(estado);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin("Lienzo AeroGrafos", nullptr,
+        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+    ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+
+    if (canvas_size.x <= 0 || canvas_size.y <= 0) {
+        ImGui::End();
+        ImGui::PopStyleVar();
+        return;
+    }
+
+    // ── Clipping global del canvas ──────────────────────────────────────────
+    dl->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true);
+
+    // 1. Océano
+    dibujarOcean(dl, canvas_pos, canvas_size, estado.modo_noche);
+
+    // 2. Textura del mundo (aplicada también en modo noche pero con tinte oscuro)
+    dibujarTexturaMundo(dl, estado, canvas_pos, canvas_size);
+
+    // 3. Grid
+    dibujarGrid(dl, estado, canvas_pos, canvas_size);
+
+    // 4. Rutas
+    dibujarRutas(dl, estado, canvas_pos, canvas_size);
+
+    // 5. Ciudades + hover
+    int hover_ciudad = dibujarCiudades(dl, estado, canvas_pos, canvas_size);
+
+    // 6. Resultados de algoritmos
+    dibujarResultadoAlgoritmo(dl, estado, canvas_pos, canvas_size);
+
+    // 7. Animación paso a paso
+    if (estado.animacion.activa)
+        dibujarAnimacion(dl, estado, canvas_pos, canvas_size);
+
+    // 8. Mensajes
+    dibujarMensajes(dl, estado, canvas_pos, canvas_size);
+
+    // 9. Indicador de zoom
+    dibujarInfoZoom(dl, estado, canvas_pos, canvas_size);
+
+    dl->PopClipRect();
+
+    // ── Controles de zoom (como widgets ImGui, encima del canvas) ──────────
+    dibujarControlesZoom(estado);
+
+    // ── Área clickeable ─────────────────────────────────────────────────────
+    ImGui::SetCursorScreenPos(canvas_pos);
+    ImGui::InvisibleButton("lienzo_aerografos", canvas_size,
+        ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle);
+
+    bool hovered = ImGui::IsItemHovered();
+    // Necesitamos que InvisibleButton capture clicks incluso si el ratón está
+    // sobre el área de controles; el hover del botón se maneja aparte
+
+    // ── Interacción ─────────────────────────────────────────────────────────
+    manejarInteraccion(estado, hovered, canvas_pos, canvas_size, hover_ciudad);
+
+    // ── Tooltip ────────────────────────────────────────────────────────────
+    dibujarTooltipCiudad(hover_ciudad);
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+}
+
+} // namespace LienzoAeroGrafos
