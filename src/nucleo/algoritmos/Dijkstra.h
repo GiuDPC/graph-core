@@ -70,7 +70,7 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
     resultado.distancias = dist;
     if (dist[id_destino] == INF) return resultado;
 
-    // Reconstruir ruta
+    // reconstruir ruta
     for (int at = id_destino; at != -1; at = prev[at])
         resultado.ruta.push_back(at);
     std::reverse(resultado.ruta.begin(), resultado.ruta.end());
@@ -141,7 +141,6 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
         }
     }
 
-    // Resaltar ruta final
     if (dist[id_destino] < INF) {
         std::vector<int> ruta;
         for (int at = id_destino; at != -1; at = prev[at]) ruta.push_back(at);

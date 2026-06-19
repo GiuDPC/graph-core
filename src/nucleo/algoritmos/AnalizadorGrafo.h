@@ -25,7 +25,7 @@ struct AnalizadorGrafo {
 
         if (num_nodos == 0) return props;
 
-        // 1. Deteccion de Conexo usando BFS
+        // deteccion de conexo usando bfs
         std::vector<bool> visitado(num_nodos, false);
         int visitados_count = 0;
         
@@ -49,19 +49,19 @@ struct AnalizadorGrafo {
         
         props.es_conexo = (visitados_count == num_nodos);
 
-        // 2. Deteccion de Arbol (Conexo y sin ciclos E = V - 1)
+        // deteccion de arbol conexo y sin ciclos e v 1
         if (props.es_conexo && num_aristas == num_nodos - 1) {
             props.es_arbol = true;
         }
 
-        // 3. Deteccion de Completo (Kn)
-        // Numero maximo de aristas en grafo no dirigido sin bucles: n*(n-1)/2
+        //  deteccion de completo kn
+        // numero maximo de aristas en grafo no dirigido sin bucles nn1/2
         int max_aristas = num_nodos * (num_nodos - 1) / 2;
         if (num_aristas == max_aristas && num_nodos > 1) {
             props.es_completo = true;
         }
 
-        // 4. Deteccion de Regular (Todos tienen el mismo grado)
+        // deteccion de regular todos tienen el mismo grado
         if (num_nodos > 0) {
             int grado_base = (int)g.vecinos(0).size();
             bool todos_iguales = true;
@@ -76,14 +76,14 @@ struct AnalizadorGrafo {
                 props.grado_regular = grado_base;
             }
 
-            // 5. Deteccion de Euleriano (Conexo y todos los grados son pares)
+            // deteccion de euleriano conexo y todos los grados son pares
             if (props.es_conexo && todos_pares && num_aristas > 0) {
                 props.es_euleriano = true;
             }
         }
 
-        // 6. Deteccion de Bipartito (2-coloreable)
-        // BFS para intentar colorear con 2 colores (0 y 1)
+        // deteccion de bipartito 2coloreable
+        // bfs para intentar colorear con 2 colores 0 y 1
         if (num_nodos > 0) {
             std::vector<int> color(num_nodos, -1);
             bool es_bipartito = true;
@@ -117,4 +117,4 @@ struct AnalizadorGrafo {
     }
 };
 
-} // namespace Algoritmos
+}

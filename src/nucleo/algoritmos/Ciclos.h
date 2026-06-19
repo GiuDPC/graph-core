@@ -14,7 +14,7 @@ struct ResultadoCiclos {
     std::string                     descripcion;
 };
 
-// Detecta ciclos en grafos NO dirigidos usando UnionFind (legacy)
+// detecta ciclos en grafos no dirigidos usando unionfind legacy
 ResultadoCiclos detectarCiclos(const Grafo& g) {
     ResultadoCiclos resultado;
     if (g.estaVacio()) return resultado;
@@ -33,9 +33,7 @@ ResultadoCiclos detectarCiclos(const Grafo& g) {
     return resultado;
 }
 
-// Detecta ciclos en digrafos usando DFS 3-colores (blanco/gris/negro)
-// WHITE=0: no visitado, GRAY=1: en el stack actual, BLACK=2: procesado
-// Si encuentra un nodo GRAY → hay ciclo dirigido
+// detecta ciclos con dfs 3 colores si toca gris hay ciclo
 ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     ResultadoCiclos resultado;
     if (g.estaVacio()) return resultado;
@@ -47,15 +45,12 @@ ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     int rango = g.rangoIds();
     std::vector<int> color(rango, WHITE);
 
-    // Para rastrear las aristas del ciclo
     std::vector<std::pair<int,int>> pila_aristas;
 
     std::function<bool(int)> dfs = [&](int u) -> bool {
         color[u] = GRAY;
         for (const auto& a : g.aristas) {
-            // Solo seguir aristas en direccion correcta:
-            // Para dirigidas: solo origen → destino
-            // Para no-dirigidas: ambas direcciones (same as Dijkstra/BFS pattern)
+            // sigue direccion correcta origen destino o ambas
             int v = -1;
             if (a.origen_id == u) v = a.destino_id;
             else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
@@ -64,7 +59,6 @@ ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
             pila_aristas.push_back({a.origen_id, a.destino_id});
 
             if (color[v] == GRAY) {
-                // Encontramos back-edge → ciclo dirigido
                 resultado.tiene_ciclo = true;
                 resultado.aristas_ciclo.push_back({a.origen_id, a.destino_id});
                 resultado.descripcion = "Ciclo dirigido detectado";
@@ -94,4 +88,4 @@ ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     return resultado;
 }
 
-} // namespace Algoritmos
+} 

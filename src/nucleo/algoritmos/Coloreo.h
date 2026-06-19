@@ -8,11 +8,11 @@
 namespace Algoritmos {
 
 struct ResultadoColoreo {
-    std::vector<int> colores;        // colores[id_nodo] = color asignado
-    int              num_colores;    // numero cromatico greedy
+    std::vector<int> colores;
+    int              num_colores;    
 };
 
-// ── Greedy estandar (orden de nodos) ────────────────────────────────────────
+// greedy estandar orden de nodos
 ResultadoColoreo coloreoGreedy(const Grafo& g) {
     ResultadoColoreo resultado;
     int rango = g.rangoIds();
@@ -44,7 +44,6 @@ ResultadoColoreo coloreoGreedy(const Grafo& g) {
     return resultado;
 }
 
-// ── Greedy por grado descendente (Welsh-Powell) ────────────────────────────
 ResultadoColoreo coloreoWelshPowell(const Grafo& g) {
     ResultadoColoreo resultado;
     int rango = g.rangoIds();
@@ -53,7 +52,7 @@ ResultadoColoreo coloreoWelshPowell(const Grafo& g) {
 
     if (g.estaVacio()) return resultado;
 
-    // Ordenar nodos por grado descendente
+    // ordenar nodos por grado descendente
     std::vector<int> orden;
     for (const auto& n : g.nodos) orden.push_back(n.id);
     std::sort(orden.begin(), orden.end(), [&](int a, int b) {
@@ -64,7 +63,7 @@ ResultadoColoreo coloreoWelshPowell(const Grafo& g) {
         if (resultado.colores[u] != -1) continue;
         resultado.colores[u] = resultado.num_colores;
 
-        // Asignar el mismo color a todos los no-adyacentes no coloreados
+        // asignar el mismo color a todos los noadyacentes no coloreados
         for (int v : orden) {
             if (resultado.colores[v] != -1) continue;
             bool adyacente = false;
@@ -74,7 +73,7 @@ ResultadoColoreo coloreoWelshPowell(const Grafo& g) {
                     (!a.es_dirigida && ((a.origen_id == u && a.destino_id == v) || (a.origen_id == v && a.destino_id == u)))) {
                     adyacente = true; break;
                 }
-                // Para no dirigido, chequear vecindad de v con los ya coloreados con este color
+                
                 if (!a.es_dirigida && a.origen_id == v && resultado.colores[a.destino_id] == resultado.num_colores) {
                     adyacente = true; break;
                 }
@@ -91,7 +90,6 @@ ResultadoColoreo coloreoWelshPowell(const Grafo& g) {
     return resultado;
 }
 
-// ── Generar pasos de animacion para coloreo greedy ──────────────────────────
 inline std::vector<PasoAnimacion> generarPasosColoreo(const Grafo& g) {
     std::vector<PasoAnimacion> pasos;
     int rango = g.rangoIds();
@@ -99,7 +97,7 @@ inline std::vector<PasoAnimacion> generarPasosColoreo(const Grafo& g) {
 
     if (g.estaVacio()) return pasos;
 
-    // Primer nodo
+    // primer nodo
     int primero = g.nodos[0].id;
     colores[primero] = 0;
     pasos.push_back({PasoAnimacion::COLOREAR, primero, -1, -1,
@@ -127,4 +125,4 @@ inline std::vector<PasoAnimacion> generarPasosColoreo(const Grafo& g) {
     return pasos;
 }
 
-} // namespace Algoritmos
+}

@@ -133,6 +133,8 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     ImVec2 origin = ImGui::GetCursorScreenPos();
     float tiempo = (float)ImGui::GetTime();
 
+    bool tooltip_mostrado = false; // Prevents overlapping tooltip flicker
+
     // grilla dinamica se escala y desvanece con el zoom
     float zoom_estimado = red.nodos.empty() ? 1.0f : (red.nodos[0].radio / 20.0f);
     float grid = std::max(10.0f, 25.0f * zoom_estimado);
@@ -709,11 +711,25 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                         }
                     }
                 } else if (uso_arista > 0.02f) {
-                    // Brillo de fondo animado
-                    float glow_intensity = 0.2f + uso_arista * 0.5f;
+                    // --- Fase 2: Grosor dinámico realista (capacidad + uso) ---
+                    auto key_ea = std::make_pair(a.origen_id, a.destino_id);
+                    float bw_factor = 1.0f;
+                    if (self.estado_redes.simulador.estado.aristas.count(key_ea)) {
+                        const auto& ea = self.estado_redes.simulador.estado.aristas.at(key_ea);
+                        bw_factor = std::min(ea.bandwidth_mbps / 100.0f, 4.0f);
+                    }
+                    float grosor_fondo = 2.0f + bw_factor * 3.0f;
+
+                    // Fondo = capacidad (linea base gris representa ancho de banda maximo)
+                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
+                        IM_COL32(60, 65, 75, 100), grosor_fondo);
+
+                    // Brillo animado
+                    float glow_intensity = 0.2f + uso_arista * 0.4f;
                     ImU32 glow_col = colorSaturacion(uso_arista);
-                    glow_col = (glow_col & 0x00FFFFFF) | ((int)(glow_intensity * 60) << 24);
-                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva, glow_col, grosor + 4.0f);
+                    glow_col = (glow_col & 0x00FFFFFF) | ((int)(glow_intensity * 50) << 24);
+                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
+                        glow_col, grosor_fondo + 4.0f);
 
                     // onda viajera
                     float t_onda = fmod(tiempo * (0.5f + uso_arista * 2.0f), 1.0f);
@@ -721,9 +737,16 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     ImU32 col_onda = colorSaturacion(uso_arista);
                     dl->AddCircleFilled(pos_onda, 3.0f + uso_arista * 3.0f, col_onda, 10);
 
-                    // color de arista base segun saturacion
+                    // Linea de uso (brillante encima)
                     col = colorSaturacion(uso_arista);
-                    grosor = 2.0f + uso_arista * 4.0f;
+                    grosor = 1.5f + uso_arista * grosor_fondo * 0.8f;
+                }
+
+                // Si el uso es >92%, borde rojo pulsante
+                if (uso_arista > 0.92f && !arista_caida) {
+                    float pulse = sinf(tiempo * 4.0f) * 0.3f + 0.7f;
+                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
+                        IM_COL32(255, 50, 50, (int)(80 * pulse)), grosor + 6.0f);
                 }
             }
 
@@ -789,6 +812,33 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 dl->AddLine(ImVec2(mid2.x - sz, mid2.y - sz), ImVec2(mid2.x + sz, mid2.y + sz), col_x, 3.0f);
                 dl->AddLine(ImVec2(mid2.x + sz, mid2.y - sz), ImVec2(mid2.x - sz, mid2.y + sz), col_x, 3.0f);
             }
+
+            // --- Fase 3: Tooltip de arista (hover) ---
+            if (modo_red && !arista_caida && !tooltip_mostrado) {
+                ImVec2 mouse_edge = ImGui::GetMousePos();
+                float dist_min_edge = 999.0f;
+                for (int s = 0; s < 20; s++) {
+                    float t_s = s / 19.0f;
+                    ImVec2 pt = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, t_s);
+                    float d_e = hypotf(mouse_edge.x - pt.x, mouse_edge.y - pt.y);
+                    if (d_e < dist_min_edge) dist_min_edge = d_e;
+                }
+                if (dist_min_edge < 12.0f) {
+                    auto key_tt = std::make_pair(a.origen_id, a.destino_id);
+                    if (self.estado_redes.simulador.estado.aristas.count(key_tt)) {
+                        const auto& ea_tt = self.estado_redes.simulador.estado.aristas.at(key_tt);
+                        ImGui::BeginTooltip();
+                        ImGui::Text("%s -> %s",
+                            g_dib.nombreNodo(a.origen_id).c_str(),
+                            g_dib.nombreNodo(a.destino_id).c_str());
+                        ImGui::Text("Uso: %.0f%%", uso_arista * 100.0f);
+                        ImGui::Text("BW: %.0f Mbps | Lat: %.1f ms", ea_tt.bandwidth_mbps, ea_tt.latencia_ms);
+                        ImGui::Text("Jitter: %.1f ms | Perdida: %.1f%%", ea_tt.jitter_ms, ea_tt.packet_loss * 100.0f);
+                        ImGui::EndTooltip();
+                        tooltip_mostrado = true;
+                    }
+                }
+            }
         }
 
         // dibujar paquetes
@@ -818,6 +868,16 @@ inline void dibujar(Grafo& red, Interfaz& self) {
 
                 float t = Easing::easeInOutCubic(pkt.progreso);
                 ImVec2 pos_pkt = puntoEnArista(no->posicion, nd->posicion, pkt_pc, pkt_curvo, t);
+
+                // --- Fase 4: Render especial para TRACE ---
+                if (pkt.tipo == "TRACE") {
+                    float tam_trace = 6.0f + sinf(tiempo * 3.0f) * 2.0f;
+                    dl->AddCircleFilled(pos_pkt, tam_trace * 6.0f,
+                        IM_COL32(0, 188, 212, (int)(20 + sinf(tiempo * 2.0f) * 10)), 20);
+                    dl->AddCircleFilled(pos_pkt, tam_trace, IM_COL32(0, 220, 255, 255), 20);
+                    dl->AddCircleFilled(pos_pkt, tam_trace * 0.5f, IM_COL32(255, 255, 255, 200), 12);
+                    dl->AddText(ImVec2(pos_pkt.x - 5, pos_pkt.y - 6), IM_COL32(255, 255, 255, 255), "T");
+                } else {
 
                 ImU32 col_pkt = imColorProtocolo(pkt.tipo);
                 float tam = 2.5f + pkt.tamaño_mb * 0.3f;
@@ -855,15 +915,22 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 dl->AddText(ImVec2(pos_pkt.x - ls.x * 0.5f - 8, pos_pkt.y - ls.y * 0.5f - 8),
                     IM_COL32(255, 255, 255, 180), label);
 
+                } // end else (not TRACE)
+
                 // tooltip de inspeccion (hitbox expandido para atraparlos facil)
-                ImVec2 mouse = ImGui::GetMousePos();
-                if (std::hypot(mouse.x - pos_pkt.x, mouse.y - pos_pkt.y) < 25.0f) {
+                if (!tooltip_mostrado && std::hypot(mouse.x - pos_pkt.x, mouse.y - pos_pkt.y) < 25.0f) {
                     ImGui::BeginTooltip();
                     ImGui::Text("Paquete ID: #%d", pkt.id);
                     ImGui::Text("Protocolo: %s", pkt.tipo.c_str());
-                    ImGui::Text("Ruta: %s -> %s", g_dib.nombreNodo(pkt.origen_id).c_str(), g_dib.nombreNodo(pkt.destino_id).c_str());
-                    ImGui::Text("Progreso: Salto %d de %d", pkt.paso_actual + 1, (int)pkt.ruta.size() - 1);
+                    if (pkt.paso_actual + 1 < (int)pkt.ruta.size()) {
+                        ImGui::Text("Ruta: %s -> %s",
+                            g_dib.nombreNodo(pkt.ruta[pkt.paso_actual]).c_str(),
+                            g_dib.nombreNodo(pkt.ruta[pkt.paso_actual+1]).c_str()
+                        );
+                    }
+                    ImGui::Text("Progreso: Salto %d de %d", pkt.paso_actual + 1, (int)pkt.ruta.size());
                     ImGui::EndTooltip();
+                    tooltip_mostrado = true;
                 }
             }
         }
@@ -928,6 +995,34 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     float pulse = sinf(tiempo * 2.0f + n.id) * 0.3f + 1.0f;
                     float ring_r = n.radio + 4.0f + health * 4.0f * pulse;
                     dl->AddCircle(n.posicion, ring_r, col_ring, 32, 2.5f + health * 2.0f);
+                }
+            }
+
+            // --- Fase 5: Anillo de buffer (congestion) ---
+            if (modo_red && self.estado_redes.simulador.estado.nodos.count(n.id) && !es_g2) {
+                const auto& en_buf = self.estado_redes.simulador.estado.nodos.at(n.id);
+                if (en_buf.activo) {
+                    float buf_ratio = std::min(1.0f, en_buf.buffer_mb / std::max(0.1f, en_buf.buffer_max_mb));
+                    if (buf_ratio > 0.02f) {
+                        float r_inner = n.radio * 0.65f;
+                        ImU32 col_buf = IM_COL32(
+                            (int)(buf_ratio * 255),
+                            (int)((1.0f - buf_ratio) * 180),
+                            (int)((1.0f - buf_ratio) * 100), 180);
+                        dl->AddCircle(n.posicion, r_inner, col_buf, 24, 2.0f + buf_ratio * 3.0f);
+                    }
+                }
+            }
+            // --- Indicador de cola de paquetes ---
+            if (modo_red && self.estado_redes.simulador.estado.nodos.count(n.id) && !es_g2) {
+                const auto& en_q = self.estado_redes.simulador.estado.nodos.at(n.id);
+                if (en_q.paquetes_cola > 0) {
+                    char qtxt[8];
+                    snprintf(qtxt, sizeof(qtxt), "%d", en_q.paquetes_cola);
+                    ImVec2 qs = ImGui::CalcTextSize(qtxt);
+                    dl->AddText(ImVec2(n.posicion.x - qs.x * 0.5f,
+                                       n.posicion.y + n.radio + 14),
+                                IM_COL32(255, 200, 100, 200), qtxt);
                 }
             }
 
@@ -1018,7 +1113,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
 
             // tool tip con metricas
             if (modo_red && n.id == self.estado_ui.nodo_hover && !es_g2 &&
-                self.estado_redes.simulador.estado.nodos.count(n.id)) {
+                self.estado_redes.simulador.estado.nodos.count(n.id) && !tooltip_mostrado) {
                 const auto& en = self.estado_redes.simulador.estado.nodos.at(n.id);
                 char tooltip[256];
                 snprintf(tooltip, sizeof(tooltip),
@@ -1027,6 +1122,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     en.paquetes_rx, en.paquetes_tx,
                     en.activo ? "✅ Activo" : "❌ CAIDO");
                 ImGui::SetTooltip("%s", tooltip);
+                tooltip_mostrado = true;
             }
         }
 
@@ -1059,6 +1155,40 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             dl->AddCircleFilled(pos, self.estado_grafos.anim_estado.particula.radio * 0.4f, IM_COL32(255, 255, 255, 200), 16);
         }
         }
+
+    // --- Fase 1: Notificaciones emergentes en canvas ---
+    {
+        float now = (float)ImGui::GetTime();
+        auto& notifs = self.estado_redes.simulador.estado.notificaciones;
+
+        for (size_t i = 0; i < notifs.size(); ) {
+            float edad = now - notifs[i].tiempo_real;
+            if (edad > notifs[i].duracion) {
+                notifs.erase(notifs.begin() + (int)i);
+                continue;
+            }
+            float alpha = 1.0f;
+            if (edad > notifs[i].duracion - 0.8f)
+                alpha = (notifs[i].duracion - edad) / 0.8f;
+
+            ImVec2 pos_n(origin.x + tamano.x * 0.5f, origin.y + 40.0f + i * 32.0f);
+            ImVec2 ts_n = ImGui::CalcTextSize(notifs[i].mensaje.c_str());
+
+            // Fondo translucido
+            dl->AddRectFilled(
+                ImVec2(pos_n.x - ts_n.x * 0.5f - 12, pos_n.y - 6),
+                ImVec2(pos_n.x + ts_n.x * 0.5f + 12, pos_n.y + ts_n.y + 6),
+                IM_COL32(10, 10, 15, (int)(180 * alpha)), 6.0f);
+
+            // Texto
+            uint32_t col_n = notifs[i].color;
+            ImU32 col_final = IM_COL32(
+                ((col_n >> 16) & 0xFF), ((col_n >> 8) & 0xFF), (col_n & 0xFF),
+                (int)(255 * alpha));
+            dl->AddText(ImVec2(pos_n.x - ts_n.x * 0.5f, pos_n.y), col_final, notifs[i].mensaje.c_str());
+            i++;
+        }
+    }
 
     //overlays de resultados de algoritmo en el lienzo
     if (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos) {

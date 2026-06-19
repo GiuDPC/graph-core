@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <deque>
+#include <chrono>
 #include "Grafo.h"
 #include "tipos/EstadoRed.h"
 #include "algoritmos/Dijkstra.h"
@@ -34,6 +35,17 @@ namespace ColoresProtocolo {
         if (tipo == "FTP")     return "F";
         return "•";
     }
+}
+
+// --- Prioridad QoS (menor = mas prioritario) ---
+inline int prioridadProtocolo(const std::string& tipo) {
+    if (tipo == "VOIP")  return 1;
+    if (tipo == "VIDEO") return 2;
+    if (tipo == "HTTP")  return 3;
+    if (tipo == "DNS")   return 4;
+    if (tipo == "PING")  return 5;
+    if (tipo == "DDOS")  return 6;
+    return 5;
 }
 
 // Motor de simulacion de red mejorado
@@ -123,6 +135,7 @@ public:
         float tamaño_mb;
         int paso_actual = 0;
         std::vector<int> ruta;
+        int prioridad = 5;              // QoS: menor = mas prioritario
     };
 
     const std::vector<Paquete>& obtenerPaquetes() const { return paquetes_activos; }
@@ -167,6 +180,15 @@ public:
     }
 
     // ── Fallos / Restauraciones con timeline ────────────────────────────────
+    // --- Lanzar notificacion visual en canvas ---
+    static float tiempoReal() {
+        static auto t0 = std::chrono::steady_clock::now();
+        return std::chrono::duration<float>(std::chrono::steady_clock::now() - t0).count();
+    }
+    void notificar(const std::string& msg, uint32_t color, float duracion = 3.0f) {
+        estado.notificaciones.push_back({tiempoReal(), duracion, msg, color});
+    }
+
     void simularFalloNodo(int nodo_id, Grafo& g) {
         if (!estado.nodos.count(nodo_id)) return;
         estado.nodos[nodo_id].activo = false;
@@ -176,6 +198,7 @@ public:
         estado.registrarEvento(estado.tiempo,
             g.nombreNodo(nodo_id) + " CAIDO — recalculando rutas...",
             EventoRed::ERROR_RED);
+        notificar(g.nombreNodo(nodo_id) + " CAIDO", 0xFFFF3333);
         cache_rutas.clear();
         g_sonidos.reproducir(Sonidos::NODO_CAIDO);
     }
@@ -190,6 +213,7 @@ public:
         estado.registrarEvento(estado.tiempo,
             "Enlace " + g.nombreNodo(origen) + " -> " + g.nombreNodo(destino) + " CAIDO",
             EventoRed::ERROR_RED);
+        notificar("Enlace caido: " + g.nombreNodo(origen) + " -> " + g.nombreNodo(destino), 0xFFFF6600);
         cache_rutas.clear();
         g_sonidos.reproducir(Sonidos::NODO_CAIDO);
     }
@@ -201,6 +225,7 @@ public:
             0xFF4CAF50, TimelineEvent::RESTAURACION);
         estado.registrarEvento(estado.tiempo,
             g.nombreNodo(nodo_id) + " restaurado", EventoRed::INFO);
+        notificar(g.nombreNodo(nodo_id) + " restaurado", 0xFF4CAF50);
         cache_rutas.clear();
         g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
     }
@@ -279,6 +304,59 @@ public:
                     pf.mbps, pf.tipo, pf.duracion, g);
             }
         }
+    }
+
+    // --- Traceroute: un solo paquete que viaja lento mostrando cada salto ---
+    void enviarTraceroute(Grafo& g, int origen, int destino) {
+        auto ruta = obtenerRuta(g, origen, destino);
+        if (ruta.size() < 2) {
+            estado.registrarEvento(estado.tiempo,
+                "[Traceroute] No hay ruta entre " + g.nombreNodo(origen) +
+                " y " + g.nombreNodo(destino), EventoRed::ADVERTENCIA);
+            return;
+        }
+
+        Paquete p;
+        p.id = contador_paquetes++;
+        p.origen_id = origen;
+        p.destino_id = destino;
+        p.tipo = "TRACE";
+        p.mbps = 0.001f;
+        p.ruta = ruta;
+        p.paso_actual = 0;
+        p.tamaño_mb = 0.001f;
+        p.prioridad = 0; // maxima prioridad
+        paquetes_activos.push_back(p);
+
+        estado.registrarEvento(estado.tiempo,
+            "[Traceroute] Rastreando ruta " + g.nombreNodo(origen) +
+            " -> " + g.nombreNodo(destino) +
+            " (" + std::to_string((int)ruta.size()-1) + " saltos)");
+        notificar("Traceroute: " + g.nombreNodo(origen) + " -> " + g.nombreNodo(destino),
+                  0xFF00BCD4, 4.0f);
+    }
+
+    // --- Tormenta de red: tumbar % de enlaces aleatorios ---
+    void simularTormenta(Grafo& g, float porcentaje = 0.30f, float duracion = 5.0f) {
+        int a_tumbar = std::max(1, (int)(g.aristas.size() * porcentaje));
+        std::vector<int> indices(g.aristas.size());
+        for (size_t i = 0; i < indices.size(); i++) indices[i] = (int)i;
+        std::shuffle(indices.begin(), indices.end(), gen);
+
+        for (int i = 0; i < a_tumbar && i < (int)indices.size(); i++) {
+            const auto& a = g.aristas[indices[i]];
+            simularFalloArista(a.origen_id, a.destino_id, g);
+            microcortes_pendientes.push_back({
+                (int)a.origen_id, (int)a.destino_id,
+                estado.tiempo + duracion + uniformeF(0, 2.0f)
+            });
+        }
+        notificar("TORMENTA DE RED: " + std::to_string(a_tumbar) + " enlaces caidos",
+                  0xFFFF3333, 5.0f);
+        estado.registrarEvento(estado.tiempo,
+            "Tormenta de red: " + std::to_string(a_tumbar) +
+            " enlaces caidos (" + std::to_string((int)(porcentaje*100)) + "%)",
+            EventoRed::ERROR_RED);
     }
 
 private:
@@ -389,6 +467,7 @@ private:
                     EventoRed::ADVERTENCIA);
                 estado.registrarTimeline(estado.tiempo, g.nombreNodo(n.id) + " sobrecargado",
                     0xFFFF9800, TimelineEvent::SOBRECARGA);
+                notificar(g.nombreNodo(n.id) + " SOBRECARGADO", 0xFFFF9800);
                 g_sonidos.reproducir(Sonidos::ARISTA_SATURADA);
             }
         }
@@ -438,6 +517,7 @@ private:
                 p.ruta        = ruta;
                 p.paso_actual = 0;
                 p.tamaño_mb   = 0.5f + std::min(it->mbps * 0.01f, 3.5f);
+                p.prioridad   = prioridadProtocolo(p.tipo);
                 paquetes_activos.push_back(p);
                 total_paquetes_enviados++;
             }
@@ -446,10 +526,22 @@ private:
 
         if (timer_paquetes >= 0.1f) timer_paquetes = 0.0f;
 
+        // --- QoS: ordenar paquetes por prioridad cada frame ---
+        std::sort(paquetes_activos.begin(), paquetes_activos.end(),
+            [](const Paquete& a, const Paquete& b) {
+                return a.prioridad < b.prioridad;
+            });
+
         // 2. Avanzar paquetes activos + acumular uso en aristas
         // Resetear uso_actual_mbps a solo paquetes activos (sistema mas realista)
         for (auto& [key, ea] : estado.aristas) {
             if (ea.activa) ea.uso_actual_mbps = 0.0f;
+        }
+
+        // Reset buffer de nodos
+        for (auto& [id, en] : estado.nodos) {
+            en.buffer_mb = 0.0f;
+            en.paquetes_cola = 0;
         }
 
         for (auto it = paquetes_activos.begin(); it != paquetes_activos.end(); ) {
@@ -457,6 +549,22 @@ private:
                 int dst = it->destino_id;
                 if (estado.nodos.count(dst)) {
                     estado.nodos[dst].paquetes_rx++;
+                }
+                // --- Traceroute: llegada a destino ---
+                if (it->tipo == "TRACE") {
+                    float lat_total = 0;
+                    for (size_t si = 0; si + 1 < it->ruta.size(); si++) {
+                        auto k = std::make_pair(it->ruta[si], it->ruta[si + 1]);
+                        if (estado.aristas.count(k)) lat_total += estado.aristas.at(k).latencia_ms;
+                    }
+                    estado.registrarEvento(estado.tiempo,
+                        "[Traceroute] Destino alcanzado en " +
+                        std::to_string((int)it->ruta.size()-1) + " saltos (" +
+                        std::to_string((int)lat_total) + "ms total)",
+                        EventoRed::INFO);
+                    notificar("Traceroute completo: " +
+                        std::to_string((int)it->ruta.size()-1) + " saltos",
+                        0xFF4CAF50, 4.0f);
                 }
                 total_paquetes_entregados++;
                 it = paquetes_activos.erase(it);
@@ -503,12 +611,40 @@ private:
                 ea.uso_actual_mbps += it->mbps / std::max(velocidad, 0.01f) * 0.1f;
             }
 
+            // Calcular buffer en el nodo actual
+            if (estado.nodos.count(u)) {
+                estado.nodos[u].buffer_mb += it->tamaño_mb;
+                estado.nodos[u].paquetes_cola++;
+            }
+
+            // Buffer overflow check (si el buffer se llena, dropear)
+            if (estado.nodos.count(u) && estado.nodos[u].buffer_mb > estado.nodos[u].buffer_max_mb) {
+                if (uniformeF(0, 1) < 0.15f) { // 15% de dropear cuando esta lleno
+                    total_paquetes_perdidos++;
+                    it = paquetes_activos.erase(it);
+                    continue;
+                }
+            }
+
             it->progreso += dt / std::max(velocidad, 0.01f);
             if (it->progreso >= 1.0f) {
                 it->progreso = 0.0f;
                 it->paso_actual++;
                 if (estado.nodos.count(v)) estado.nodos[v].paquetes_rx++;
                 if (estado.nodos.count(u)) estado.nodos[u].paquetes_tx++;
+
+                // --- Traceroute logging ---
+                if (it->tipo == "TRACE" && it->paso_actual > 0) {
+                    float lat_acum = 0;
+                    for (int si = 0; si < it->paso_actual && si + 1 < (int)it->ruta.size(); si++) {
+                        auto k = std::make_pair(it->ruta[si], it->ruta[si + 1]);
+                        if (estado.aristas.count(k)) lat_acum += estado.aristas.at(k).latencia_ms;
+                    }
+                    estado.registrarEvento(estado.tiempo,
+                        "[Traceroute] Salto " + std::to_string(it->paso_actual) + ": " +
+                        g.nombreNodo(it->ruta[it->paso_actual]) + " (" +
+                        std::to_string((int)lat_acum) + "ms)");
+                }
             }
             ++it;
         }

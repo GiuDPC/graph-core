@@ -11,15 +11,15 @@ namespace Isomorfismo {
 
 struct ResultadoIsomorfismo {
     bool                            son_isomorfos = false;
-    std::vector<std::pair<int,int>> mapeo;          // (id_g1, id_g2)
+    std::vector<std::pair<int,int>> mapeo;          // id_g1 id_g2
     std::string                     descripcion;
-    // Condiciones de verificacion rapida
+    // condiciones de verificacion rapida
     bool misma_cantidad_nodos   = false;
     bool misma_cantidad_aristas = false;
     bool misma_secuencia_grados = false;
 };
 
-// Genera la secuencia de grados ordenada de mayor a menor
+// genera la secuencia de grados ordenada de mayor a menor
 std::vector<int> secuenciaGrados(const Grafo& g) {
     std::vector<int> grados;
     for (const auto& n : g.nodos)
@@ -28,9 +28,9 @@ std::vector<int> secuenciaGrados(const Grafo& g) {
     return grados;
 }
 
-// Backtracking para encontrar el mapeo isomorfo
+// backtracking para encontrar el mapeo isomorfo
 bool backtrack(const Grafo& g1, const Grafo& g2,
-               std::vector<int>& mapeo,          // mapeo[i] = id en g2 para nodo i de g1
+               std::vector<int>& mapeo,          // mapeo[i] id en g2 para nodo i de g1
                std::vector<bool>& usado_g2,
                int idx)
 {
@@ -41,8 +41,8 @@ bool backtrack(const Grafo& g1, const Grafo& g2,
         if (usado_g2[j]) continue;
         int u2 = g2.nodos[j].id;
 
-        // Verificar consistencia: para cada arista (u1, v1) ya mapeada,
-        // debe existir (u2, mapeo[v1]) en g2
+        // verificar consistencia para cada arista u1 v1 ya mapeada
+        // debe existir u2 mapeo[v1] en g2
         bool consistente = true;
         for (int k = 0; k < idx && consistente; k++) {
             int v1 = g1.nodos[k].id;
@@ -68,7 +68,7 @@ bool backtrack(const Grafo& g1, const Grafo& g2,
 ResultadoIsomorfismo verificar(const Grafo& g1, const Grafo& g2) {
     ResultadoIsomorfismo resultado;
 
-    // Condicion 1: mismo numero de nodos
+    // condicion 1 mismo numero de nodos
     resultado.misma_cantidad_nodos = (g1.nodos.size() == g2.nodos.size());
     if (!resultado.misma_cantidad_nodos) {
         resultado.descripcion = "Distinto numero de nodos (" +
@@ -76,7 +76,7 @@ ResultadoIsomorfismo verificar(const Grafo& g1, const Grafo& g2) {
         return resultado;
     }
 
-    // Condicion 2: mismo numero de aristas
+    // condicion 2 mismo numero de aristas
     resultado.misma_cantidad_aristas = (g1.aristas.size() == g2.aristas.size());
     if (!resultado.misma_cantidad_aristas) {
         resultado.descripcion = "Distinto numero de aristas (" +
@@ -84,7 +84,7 @@ ResultadoIsomorfismo verificar(const Grafo& g1, const Grafo& g2) {
         return resultado;
     }
 
-    // Condicion 3: misma secuencia de grados
+    // condicion 3 misma secuencia de grados
     auto deg1 = secuenciaGrados(g1);
     auto deg2 = secuenciaGrados(g2);
     resultado.misma_secuencia_grados = (deg1 == deg2);
@@ -93,7 +93,7 @@ ResultadoIsomorfismo verificar(const Grafo& g1, const Grafo& g2) {
         return resultado;
     }
 
-    // Backtracking para encontrar el mapeo
+    // backtracking para encontrar el mapeo
     int n = (int)g1.nodos.size();
     std::vector<int>  mapeo_ids(n, -1);
     std::vector<bool> usado(n, false);

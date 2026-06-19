@@ -9,7 +9,7 @@
 #include "../tipos/PasoAnimacion.h"
 
 namespace Algoritmos {
-namespace Kruskal { // Nested namespace to avoid generarPasos conflicts, actually the doc said to use namespace alias or nested namespaces
+namespace Kruskal {
 
 struct ResultadoKruskal {
     std::vector<Arista> aristas_mst;
@@ -28,8 +28,6 @@ ResultadoKruskal kruskal(const Grafo& g) {
 
     UnionFind uf(g.rangoIds());
     for (const auto& a : ordenadas) {
-        // Kruskal solo funciona para grafos no-dirigidos (MST no tiene sentido en digrafos).
-        // Las aristas dirigidas se omiten.
         if (a.es_dirigida) { resultado.aristas_rechazadas++; continue; }
         if (uf.unir(a.origen_id, a.destino_id)) {
             resultado.aristas_mst.push_back(a);
@@ -55,8 +53,6 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g) {
     int aceptadas = 0;
 
     for (const auto& a : ordenadas) {
-        // Kruskal solo funciona para grafos no-dirigidos (MST no tiene sentido en digrafos).
-        // Las aristas dirigidas se omiten.
         if (a.es_dirigida) continue;
         pasos.push_back({PasoAnimacion::EXPLORAR, -1, a.origen_id, a.destino_id,
             "Evaluando " + g.nombreNodo(a.origen_id) + " - " + g.nombreNodo(a.destino_id) +
@@ -77,5 +73,5 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g) {
     return pasos;
 }
 
-} // namespace Kruskal
-} // namespace Algoritmos
+}
+}

@@ -135,13 +135,27 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         // presets rapidos
         ImGui::Spacing();
         ImGui::TextDisabled("Generar trafico:");
+        float width_avail = ImGui::GetContentRegionAvail().x;
+        
         if (ImGui::SmallButton("Videollamada")) sim.enviarFlujoPreset(red, 1);
         ImGui::SameLine();
         if (ImGui::SmallButton("Empresarial")) sim.enviarFlujoPreset(red, 2);
         ImGui::SameLine();
         if (ImGui::SmallButton("DDoS")) sim.enviarFlujoPreset(red, 3);
-        ImGui::SameLine();
+        
         if (ImGui::SmallButton("Supervivencia")) sim.enviarFlujoPreset(red, 4);
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Traceroute")) {
+            int o = self.estado_redes.flujo_origen;
+            int d = self.estado_redes.flujo_destino;
+            if (o == d || o < 0 || d < 0) {
+                self.estado_redes.simulador.notificar("Selecciona origen y destino primero!", 0xFFFF3333, 4.0f);
+            } else {
+                self.estado_redes.simulador.enviarTraceroute(red, o, d);
+            }
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Envia un paquete TRACE.\nSelecciona origen/destino en 'Enviar Trafico' primero.");
     }
 
     // Leyenda de colores de protocolo 
@@ -297,22 +311,56 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 if (ImGui::BeginCombo("##arista_fallo", preview.c_str())) {
                     for (int i = 0; i < (int)red.aristas.size(); i++) {
                         std::string label = red.nombreNodo(red.aristas[i].origen_id) + " <-> " +
-                                           red.nombreNodo(red.aristas[i].destino_id) +
-                                           " (" + std::to_string((int)red.aristas[i].peso) + "ms)";
+                                           red.nombreNodo(red.aristas[i].destino_id);
                         if (ImGui::Selectable(label.c_str(), arista_seleccionada == i))
                             arista_seleccionada = i;
                     }
                     ImGui::EndCombo();
                 }
+
+                auto key_ea = std::make_pair(red.aristas[arista_seleccionada].origen_id,
+                                             red.aristas[arista_seleccionada].destino_id);
+                if (self.estado_redes.simulador.estado.aristas.count(key_ea)) {
+                    auto& ea = self.estado_redes.simulador.estado.aristas[key_ea];
+                    ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Propiedades del enlace:");
+                    
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("##lat", &ea.latencia_ms, 1.0f, 200.0f, "Latencia: %.1f ms");
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Retardo base en milisegundos. Aumentalo para simular distancia física o lentitud.");
+                    
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("##jit", &ea.jitter_ms, 0.0f, 50.0f, "Jitter: %.1f ms");
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Variación de la latencia (ruido). Afecta severamente a VoIP y Video.");
+                    
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("##pl", &ea.packet_loss, 0.0f, 1.0f, "Pérdida: %.0f%%");
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Probabilidad de que un paquete se pierda cruzando este enlace.");
+                }
+
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.3f, 0.1f, 1.0f));
                 if (ImGui::Button(ICON_FA_LINK_SLASH " Cortar Enlace", ImVec2(-1, 0))) {
                     self.estado_redes.simulador.simularFalloArista(
                         red.aristas[arista_seleccionada].origen_id,
                         red.aristas[arista_seleccionada].destino_id, red);
                 }
-                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Simula un corte de cable en el enlace seleccionado.");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Simula un corte físico del cable.");
                 ImGui::PopStyleColor();
             }
+
+            // --- Fase 6: Tormenta de red ---
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.1f, 1.0f), "CAOS");
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.1f, 1.0f));
+            if (ImGui::Button("Tormenta de Red (30%)", ImVec2(-1, 32))) {
+                self.estado_redes.simulador.simularTormenta(red, 0.30f, 5.0f);
+                g_sonidos.reproducir(Sonidos::NODO_CAIDO);
+            }
+            ImGui::PopStyleColor(2);
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Tumba el 30%% de enlaces aleatoriamente durante 5s.\n"
+                                  "Muestra como Dijkstra recalcula rutas en tiempo real.");
         }
 
         // Tabla de ruteo 

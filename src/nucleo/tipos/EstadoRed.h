@@ -46,6 +46,9 @@ struct EstadoNodo {
     float memoria_uso    = 0.0f;    // 0.0 - 1.0
     float paquetes_rx    = 0.0f;    // paquetes/segundo recibidos
     float paquetes_tx    = 0.0f;    // paquetes/segundo enviados
+    float buffer_mb      = 0.0f;    // MB ocupados actualmente
+    float buffer_max_mb  = 50.0f;   // capacidad maxima del buffer
+    int   paquetes_cola  = 0;       // paquetes esperando en este nodo
     bool  activo         = true;    // false = nodo caido (failover)
     float uptime         = 0.0f;    // segundos desde inicio simulacion
     float tiempo_caida   = 0.0f;    // si activo=false, cuantos seg lleva caido
@@ -105,6 +108,14 @@ struct TimelineEvent {
     enum Tipo { INSTANTE, SPIKE, CORTE, RESTAURACION, SOBRECARGA } tipo;
 };
 
+// --- Notificacion tipo "achievement" para feedback en canvas ---
+struct Notificacion {
+    float tiempo_real;              // ImGui::GetTime() real, no simulado
+    float duracion = 3.0f;
+    std::string mensaje;
+    uint32_t color;                 // ARGB
+};
+
 // Estado global de la simulacion
 struct EstadoSimulacion {
     bool  activa         = false;
@@ -117,6 +128,7 @@ struct EstadoSimulacion {
     std::deque<EventoRed>                      log_eventos;  // ultimos 100 eventos
     std::deque<TimelineEvent>                  timeline;     // eventos para timeline grafico
     EstadisticasRed                            stats;
+    std::vector<Notificacion>                  notificaciones;
 
     void registrarEvento(float t, const std::string& msg,
                          EventoRed::Severidad sev = EventoRed::INFO) {

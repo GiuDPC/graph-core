@@ -24,12 +24,12 @@ void configurarTemaIngenieria() {
     s.GrabRounding      = 3.0f;
     s.TabRounding       = 3.0f;
     s.ScrollbarRounding = 3.0f;
-    s.PopupRounding     = 4.0f;
+    s.PopupRounding     = 8.0f;
     s.ChildRounding     = 3.0f;
 
     s.WindowBorderSize  = 1.0f;
     s.FrameBorderSize   = 1.0f;
-    s.PopupBorderSize   = 1.0f;
+    s.PopupBorderSize   = 0.5f;
 
     s.WindowPadding     = ImVec2(10, 10);
     s.FramePadding      = ImVec2(8, 5);
@@ -42,7 +42,7 @@ void configurarTemaIngenieria() {
 
     c[ImGuiCol_WindowBg]        = ImVec4(0.10f, 0.10f, 0.13f, 1.00f);
     c[ImGuiCol_ChildBg]         = ImVec4(0.09f, 0.09f, 0.12f, 1.00f);
-    c[ImGuiCol_PopupBg]         = ImVec4(0.11f, 0.11f, 0.15f, 0.97f);
+    c[ImGuiCol_PopupBg]         = ImVec4(0.08f, 0.08f, 0.12f, 0.85f);
     c[ImGuiCol_MenuBarBg]       = ImVec4(0.08f, 0.08f, 0.10f, 1.00f);
 
     c[ImGuiCol_Border]          = ImVec4(0.22f, 0.24f, 0.28f, 0.65f);

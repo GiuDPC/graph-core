@@ -11,7 +11,7 @@ namespace DFS {
 
 struct ResultadoDFS {
     std::vector<int>                       orden_visita;
-    std::vector<std::pair<int,int>>        back_edges;    // aristas que crean ciclos
+    std::vector<std::pair<int,int>>        back_edges;   
 };
 
 void dfsHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis, ResultadoDFS& resultado) {
@@ -22,12 +22,12 @@ void dfsHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis, Resulta
         int v = -1;
         if (a.origen_id == u) v = a.destino_id;
         else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
-        if (v == -1 || v >= g.rangoIds() || v == padre) continue; // NO marcar vuelta al padre como back-edge
+        if (v == -1 || v >= g.rangoIds() || v == padre) continue; // no marcar vuelta al padre como backedge
 
         if (!vis[v]) {
             dfsHelper(g, v, u, vis, resultado);
         } else {
-            resultado.back_edges.push_back({u, v}); // arista de vuelta = ciclo genuino
+            resultado.back_edges.push_back({u, v}); // arista de vuelta ciclo genuino
         }
     }
 }
@@ -75,5 +75,5 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
     return pasos;
 }
 
-} // namespace DFS
-} // namespace Algoritmos
+}
+} 

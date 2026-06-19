@@ -8,53 +8,39 @@
 
 namespace Algoritmos {
 
-// ── Deteccion de planaridad (Kuratowski) ────────────────────────────────────
 struct ResultadoPlanaridad {
     bool es_planar                = false;
-    bool pasa_cota_aristas        = false;   // |E| <= 3|V| - 6 (necesaria)
-    int  cruces_estimadas         = 0;       // estimacion simple de cruces
+    bool pasa_cota_aristas        = false;   
+    int  cruces_estimadas         = 0;       
     std::string descripcion;
-    std::vector<std::pair<int,int>> aristas_cruce;  // pares de aristas que se cruzan
-    bool sospecha_k5              = false;    // probable K5 minor
-    bool sospecha_k33             = false;    // probable K3,3 minor
+    std::vector<std::pair<int,int>> aristas_cruce;  
+    bool sospecha_k5              = false;    
+    bool sospecha_k33             = false;    
 };
 
 struct Planaridad {
-
-    // ── Cota de Euler: condicion necesaria para planaridad ─────────────────
     static bool verificarCotaEuler(const Grafo& g) {
         int V = (int)g.nodos.size();
         int E = (int)g.aristas.size();
-        if (V < 3) return true;  // grafos pequenos siempre planares
-        // Para grafos conexos: |E| <= 3|V| - 6
-        // Sin ciclos de largo 3: |E| <= 2|V| - 4
+        if (V < 3) return true;  
         return E <= 3 * V - 6;
     }
-
-    // ── Detectar subdivision de K5 (heuristica) ────────────────────────────
-    // K5 = 5 nodos todos conectados entre si (10 aristas)
     static bool sospecharK5(const Grafo& g) {
         int V = (int)g.nodos.size();
-        // Buscar 5 nodos con grado >= 4 (en K5 todos tienen grado 4)
         int candidatos = 0;
         for (const auto& n : g.nodos) {
             if (g.gradoNodo(n.id) >= 4) candidatos++;
       }
-        // Si hay al menos 5 nodos de grado >= 4, podria haber K5
         if (candidatos >= 5) return true;
 
-        // Buscar conjunto denso de 5 nodos
         std::vector<int> ids;
         for (const auto& n : g.nodos) ids.push_back(n.id);
         if ((int)ids.size() < 5) return false;
 
-        // Tomar los 5 de mayor grado
         std::sort(ids.begin(), ids.end(), [&](int a, int b) {
             return g.gradoNodo(a) > g.gradoNodo(b);
         });
         ids.resize(5);
-
-        // Verificar si estan densamente conectados
         int aristas_entre = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = i + 1; j < 5; j++) {
@@ -63,31 +49,22 @@ struct Planaridad {
                     aristas_entre++;
             }
         }
-        // K5 tiene 10 aristas entre sus 5 nodos
-        return aristas_entre >= 7;  // umbral heuristico
+        return aristas_entre >= 7;  
     }
-
-    // ── Detectar subdivision de K3,3 (heuristica) ──────────────────────────
-    // K3,3 = 2 conjuntos de 3 nodos, todos conectados al otro conjunto (9 aristas)
     static bool sospecharK33(const Grafo& g) {
-        // Buscar 6 nodos donde algunos tengan grado >= 3
         int grado3 = 0;
         for (const auto& n : g.nodos) {
             if (g.gradoNodo(n.id) >= 3) grado3++;
         }
         return grado3 >= 6;
     }
-
-    // ── Detectar cruces en el dibujo actual ────────────────────────────────
     static bool aristasSeCruzan(const Grafo& g, int a1, int a2, int b1, int b2) {
-        // Obtener posiciones
         auto n_a1 = g.obtenerNodo(a1);
         auto n_a2 = g.obtenerNodo(a2);
         auto n_b1 = g.obtenerNodo(b1);
         auto n_b2 = g.obtenerNodo(b2);
         if (!n_a1 || !n_a2 || !n_b1 || !n_b2) return false;
 
-        // No contar aristas que comparten nodo
         if (a1 == b1 || a1 == b2 || a2 == b1 || a2 == b2) return false;
 
         float x1 = n_a1->posicion.x, y1 = n_a1->posicion.y;
@@ -95,7 +72,6 @@ struct Planaridad {
         float x3 = n_b1->posicion.x, y3 = n_b1->posicion.y;
         float x4 = n_b2->posicion.x, y4 = n_b2->posicion.y;
 
-        // Algoritmo de interseccion de segmentos
         float denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
         if (fabs(denom) < 0.001f) return false;
 
@@ -112,13 +88,10 @@ struct Planaridad {
 
         res.pasa_cota_aristas = verificarCotaEuler(g);
 
-        // Chequeo de K5
         res.sospecha_k5 = sospecharK5(g);
 
-        // Chequeo de K3,3
         res.sospecha_k33 = sospecharK33(g);
 
-        // Detectar cruces visuales entre aristas
         res.aristas_cruce.clear();
         for (size_t i = 0; i < g.aristas.size(); i++) {
             for (size_t j = i + 1; j < g.aristas.size(); j++) {
@@ -131,7 +104,6 @@ struct Planaridad {
         }
         res.cruces_estimadas = (int)res.aristas_cruce.size();
 
-        // Decision final
         bool tiene_cruces = (res.cruces_estimadas > 0);
         bool pasa_euler = res.pasa_cota_aristas;
 
@@ -165,4 +137,4 @@ struct Planaridad {
     }
 };
 
-} // namespace Algoritmos
+}

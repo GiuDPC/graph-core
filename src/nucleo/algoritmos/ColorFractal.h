@@ -7,20 +7,17 @@
 
 namespace Algoritmos {
 
-// ── Coloreo con modulacion fractal ──────────────────────────────────────────
-// No reemplaza el coloreo greedy: parte de sus colores y los modula
-// con un fractal de Mandelbrot adaptado a la posicion de cada nodo.
-// Resultado: colores validos (adyacentes distintos) con gradientes fractales.
+// Coloreo con modulacion fractal 
 struct ResultadoColorFractal {
-    std::vector<int> colores_base;      // colores greedy originales (0..N)
-    std::vector<float> modulacion_fractal;  // 0.0-1.0 por nodo
+    std::vector<int> colores_base;      //colores originales
+    std::vector<float> modulacion_fractal; // 0.0-1.0 por nodo
     std::vector<float> morph_fase;      // fase para morphing animado
     int num_colores = 0;
 };
 
 struct ColorFractal {
 
-    // Mapear posicion 2D al plano complejo de Mandelbrot
+    // mapeo de la posicion 2d al plano de mandelbrot
     static void mapearMandelbrot(const Grafo& g,
                                   float& min_x, float& max_x,
                                   float& min_y, float& max_y) {
@@ -36,13 +33,12 @@ struct ColorFractal {
         float cy = (min_y + max_y) * 0.5f;
         float r = std::max(max_x - min_x, max_y - min_y) * 0.5f;
         if (r < 1.0f) r = 1.0f;
-        // Expandir un 20% para bordes suaves
         r *= 1.2f;
         min_x = cx - r; max_x = cx + r;
         min_y = cy - r; max_y = cy + r;
     }
 
-    // Calcular iteraciones de Mandelbrot para un punto
+    // iteraciones de mandelbrot para un punto
     static int iterarMandelbrot(double cx, double cy, int max_iter) {
         double zx = 0.0, zy = 0.0;
         int iter = 0;
@@ -57,8 +53,7 @@ struct ColorFractal {
         return iter;
     }
 
-    // Calcular para todos los nodos del grafo
-    // recibe los colores_base del greedy y devuelve modulacion fractal
+    // calcular para todos los nodos del grafo
     static ResultadoColorFractal calcular(const Grafo& g,
                                            const std::vector<int>& colores_base,
                                            float tiempo = 0.0f) {
@@ -73,7 +68,6 @@ struct ColorFractal {
         float min_x, max_x, min_y, max_y;
         mapearMandelbrot(g, min_x, max_x, min_y, max_y);
 
-        // Parametros morphing: offset que rota lentamente
         double cx_offset = sin(tiempo * 0.1) * 0.3;
         double cy_offset = cos(tiempo * 0.13) * 0.3;
 
@@ -83,23 +77,19 @@ struct ColorFractal {
             if (i >= (int)g.nodos.size()) break;
             const auto& nodo = g.nodos[i];
 
-            // Mapear posicion del nodo al plano de Mandelbrot (-2..1, -1.5..1.5)
+            // mapeo posicion del nodo al plano de mandelbrot (-2..1, -1.5..1.5)
             double cx = -0.7 + (nodo.posicion.x - min_x) / (max_x - min_x) * 2.5 - 0.5;
             double cy = (nodo.posicion.y - min_y) / (max_y - min_y) * 2.5 - 1.25;
 
-            // Aplicar morphing
             cx += cx_offset;
             cy += cy_offset;
 
             int iter = iterarMandelbrot(cx, cy, max_iter);
 
-            // Normalizar a 0.0-1.0 (suave, no binario)
             float v = (float)iter / max_iter;
-            // Smooth coloring: mas suave en los bordes del fractal
             v = v * v * (3.0f - 2.0f * v);  // smoothstep
             res.modulacion_fractal[i] = std::clamp(v, 0.0f, 1.0f);
 
-            // Fase para morphing individual (pequeno offset por nodo)
             res.morph_fase[i] = fmod(tiempo * 0.05f + i * 0.1f, 1.0f);
         }
 
@@ -112,11 +102,9 @@ struct ColorFractal {
         return res;
     }
 
-    // Obtener color final para un nodo (fusion de base + fractal)
-    // Devuelve color ARGB
+    // Obtener color final para un nodo
     static uint32_t colorFusionado(int color_idx, float mod_fractal,
                                     float morph_fase, int num_colores_totales) {
-        // Paleta base (6 colores vibrantes)
         struct HSV { float h, s, v; };
         static const HSV paleta[] = {
             {0.00f, 0.75f, 0.90f},  // Rojo
@@ -133,19 +121,15 @@ struct ColorFractal {
             s = paleta[color_idx].s;
             v = paleta[color_idx].v;
         } else {
-            // Colores extra: distribuir en el circulo cromatico
             h = (color_idx % 12) / 12.0f;
             s = 0.7f;
             v = 0.8f;
         }
 
-        // Modulacion fractal: la saturacion y el brillo varian
         float mod = mod_fractal;
-        // Efecto: zonas de alta iteracion = mas saturadas y brillantes
         s = std::clamp(s * (0.6f + mod * 0.5f), 0.3f, 1.0f);
         v = std::clamp(v * (0.7f + mod * 0.4f), 0.3f, 1.0f);
 
-        // Pequeno shift de matiz para efecto arcoiris (sutil)
         h = fmod(h + mod * 0.05f + morph_fase * 0.02f, 1.0f);
 
         // HSV to RGB
@@ -171,4 +155,4 @@ struct ColorFractal {
     }
 };
 
-} // namespace Algoritmos
+}

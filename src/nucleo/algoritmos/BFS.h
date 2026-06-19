@@ -13,8 +13,8 @@ namespace BFS {
 
 struct ResultadoBFS {
     std::vector<int>    orden_visita;
-    std::map<int, int>  nivel;      // nodo_id → distancia en saltos desde inicio
-    std::map<int, int>  padre;      // nodo_id → padre en el arbol BFS
+    std::map<int, int>  nivel;     
+    std::map<int, int>  padre;     
 };
 
 ResultadoBFS bfs(const Grafo& g, int inicio_id) {
@@ -88,5 +88,5 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
     return pasos;
 }
 
-} // namespace BFS
-} // namespace Algoritmos
+}
+} 
