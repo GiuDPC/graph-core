@@ -161,6 +161,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         : (estado.modo_animacion ? ICON_FA_PLAY " Ejecutar animado" : ICON_FA_PLAY " Ejecutar algoritmo");
         
     if (ImGui::Button(ICON_FA_ARROW_ROTATE_LEFT, ImVec2(36, 36))) {
+        self.estado_ui.registrarLog("[AeroGrafos] Entorno reiniciado.");
         estado.algoritmo_ejecutado = false;
         estado.ruta_resultado.clear();
         estado.aristas_mst.clear();
@@ -178,6 +179,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     ImGui::SameLine();
     
     if (ImGui::Button(btn_label, ImVec2(-1, 36))) {
+        self.estado_ui.registrarLog(std::string("[AeroGrafos] Ejecutando: ") + btn_label);
         // Limpiar estado anterior
         estado.algoritmo_ejecutado = false;
         estado.ruta_resultado.clear();
@@ -194,16 +196,14 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         // Aplicar restricciones geopolíticas
         if (estado.restricciones_geopoliticas) {
             for (auto& a : g.aristas) {
-                // 1. Toca espacio aéreo ruso (Moscú) directamente
                 bool toca_rusia = (a.origen_id == EstadoAeroGrafos::ID_MOSCU || a.destino_id == EstadoAeroGrafos::ID_MOSCU);
                 
-                // 2. Sobrevuela Siberia geográficamente (Rutas directas Europa/Turquía -> Asia Oriental)
                 bool sobrevuelo = 
-                    (a.origen_id == 16 && a.destino_id == 21) || // Estambul-Tokio
+                    (a.origen_id == 16 && a.destino_id == 21) ||
                     (a.origen_id == 21 && a.destino_id == 16) ||
-                    (a.origen_id == 11 && a.destino_id == 21) || // Londres-Tokio
+                    (a.origen_id == 11 && a.destino_id == 21) ||
                     (a.origen_id == 21 && a.destino_id == 11) ||
-                    (a.origen_id == 14 && a.destino_id == 21) || // Berlín-Tokio
+                    (a.origen_id == 14 && a.destino_id == 21) ||
                     (a.origen_id == 21 && a.destino_id == 14);
 
                 if (toca_rusia || sobrevuelo) {
@@ -492,6 +492,11 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 break;
             }
         }
+        if (estado.algoritmo_ejecutado && !estado.descripcion_resultado.empty()) {
+            std::string log_msg = estado.descripcion_resultado;
+            std::replace(log_msg.begin(), log_msg.end(), '\n', ' ');
+            self.estado_ui.registrarLog("[AeroGrafos] " + log_msg);
+        }
     }
     ImGui::PopStyleColor();
     ImGui::EndDisabled();
@@ -735,6 +740,9 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     bool cambio_restriccion = ImGui::Checkbox(ICON_FA_TRIANGLE_EXCLAMATION
         " Cierre espacio aereo ruso", &estado.restricciones_geopoliticas);
     if (cambio_restriccion) {
+        self.estado_ui.registrarLog(estado.restricciones_geopoliticas
+            ? "[AeroGrafos] Simulacion: Espacio aereo ruso CERRADO."
+            : "[AeroGrafos] Simulacion: Espacio aereo ruso ABIERTO.");
         estado.agregarMensaje(estado.restricciones_geopoliticas
             ? ICON_FA_TRIANGLE_EXCLAMATION " Espacio aereo ruso CERRADO — rutas desviadas"
             : ICON_FA_CHECK " Espacio aereo ruso ABIERTO",

@@ -56,7 +56,7 @@ inline void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMo
                     }
                     if (peso_loop >= 0) {
                         char label[32];
-                        snprintf(label, sizeof(label), "%.0f##%zu_%zu", peso_loop, f, c);
+                        snprintf(label, sizeof(label), "%g##%zu_%zu", peso_loop, f, c);
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.9f, 0.5f, 1.0f));
                         if (ImGui::Selectable(label, true, 0, ImVec2(col_w_data, 0))) {
                             int nid = red.nodos[f].id;
@@ -103,7 +103,7 @@ inline void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMo
 
                 ImGui::PushStyleColor(ImGuiCol_Text, col);
                 char label[32];
-                if (has_edge) snprintf(label, sizeof(label), "%.0f##%zu_%zu", peso, f, c);
+                if (has_edge) snprintf(label, sizeof(label), "%g##%zu_%zu", peso, f, c);
                 else snprintf(label, sizeof(label), "-##%zu_%zu", f, c);
                 
                 if (ImGui::Selectable(label, has_edge, 0, ImVec2(col_w_data, 0))) {
