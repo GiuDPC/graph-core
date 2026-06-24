@@ -10,4 +10,5 @@ struct PasoAnimacion {
     int         arista_origen  = -1;
     int         arista_destino = -1;
     std::string descripcion;
+    int         color_asignado = -1;
 };

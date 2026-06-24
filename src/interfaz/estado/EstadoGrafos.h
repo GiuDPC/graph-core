@@ -10,6 +10,7 @@
 #include "nucleo/algoritmos/Isomorfismo.h"
 #include "nucleo/algoritmos/Arbol.h"
 #include "nucleo/algoritmos/Planaridad.h"
+#include "nucleo/algoritmos/Planaridad.h"
 #include "nucleo/algoritmos/ColorFractal.h"
 #include "interfaz/util/Animacion.h"
 
@@ -87,6 +88,7 @@ struct EstadoGrafos {
     int         arbol_raiz_id         = 0;
     bool        arbol_layout_aplicado = false;
 
-    // Resultado de ruta
+    // resultado de ruta
+    // resultado de ruta
     std::vector<int> ruta_optima;
 };

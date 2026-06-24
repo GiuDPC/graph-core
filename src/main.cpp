@@ -119,6 +119,7 @@ int main(int, char**) {
         glfwTerminate();
         return 1;
     }
+    glfwMaximizeWindow(ventana);
 
     setWindowIcon(ventana, "graph-core-logo.png");
 

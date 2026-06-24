@@ -1,7 +1,9 @@
 #pragma once
 
+#include <fstream>
 #include "interfaz/Interfaz.h"
 #include "persistencia/SerializadorJSON.h"
+#include "persistencia/SerializadorGEXF.h"
 #include "portable-file-dialogs.h"
 #include "audio/Sonidos.h"
 
@@ -40,6 +42,23 @@ inline void contenido(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
             if (ruta.find(".json") == std::string::npos) ruta += ".json";
             Persistencia::guardar(red, ruta);
             self.registrarLog("[OK] Proyecto guardado: " + ruta);
+        }
+    }
+    if (ImGui::MenuItem(ICON_FA_FILE_EXPORT " Exportar GEXF...")) {
+        auto resultado = pfd::save_file("Exportar GEXF", "grafo.gexf", {"Archivos GEXF", "*.gexf"}).result();
+        if (resultado.empty()) {
+            self.registrarLog("[!] Error: no se pudo abrir el dialogo de exportacion.");
+        } else {
+            std::string ruta = resultado;
+            if (ruta.find(".gexf") == std::string::npos) ruta += ".gexf";
+            std::string xml = Persistencia::exportarGEXF(red);
+            std::ofstream f(ruta);
+            if (f.is_open()) {
+                f << xml;
+                self.registrarLog("[OK] Grafo exportado como GEXF: " + ruta);
+            } else {
+                self.registrarLog("[!] Error al escribir: " + ruta);
+            }
         }
     }
     ImGui::Separator();

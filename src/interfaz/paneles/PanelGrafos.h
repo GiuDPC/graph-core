@@ -800,6 +800,9 @@ inline void subpanelColoreo(Interfaz& self, Grafo& red) {
     }
 
     // tabla comparativa de algoritmos de coloracion
+    if (red.nodos.empty() || self.estado_grafos.colores_nodos.empty()) return;
+
+
     if (ImGui::CollapsingHeader(ICON_FA_TABLE " Comparacion de algoritmos")) {
         if (ImGui::BeginTable("tabColores", 3,
             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
@@ -840,18 +843,79 @@ inline void subpanelColoreo(Interfaz& self, Grafo& red) {
         for (const auto& n : red.nodos) {
             if (n.id < (int)self.estado_grafos.colores_nodos.size() && self.estado_grafos.colores_nodos[n.id] >= 0) {
                 int c = self.estado_grafos.colores_nodos[n.id];
-                // Si es color fractal es negativo
                 if (c < 0) {
                     ImGui::BulletText("%s → Color fractal", n.nombre.c_str());
                     continue;
                 }
                 ImGui::BulletText("%s → Color %d (%s)",
-                    n.nombre.c_str(), c,
-                    c < 6 ? nombres_colores[c] : "Extra");
+                    n.nombre.c_str(), c, c < 6 ? nombres_colores[c] : "Extra");
             }
         }
     }
 }
+
+// subpanel: forceatlas2 — control de fisicas
+inline void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
+    ImGui::TextColored(ImVec4(0.8f, 0.3f, 0.9f, 1.0f), ICON_FA_MAGNET " FORCE ATLAS 2");
+    ImGui::TextWrapped("Layout de fuerzas (Física de Grafos). Agrupa clusters y separa nodos muy conectados.");
+    ImGui::Spacing();
+
+    auto& p = self.estado_ui.fa2_params;
+
+    if (ImGui::Button(
+        self.estado_ui.fisicas_activas ? ICON_FA_PAUSE " Detener" : ICON_FA_PLAY " Activar",
+        ImVec2(-1, 32)))
+    {
+        self.estado_ui.fisicas_activas = !self.estado_ui.fisicas_activas;
+        self.estado_ui.fisicas_estado_cambiado = true;
+        if (self.estado_ui.fisicas_activas) self.estado_ui.fa2.reset();
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Activa o detiene la simulación física (las fuerzas que empujan los nodos).");
+
+    ImGui::Spacing();
+    ImGui::SliderFloat("Escala", &p.scaling_ratio, 1.0f, 50.0f, "%.1f");
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Qué tan separados van a estar los nodos (Aumenta la repulsión).");
+    
+    ImGui::SliderFloat("Gravedad", &p.gravity, 0.0f, 10.0f, "%.2f");
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Qué tan fuerte los nodos son atraídos hacia el centro de la pantalla.");
+
+    ImGui::SliderFloat("Peso Aristas", &p.edge_weight_influence, 0.0f, 3.0f, "%.2f");
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Influencia del peso de la arista en la atracción.");
+
+    ImGui::SliderFloat("Tolerancia (Jitter)", &p.jitter_tolerance, 0.1f, 5.0f, "%.2f");
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip(
+        "Controla el 'temblor' de los nodos. Valores altos permiten que los nodos se asienten más rápido,\n"
+        "pero si es muy alto vibrarán sin detenerse. NO es la velocidad visual de la animación.");
+
+    ImGui::Spacing();
+    ImGui::Checkbox("Modo LinLog", &p.linlog_mode);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Atracción logarítmica: hace que los clusters (grupos) queden muy juntos.");
+    ImGui::SameLine();
+    ImGui::Checkbox("Disuadir Hubs", &p.dissuade_hubs);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Los nodos muy conectados (hubs) son empujados hacia el borde.");
+    
+    ImGui::Checkbox("Gravedad Fuerte", &p.strong_gravity);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Aumenta la atracción al centro para nodos grandes, evitando que escapen muy lejos.");
+    ImGui::SameLine();
+    ImGui::Checkbox("Evitar Overlap", &p.prevent_overlap);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Evita que los nodos se tapen unos a otros (Puede ser más lento).");
+
+    ImGui::Spacing();
+    if (ImGui::Button(ICON_FA_ROTATE_LEFT " Resetear Motor", ImVec2(-1, 28))) {
+        self.estado_ui.fa2.reset();
+        // Leve temblor para que el usuario perciba visualmente que se reseteó la física
+        for (auto& n : red.nodos) {
+            n.posicion.x += ((rand() % 100) - 50) * 0.1f;
+            n.posicion.y += ((rand() % 100) - 50) * 0.1f;
+        }
+    }
+}
+
 
 // layout arbol jerarquico
 inline void aplicarLayoutArbol(Grafo& red, const Algoritmos::Arbol::PropiedadesArbol& props,
@@ -1188,31 +1252,33 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
         ICON_FA_PAINTBRUSH " Coloreo",
         ICON_FA_OBJECT_GROUP " Isomorfismo",
         ICON_FA_SHAPES " Fractales",
-        ICON_FA_ARROW_RIGHT_ARROW_LEFT " Euler / Hamilton"
+        ICON_FA_ARROW_RIGHT_ARROW_LEFT " Euler / Hamilton",
+        ICON_FA_MAGNET " Force Atlas 2"
     };
-    
-    // Mapeo inverso
+
     int current_item = 0;
-    if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas) current_item = 1;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatArbol) current_item = 2;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatBusqueda) current_item = 3;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatCiclos) current_item = 4;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatColoreo) current_item = 5;
+    if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)          current_item = 1;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatArbol)     current_item = 2;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatBusqueda)  current_item = 3;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatCiclos)    current_item = 4;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatColoreo)   current_item = 5;
     else if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo) current_item = 6;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFractales) current_item = 7;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFractales)  current_item = 7;
     else if (self.estado_ui.herramienta_activa == EstadoUI::CatEulerHamilton) current_item = 8;
-    
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFA2)       current_item = 9;
+
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::Combo("##algo_select", &current_item, items, 9)) {
-        if (current_item == 0) self.estado_ui.herramienta_activa = EstadoUI::CatGeneral;
-        else if (current_item == 1) self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
-        else if (current_item == 2) self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
-        else if (current_item == 3) self.estado_ui.herramienta_activa = EstadoUI::CatBusqueda;
-        else if (current_item == 4) self.estado_ui.herramienta_activa = EstadoUI::CatCiclos;
-        else if (current_item == 5) self.estado_ui.herramienta_activa = EstadoUI::CatColoreo;
-        else if (current_item == 6) self.estado_ui.herramienta_activa = EstadoUI::CatIsomorfismo;
-        else if (current_item == 7) self.estado_ui.herramienta_activa = EstadoUI::CatFractales;
-        else if (current_item == 8) self.estado_ui.herramienta_activa = EstadoUI::CatEulerHamilton;
+    if (ImGui::Combo("##algo_select", &current_item, items, 10)) {
+        if (current_item == 0)       self.estado_ui.herramienta_activa = EstadoUI::CatGeneral;
+        else if (current_item == 1)  self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
+        else if (current_item == 2)  self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
+        else if (current_item == 3)  self.estado_ui.herramienta_activa = EstadoUI::CatBusqueda;
+        else if (current_item == 4)  self.estado_ui.herramienta_activa = EstadoUI::CatCiclos;
+        else if (current_item == 5)  self.estado_ui.herramienta_activa = EstadoUI::CatColoreo;
+        else if (current_item == 6)  self.estado_ui.herramienta_activa = EstadoUI::CatIsomorfismo;
+        else if (current_item == 7)  self.estado_ui.herramienta_activa = EstadoUI::CatFractales;
+        else if (current_item == 8)  self.estado_ui.herramienta_activa = EstadoUI::CatEulerHamilton;
+        else if (current_item == 9)  self.estado_ui.herramienta_activa = EstadoUI::CatFA2;
     }
     ImGui::Separator();
 
@@ -1343,6 +1409,8 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
             break;
         }
         case EstadoUI::CatMatrices: Matrices::dibujar(red, self); break;
+        case EstadoUI::CatFA2:      subpanelForceAtlas2(self, red); break;
+
         default: break;
     }
 

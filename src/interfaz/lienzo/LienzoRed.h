@@ -122,10 +122,10 @@ inline void lineaArista(ImDrawList* dl, ImVec2 o, ImVec2 d, ImVec2 pc, bool es_c
 
 // Funcion principal de dibujo
 inline void dibujar(Grafo& red, Interfaz& self) {
-    static bool primera_vez = true;
-    if (primera_vez) {
+    static int frames_init = 0;
+    if (frames_init < 5) {
         ImGui::SetNextWindowFocus();
-        primera_vez = false;
+        frames_init++;
     }
     ImGui::Begin("Lienzo de Red");
     ImVec2 tamano = ImGui::GetContentRegionAvail();
@@ -160,8 +160,11 @@ inline void dibujar(Grafo& red, Interfaz& self) {
 
     self.estado_ui.nodo_hover = -1;
     for (auto& n : grafo_actual.nodos) {
-        float dx = mouse.x - n.posicion.x, dy = mouse.y - n.posicion.y;
-        if (sqrtf(dx * dx + dy * dy) <= n.radio) self.estado_ui.nodo_hover = n.id;
+        float screen_nx = n.posicion.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x;
+        float screen_ny = n.posicion.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y;
+        float screen_r  = n.radio * self.estado_ui.zoom_lienzo;
+        float dx = mouse.x - screen_nx, dy = mouse.y - screen_ny;
+        if (sqrtf(dx * dx + dy * dy) <= screen_r) self.estado_ui.nodo_hover = n.id;
     }
 
     // Click izquierdo: seleccion/arrastre + click en paquete
@@ -208,10 +211,12 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 ImVec2 d = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
                 if (ImGui::GetIO().KeyShift) {
                     for (auto& n_iter : grafo_actual.nodos) {
-                        n_iter.posicion.x += d.x; n_iter.posicion.y += d.y;
+                        n_iter.posicion.x += d.x / self.estado_ui.zoom_lienzo; 
+                        n_iter.posicion.y += d.y / self.estado_ui.zoom_lienzo;
                     }
                 } else {
-                    n->posicion.x += d.x; n->posicion.y += d.y;
+                    n->posicion.x += d.x / self.estado_ui.zoom_lienzo; 
+                    n->posicion.y += d.y / self.estado_ui.zoom_lienzo;
                 }
                 ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
             }
@@ -233,8 +238,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     if (std::abs(self.estado_ui.pan_velocity.x) > 0.1f || std::abs(self.estado_ui.pan_velocity.y) > 0.1f) {
         self.estado_ui.offset_lienzo.x += self.estado_ui.pan_velocity.x; 
         self.estado_ui.offset_lienzo.y += self.estado_ui.pan_velocity.y;
-        for (auto& n : red.nodos) { n.posicion.x += self.estado_ui.pan_velocity.x; n.posicion.y += self.estado_ui.pan_velocity.y; }
-        for (auto& n : self.estado_grafos.grafo_iso_g2.nodos) { n.posicion.x += self.estado_ui.pan_velocity.x; n.posicion.y += self.estado_ui.pan_velocity.y; }
+        // YA NO SE MUEVEN LOS NODOS FISICAMENTE
         self.estado_ui.pan_velocity.x *= 0.85f; // friccion
         self.estado_ui.pan_velocity.y *= 0.85f;
     }
@@ -256,16 +260,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         float factor = 1.0f + self.estado_ui.zoom_velocity;
         ImVec2 centro = en_canvas ? mouse : ImVec2(origin.x + tamano.x * 0.5f, origin.y + tamano.y * 0.5f);
         
-        for (auto& n : red.nodos) {
-            n.posicion.x = centro.x + (n.posicion.x - centro.x) * factor;
-            n.posicion.y = centro.y + (n.posicion.y - centro.y) * factor;
-            n.radio = std::max(5.0f, std::min(60.0f, n.radio * factor));
-        }
-        for (auto& n : self.estado_grafos.grafo_iso_g2.nodos) {
-            n.posicion.x = centro.x + (n.posicion.x - centro.x) * factor;
-            n.posicion.y = centro.y + (n.posicion.y - centro.y) * factor;
-            n.radio = std::max(5.0f, std::min(60.0f, n.radio * factor));
-        }
+        self.estado_ui.zoom_lienzo *= factor;
         self.estado_ui.offset_lienzo.x = centro.x + (self.estado_ui.offset_lienzo.x - centro.x) * factor;
         self.estado_ui.offset_lienzo.y = centro.y + (self.estado_ui.offset_lienzo.y - centro.y) * factor;
         
@@ -295,94 +290,10 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     }
 
     if (self.estado_ui.fisicas_activas) {
-        // todas las fuerzas se calculan en espacio normalizado zoom=1
-        // para que el resultado sea identico sin importar el nivel de zoom
-        float zoom_est = grafo_actual.nodos.empty() ? 1.0f : (grafo_actual.nodos[0].radio / 20.0f);
-        float inv_zoom = 1.0f / std::max(0.1f, zoom_est);
-        
-        float k = 100.0f; // distancia ideal fija en espacio normalizado
-        float c_rep = k * k * 0.5f;
-        float c_atr = 1.0f / k * 0.1f;
-
-        std::vector<ImVec2> desp(grafo_actual.nodos.size(), ImVec2(0, 0));
-        
-        // centro del grafo para normalizar
-        ImVec2 centro(0, 0);
-        for (const auto& n : grafo_actual.nodos) {
-            centro.x += n.posicion.x;
-            centro.y += n.posicion.y;
-        }
-        centro.x /= grafo_actual.nodos.size();
-        centro.y /= grafo_actual.nodos.size();
-        
-        // repulsion en espacio normalizado
-        for (size_t i = 0; i < grafo_actual.nodos.size(); i++) {
-            float xi = (grafo_actual.nodos[i].posicion.x - centro.x) * inv_zoom + centro.x;
-            float yi = (grafo_actual.nodos[i].posicion.y - centro.y) * inv_zoom + centro.y;
-            for (size_t j = i + 1; j < grafo_actual.nodos.size(); j++) {
-                float xj = (grafo_actual.nodos[j].posicion.x - centro.x) * inv_zoom + centro.x;
-                float yj = (grafo_actual.nodos[j].posicion.y - centro.y) * inv_zoom + centro.y;
-                float dx = xi - xj;
-                float dy = yi - yj;
-                float dist_sq = dx * dx + dy * dy;
-                if (dist_sq > 1.0f && dist_sq < 90000.0f) {
-                    float dist = sqrtf(dist_sq);
-                    float rep = c_rep / dist;
-                    float dirx = dx / dist;
-                    float diry = dy / dist;
-                    desp[i].x += dirx * rep;
-                    desp[i].y += diry * rep;
-                    desp[j].x -= dirx * rep;
-                    desp[j].y -= diry * rep;
-                }
-            }
-        }
-        
-        // atraccion en espacio normalizado
-        for (const auto& a : grafo_actual.aristas) {
-            Nodo* o = grafo_actual.obtenerNodo(a.origen_id);
-            Nodo* d = grafo_actual.obtenerNodo(a.destino_id);
-            if (!o || !d) continue;
-            if (a.origen_id == a.destino_id) continue; // self-loops no generan fuerza
-
-            int idx_o = -1, idx_d = -1;
-            for (size_t i = 0; i < grafo_actual.nodos.size(); i++) {
-                if (grafo_actual.nodos[i].id == o->id) idx_o = i;
-                if (grafo_actual.nodos[i].id == d->id) idx_d = i;
-            }
-            if (idx_o == -1 || idx_d == -1) continue;
-
-            float ox = (o->posicion.x - centro.x) * inv_zoom + centro.x;
-            float oy = (o->posicion.y - centro.y) * inv_zoom + centro.y;
-            float dx_n = (d->posicion.x - centro.x) * inv_zoom + centro.x;
-            float dy_n = (d->posicion.y - centro.y) * inv_zoom + centro.y;
-            float dx = dx_n - ox;
-            float dy = dy_n - oy;
-            float dist = sqrtf(dx * dx + dy * dy);
-            if (dist > 1.0f) {
-                float atr = dist * dist * c_atr;
-                atr *= (1.0f / std::max(0.1f, a.peso_actual));
-                float dirx = dx / dist;
-                float diry = dy / dist;
-                desp[idx_o].x += dirx * atr;
-                desp[idx_o].y += diry * atr;
-                desp[idx_d].x -= dirx * atr;
-                desp[idx_d].y -= diry * atr;
-            }
-        }
-        
-        // aplicar desplazamientos convertir de vuelta a espacio pantalla
-        for (size_t i = 0; i < grafo_actual.nodos.size(); i++) {
-            if (self.estado_ui.arrastrando && grafo_actual.nodos[i].id == self.estado_ui.nodo_seleccionado) continue;
-            float desp_len = sqrtf(desp[i].x * desp[i].x + desp[i].y * desp[i].y);
-            if (desp_len > 0.8f) { 
-                float move_len = std::min(desp_len * 0.03f, 1.5f); 
-                float px = (desp[i].x / desp_len) * move_len * zoom_est; 
-                float py = (desp[i].y / desp_len) * move_len * zoom_est;
-                grafo_actual.nodos[i].posicion.x += px;
-                grafo_actual.nodos[i].posicion.y += py;
-            }
-        }
+        // fa2: actualizar nodo siendo arrastrado para que no se mueva
+        self.estado_ui.fa2.nodo_arrastrado = self.estado_ui.arrastrando
+            ? self.estado_ui.nodo_seleccionado : -1;
+        self.estado_ui.fa2.step(grafo_actual, self.estado_ui.fa2_params);
     }
 
     if (en_canvas && ImGui::IsMouseDragging(ImGuiMouseButton_Right) && self.estado_ui.nodo_hover != -1 && !self.estado_ui.creando_arista_drag) {
@@ -409,17 +320,19 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         }
     } else if (en_canvas && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
         if (self.estado_ui.nodo_hover == -1) {
-            self.estado_ui.pos_click_derecho = mouse;
+            ImVec2 mouse_mundo((mouse.x - self.estado_ui.offset_lienzo.x) / self.estado_ui.zoom_lienzo, 
+                               (mouse.y - self.estado_ui.offset_lienzo.y) / self.estado_ui.zoom_lienzo);
+            self.estado_ui.pos_click_derecho = mouse; // Para UI se usa el real
             float current_radius = grafo_actual.nodos.empty() ? 20.0f : grafo_actual.nodos[0].radio;
             if (editando_g2) {
-                grafo_actual.agregarNodo(mouse);
+                grafo_actual.agregarNodo(mouse_mundo);
                 grafo_actual.nodos.back().nombre = "U" + std::to_string(grafo_actual.nodos.back().id);
                 grafo_actual.nodos.back().radio = current_radius;
                 self.estado_grafos.iso_analizado = false;
             } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
                 ImGui::OpenPopup("CrearEquipo");
             } else {
-                grafo_actual.agregarNodo(mouse);
+                grafo_actual.agregarNodo(mouse_mundo);
                 grafo_actual.nodos.back().nombre = "V" + std::to_string(grafo_actual.nodos.back().id);
                 grafo_actual.nodos.back().radio = current_radius;
                 self.registrarLog("Nodo creado: " + grafo_actual.nodos.back().nombre);
@@ -532,10 +445,24 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         ImGui::EndPopup();
     }
 
-    // lista de grafos a dibujar
-    std::vector<Grafo*> grafos_a_dibujar = {&red};
+    // --- TRANSFORMACION VISUAL PARA DIBUJO ---
+    Grafo red_dibujo = red;
+    Grafo iso_dibujo = self.estado_grafos.grafo_iso_g2;
+    for(auto& n : red_dibujo.nodos) {
+        n.posicion.x = n.posicion.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x;
+        n.posicion.y = n.posicion.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y;
+        n.radio *= self.estado_ui.zoom_lienzo;
+    }
+    for(auto& n : iso_dibujo.nodos) {
+        n.posicion.x = n.posicion.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x;
+        n.posicion.y = n.posicion.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y;
+        n.radio *= self.estado_ui.zoom_lienzo;
+    }
+
+    // lista de grafos a dibujar (usando las copias visuales transformadas)
+    std::vector<Grafo*> grafos_a_dibujar = {&red_dibujo};
     if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo)
-        grafos_a_dibujar.push_back(&self.estado_grafos.grafo_iso_g2);
+        grafos_a_dibujar.push_back(&iso_dibujo);
 
     // recorrer grafos
     bool modo_red = (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_redes.sim_inicializada);
@@ -934,6 +861,37 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 }
             }
         }
+        // ====================================================
+        // PRE-CALCULAR RANGOS DE RANKING PARA EVITAR O(N^2)
+        // ====================================================
+        float rank_size_min = FLT_MAX, rank_size_max = -FLT_MAX;
+        float rank_color_min = FLT_MAX, rank_color_max = -FLT_MAX;
+        bool usar_ranking = (!es_g2 && self.estado_ui.ranking.activo);
+        
+        auto getValorRank = [&](int nid, EstadoUI::EstadoRanking::Atributo attr) -> float {
+            switch (attr) {
+                case EstadoUI::EstadoRanking::GRADO: return (float)g_dib.gradoNodo(nid);
+                default: return 0;
+            }
+        };
+
+        if (usar_ranking) {
+            auto& rk = self.estado_ui.ranking;
+            if (rk.atributo_size != EstadoUI::EstadoRanking::NINGUNO) {
+                for (const auto& nn : g_dib.nodos) {
+                    float v = getValorRank(nn.id, rk.atributo_size);
+                    if (v < rank_size_min) rank_size_min = v;
+                    if (v > rank_size_max) rank_size_max = v;
+                }
+            }
+            if (rk.atributo_color != EstadoUI::EstadoRanking::NINGUNO) {
+                for (const auto& nn : g_dib.nodos) {
+                    float v = getValorRank(nn.id, rk.atributo_color);
+                    if (v < rank_color_min) rank_color_min = v;
+                    if (v > rank_color_max) rank_color_max = v;
+                }
+            }
+        }
 
         // dibujar nodos
         for (auto& n : g_dib.nodos) {
@@ -1056,6 +1014,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 }
             }
 
+
             // efecto pop al visitar
             if (es_anim && self.estado_grafos.anim_estado.visitados.count(n.id) &&
                 self.estado_grafos.anim_estado.tiempo_visita_nodo.count(n.id)) {
@@ -1066,11 +1025,43 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 }
             }
 
-            // radio dinamico
+            // radio dinamico con ranking visual aplicado
             float radio_dibujo = n.radio;
+            ImU32 colorRanking = colorFondo;
+
+            if (usar_ranking) {
+                auto& rk = self.estado_ui.ranking;
+                
+                // Aplicar Tamaño
+                if (rk.atributo_size != EstadoUI::EstadoRanking::NINGUNO) {
+                    float range = std::max(0.001f, rank_size_max - rank_size_min);
+                    float val = getValorRank(n.id, rk.atributo_size);
+                    float t = (val - rank_size_min) / range;
+                    if (rk.invertir_size) t = 1.0f - t;
+                    t = std::max(0.0f, std::min(1.0f, t));
+                    radio_dibujo = rk.min_size + t * (rk.max_size - rk.min_size);
+                }
+
+                // Aplicar Color
+                if (rk.atributo_color != EstadoUI::EstadoRanking::NINGUNO) {
+                    float range = std::max(0.001f, rank_color_max - rank_color_min);
+                    float val = getValorRank(n.id, rk.atributo_color);
+                    float t = (val - rank_color_min) / range;
+                    if (rk.invertir_color) t = 1.0f - t;
+                    t = std::max(0.0f, std::min(1.0f, t));
+                    // azul (50,100,255) -> rojo (255,50,50)
+                    colorRanking = IM_COL32(
+                        (int)(50 + t * 205),
+                        (int)(100 * (1.0f - t)),
+                        (int)(255 * (1.0f - t)),
+                        255);
+                    colorFondo = colorRanking;
+                }
+            }
+
             if ((!es_g2 && !editando_g2 && n.id == self.estado_ui.nodo_hover) ||
                 (es_g2 && editando_g2 && n.id == self.estado_ui.nodo_hover)) {
-                radio_dibujo += 2.0f + sinf(tiempo * 8.0f) * 1.5f; 
+                radio_dibujo += 2.0f + sinf(tiempo * 8.0f) * 1.5f;
             }
 
             // circulo del nodo
@@ -1111,7 +1102,17 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 }
             }
 
-            // tool tip con metricas
+            // tooltip en modo grafos: muestra metricas basicas
+            if (!modo_red && !es_g2 && n.id == self.estado_ui.nodo_hover
+                && !tooltip_mostrado) {
+                ImGui::BeginTooltip();
+                ImGui::Text("%s", n.nombre.c_str());
+                ImGui::Text("Grado: %d", g_dib.gradoNodo(n.id));
+                ImGui::EndTooltip();
+                tooltip_mostrado = true;
+            }
+
+            // tooltip en modo red con metricas de simulacion
             if (modo_red && n.id == self.estado_ui.nodo_hover && !es_g2 &&
                 self.estado_redes.simulador.estado.nodos.count(n.id) && !tooltip_mostrado) {
                 const auto& en = self.estado_redes.simulador.estado.nodos.at(n.id);

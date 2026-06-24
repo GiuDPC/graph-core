@@ -89,10 +89,10 @@ inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
         ImGui::DockBuilderDockWindow("Info del Grafo", izq);
         ImGui::DockBuilderDockWindow("AeroGrafos", der);
-        ImGui::DockBuilderDockWindow("Lienzo AeroGrafos", main);
+        ImGui::DockBuilderDockWindow("Mapa FlightNet", main);
         ImGui::DockBuilderDockWindow("Matrices", main);
         ImGui::DockBuilderDockWindow("Registro del Kernel", main);
-        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo AeroGrafos");
+        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Mapa FlightNet");
     }
 }
 

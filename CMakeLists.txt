@@ -117,6 +117,13 @@ target_include_directories(graph-core PRIVATE
     ${CMAKE_SOURCE_DIR}/src/audio
 )
 
+# Copiar carpeta de recursos (fuentes, iconos, etc.) al directorio de build
+add_custom_command(TARGET graph-core POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/recursos
+        ${CMAKE_BINARY_DIR}/recursos
+)
+
 # ============================================================================
 # Tests unitarios (GoogleTest)
 # ============================================================================

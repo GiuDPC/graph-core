@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "nucleo/algoritmos/ForceAtlas2.h"
 
 struct EstadoUI {
     enum class ModoApp { Grafos, AeroGrafos };
@@ -19,7 +20,8 @@ struct EstadoUI {
         CatIsomorfismo,
         CatMatrices,
         CatFractales,
-        CatEulerHamilton
+        CatEulerHamilton,
+        CatFA2
     };
     Categoria herramienta_activa = CatGeneral;
 
@@ -32,6 +34,7 @@ struct EstadoUI {
     ImVec2 offset_lienzo = ImVec2(0, 0);
     ImVec2 pan_velocity  = ImVec2(0, 0);
     float  zoom_velocity = 0.0f;
+    float  zoom_lienzo   = 1.0f;
 
     //  creacion pendiente 
     bool   creando_arista_drag        = false;
@@ -55,9 +58,25 @@ struct EstadoUI {
     bool mostrar_ventana_ayuda = false;
     int seccion_ayuda_actual = 0;
 
-    bool  fisicas_activas = false;
-    bool  fisicas_estado_cambiado = false;
+    // --- forceatlas2 ---
+    bool fisicas_activas          = false;
+    bool fisicas_estado_cambiado  = false;
     std::unordered_map<int, ImVec2> fisicas_posiciones_guardadas;
+    Algoritmos::ParametrosFA2 fa2_params;
+    Algoritmos::ForceAtlas2   fa2;
+
+    // --- ranking visual ---
+    struct EstadoRanking {
+        bool activo = false;
+        // atributos disponibles para mapear a size/color
+        enum Atributo { NINGUNO = 0, GRADO };
+        Atributo atributo_size  = NINGUNO;
+        Atributo atributo_color = NINGUNO;
+        float min_size   = 8.0f;
+        float max_size   = 40.0f;
+        bool  invertir_size  = false;
+        bool  invertir_color = false;
+    } ranking;
 
     bool aristas_dirigidas = false;  // toggle global: true = nuevas aristas se crean dirigidas
 

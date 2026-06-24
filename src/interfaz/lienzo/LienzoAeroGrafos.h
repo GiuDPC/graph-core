@@ -649,6 +649,37 @@ inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
         }
     }
 
+    // ── 4.5. Animación de coloreo ──
+    ImU32 paleta[] = {
+        IM_COL32(255, 60, 60, 220),   IM_COL32(60, 220, 60, 220),
+        IM_COL32(60, 120, 255, 220),  IM_COL32(255, 220, 40, 220),
+        IM_COL32(200, 80, 255, 220),  IM_COL32(40, 230, 230, 220),
+        IM_COL32(255, 140, 40, 220),  IM_COL32(255, 80, 160, 220),
+        IM_COL32(140, 200, 80, 220),  IM_COL32(100, 100, 100, 220),
+    };
+    int num_paleta = sizeof(paleta)/sizeof(paleta[0]);
+    
+    if (anim.paso_actual >= 0) {
+        for (int i = 0; i <= anim.paso_actual && i < (int)anim.pasos.size(); i++) {
+            const auto& paso = anim.pasos[i];
+            if (paso.accion == PasoAnimacion::COLOREAR && paso.nodo_id >= 0 && paso.color_asignado >= 0) {
+                ImVec2 p = ciudadAPantalla(paso.nodo_id);
+                if (p.x >= pos.x - 20 && p.x <= pos.x + sz.x + 20) {
+                    ImU32 col = paleta[paso.color_asignado % num_paleta];
+                    // Si es el nodo que se acaba de colorear (el último), darle un pulso
+                    float r = 8.0f;
+                    if (i == anim.paso_actual) {
+                        float pulso = sinf(t * 8.0f) * 0.4f + 1.0f;
+                        r *= pulso;
+                        dl->AddCircleFilled(p, r * 1.5f, (col & 0x00FFFFFF) | (100 << 24), 16);
+                    }
+                    dl->AddCircleFilled(p, r, col, 12);
+                    dl->AddCircle(p, r, IM_COL32(255,255,255,150), 12, 2.0f);
+                }
+            }
+        }
+    }
+
     // ── 5. Mensaje descriptivo actual del algoritmo ──
     if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
         const auto& paso = anim.pasos[anim.paso_actual];
@@ -750,9 +781,23 @@ inline void dibujarTooltipCiudad(int hover) {
 }
 
 // ── Clamping de cámara ───────────────────────────────────────────────────
-inline void clampaCentro(EstadoAeroGrafos& estado) {
-    estado.centro_mapa.x = std::max(0.0f, std::min((float)DatosMundo::ANCHO_VIRTUAL, estado.centro_mapa.x));
-    estado.centro_mapa.y = std::max(0.0f, std::min((float)DatosMundo::ALTO_VIRTUAL, estado.centro_mapa.y));
+inline void clampaCentro(EstadoAeroGrafos& estado, ImVec2 tam) {
+    float min_zoom_x = tam.x / DatosMundo::ANCHO_VIRTUAL;
+    float min_zoom_y = tam.y / DatosMundo::ALTO_VIRTUAL;
+    float min_zoom = std::max(min_zoom_x, min_zoom_y);
+    
+    estado.zoom_mapa = std::max(min_zoom, std::min(estado.zoom_mapa, 15.0f));
+    
+    float min_cx = tam.x / (2.0f * estado.zoom_mapa);
+    float max_cx = DatosMundo::ANCHO_VIRTUAL - min_cx;
+    float min_cy = tam.y / (2.0f * estado.zoom_mapa);
+    float max_cy = DatosMundo::ALTO_VIRTUAL - min_cy;
+
+    if (max_cx < min_cx) { estado.centro_mapa.x = DatosMundo::ANCHO_VIRTUAL / 2.0f; }
+    else { estado.centro_mapa.x = std::max(min_cx, std::min(max_cx, estado.centro_mapa.x)); }
+
+    if (max_cy < min_cy) { estado.centro_mapa.y = DatosMundo::ALTO_VIRTUAL / 2.0f; }
+    else { estado.centro_mapa.y = std::max(min_cy, std::min(max_cy, estado.centro_mapa.y)); }
 }
 
 // ── Interacción principal ──────────────────────────────────────────────────
@@ -788,7 +833,7 @@ inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
         estado.interpolando_camara = false;
         estado.centro_mapa.x -= ImGui::GetIO().MouseDelta.x / estado.zoom_mapa;
         estado.centro_mapa.y -= ImGui::GetIO().MouseDelta.y / estado.zoom_mapa;
-        clampaCentro(estado);
+        clampaCentro(estado, tam);
         estado.target_centro = estado.centro_mapa;
     }
 
@@ -797,7 +842,7 @@ inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
         estado.interpolando_camara = false;
         estado.centro_mapa.x -= ImGui::GetIO().MouseDelta.x / estado.zoom_mapa;
         estado.centro_mapa.y -= ImGui::GetIO().MouseDelta.y / estado.zoom_mapa;
-        clampaCentro(estado);
+        clampaCentro(estado, tam);
         estado.target_centro = estado.centro_mapa;
     }
 
@@ -841,7 +886,7 @@ inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
             // Ajustar centro para mantener cursor en el mismo punto
             estado.centro_mapa.x = wx - (rx - tam.x * 0.5f) / estado.zoom_mapa;
             estado.centro_mapa.y = wy - (ry - tam.y * 0.5f) / estado.zoom_mapa;
-            clampaCentro(estado);
+            clampaCentro(estado, tam);
             estado.target_centro = estado.centro_mapa;
         }
     }
@@ -863,7 +908,7 @@ inline void dibujarControlesZoom(EstadoAeroGrafos& estado) {
         estado.interpolando_camara = false;
         estado.zoom_mapa = std::min(estado.zoom_mapa * 1.4f, 15.0f);
         estado.target_zoom = estado.zoom_mapa;
-        clampaCentro(estado);
+        clampaCentro(estado, ImGui::GetContentRegionAvail());
         estado.target_centro = estado.centro_mapa;
     }
     ImGui::PopStyleVar();
@@ -879,7 +924,7 @@ inline void dibujarControlesZoom(EstadoAeroGrafos& estado) {
         estado.interpolando_camara = false;
         estado.zoom_mapa = std::max(estado.zoom_mapa / 1.4f, 0.2f);
         estado.target_zoom = estado.zoom_mapa;
-        clampaCentro(estado);
+        clampaCentro(estado, ImGui::GetContentRegionAvail());
         estado.target_centro = estado.centro_mapa;
     }
     ImGui::PopStyleVar();
@@ -961,6 +1006,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             else if (accion == PasoAnimacion::CONFIRMAR) g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
             else if (accion == PasoAnimacion::DESCARTAR) g_sonidos.reproducir(Sonidos::DESCARTAR);
             else if (accion == PasoAnimacion::EXPLORAR) g_sonidos.reproducir(Sonidos::VISITAR_NODO);
+            else if (accion == PasoAnimacion::COLOREAR) g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
         }
         if (!completa_ant && estado.animacion.completa) {
             g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
@@ -970,7 +1016,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     cargarTexturaMundo(estado);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin("Lienzo AeroGrafos", nullptr,
+    ImGui::Begin("Mapa FlightNet", nullptr,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
@@ -1001,8 +1047,10 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     // 5. Ciudades + hover
     int hover_ciudad = dibujarCiudades(dl, estado, canvas_pos, canvas_size);
 
-    // 6. Resultados de algoritmos
-    dibujarResultadoAlgoritmo(dl, estado, canvas_pos, canvas_size);
+    // 6. Resultados de algoritmos (solo si no hay animación activa)
+    if (!estado.animacion.activa) {
+        dibujarResultadoAlgoritmo(dl, estado, canvas_pos, canvas_size);
+    }
 
     // 7. Animación paso a paso
     if (estado.animacion.activa)

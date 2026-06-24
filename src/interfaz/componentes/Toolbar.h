@@ -22,7 +22,7 @@ struct Toolbar {
         {
             bool en_g = (ui.modo_actual == EstadoUI::ModoApp::Grafos);
             if (en_g) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
-            if (ImGui::Button(ICON_FA_DIAGRAM_PROJECT " Grafos", ImVec2(0, 28))) {
+            if (ImGui::Button(ICON_FA_DIAGRAM_PROJECT " Graph Lab", ImVec2(0, 28))) {
                 ui.modo_actual = EstadoUI::ModoApp::Grafos;
                 ui.herramienta_activa = EstadoUI::CatGeneral;
                 cambio = true;
@@ -33,7 +33,7 @@ struct Toolbar {
 
             bool en_a = (ui.modo_actual == EstadoUI::ModoApp::AeroGrafos);
             if (en_a) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
-            if (ImGui::Button(ICON_FA_PLANE " AeroGrafos", ImVec2(0, 28))) {
+            if (ImGui::Button(ICON_FA_PLANE " FlightNet", ImVec2(0, 28))) {
                 ui.modo_actual = EstadoUI::ModoApp::AeroGrafos;
                 ui.herramienta_activa = EstadoUI::CatGeneral;
                 cambio = true;
@@ -71,12 +71,13 @@ struct Toolbar {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.3f, 0.8f, 0.8f));
                 fisicas_pushed = true;
             }
-            if (ImGui::Button(ui.fisicas_activas ? ICON_FA_MAGNET " Fisicas (ON)" : ICON_FA_MAGNET " Fisicas (OFF)", ImVec2(145, 28))) {
+            if (ImGui::Button(ui.fisicas_activas ? ICON_FA_MAGNET " FA2 (ON)" : ICON_FA_MAGNET " FA2 (OFF)", ImVec2(145, 28))) {
                 ui.fisicas_activas = !ui.fisicas_activas;
                 ui.fisicas_estado_cambiado = true;
+                if (ui.fisicas_activas) ui.fa2.reset();
             }
             if (fisicas_pushed) ImGui::PopStyleColor();
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Activa la simulacion de fuerzas (Fruchterman-Reingold) para ordenar el grafo automaticamente");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Activa ForceAtlas2: layout de fuerzas que agrupa clusters. (Gephi)");
         }
 
         ImGui::PopStyleVar(3);

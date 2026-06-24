@@ -65,7 +65,7 @@ inline void selectorAlgoritmo(EstadoAeroGrafos& estado) {
             case EstadoAeroGrafos::Algoritmo::ConectarTodo: ImGui::TextUnformatted("Kruskal: Conecta todos los nodos minimizando el costo sin ciclos."); break;
             case EstadoAeroGrafos::Algoritmo::ExplorarNiveles: ImGui::TextUnformatted("BFS: Explora nivel por nivel (menos saltos)."); break;
             case EstadoAeroGrafos::Algoritmo::ExplorarTodo: ImGui::TextUnformatted("DFS: Explora en profundidad (util para detectar ciclos)."); break;
-            case EstadoAeroGrafos::Algoritmo::ColorearRegiones: ImGui::TextUnformatted("Coloreo: Asigna colores/frecuencias sin que nodos adyacentes repitan."); break;
+            case EstadoAeroGrafos::Algoritmo::ColorearRegiones: ImGui::TextUnformatted("Coloreo: Asigna frecuencias/colores distintos a ciudades conectadas para que no interfieran."); break;
             case EstadoAeroGrafos::Algoritmo::RutaMantenimiento: ImGui::TextUnformatted("Euler: Recorre todas las aristas exactamente una vez."); break;
             case EstadoAeroGrafos::Algoritmo::VueltaAlMundo: ImGui::TextUnformatted("Hamilton: Visita todos los nodos exactamente una vez."); break;
             case EstadoAeroGrafos::Algoritmo::AnalizarRed: ImGui::TextUnformatted("Analisis: Calcula metricas topologicas como densidad, hubs, etc."); break;
@@ -105,13 +105,13 @@ inline void selectorCiudad(const char* label, int& ciudad_id,
 
 // ── Panel principal ───────────────────────────────────────────────────────
 inline void dibujar(Interfaz& self, Grafo& red) {
-    ImGui::Begin("AeroGrafos");
+    ImGui::Begin("Opciones FlightNet");
 
     const auto& ciudades = DatosMundo::obtenerCiudades();
     auto& estado = self.estado_aerografos;
 
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
-        ICON_FA_PLANE " AEROGRAFOS");
+        ICON_FA_PLANE " FLIGHTNET");
     ImGui::TextDisabled("Red de rutas aereas mundiales");
     ImGui::Separator();
 
@@ -363,12 +363,13 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 estado.aristas_mst.clear();
                 char buf[256];
                 snprintf(buf, sizeof(buf),
-                    ICON_FA_PAINTBRUSH " Coloreo: %d colores usados (greedy)",
+                    ICON_FA_PAINTBRUSH " Coloreo: %d frecuencias distintas asignadas.\n"
+                    "Regla cumplida: Ninguna ciudad conectada directamente comparte el mismo color/frecuencia.",
                     res.num_colores);
                 estado.descripcion_resultado = buf;
                 char msg[192];
                 snprintf(msg, sizeof(msg),
-                    ICON_FA_CHECK " Coloreo: %d colores", res.num_colores);
+                    ICON_FA_CHECK " Coloreo: %d colores (0 conflictos)", res.num_colores);
                 estado.agregarMensaje(msg, IM_COL32(180,130,255,255), 5.0f);
                 estado.algoritmo_ejecutado = true;
                 if (estado.modo_animacion) {
@@ -501,7 +502,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     ImGui::PopStyleColor();
     ImGui::EndDisabled();
 
-    // ── Animación: Controles ──
+    // Animación y Controles
     if (estado.animacion.activa) {
         ImGui::Spacing();
         ImGui::Separator();
@@ -521,13 +522,13 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         float ancho_boton = (ImGui::GetContentRegionAvail().x - 12.0f) / 4.0f;
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
-        // Step back
+        // ir paso atras en la animacion
         if (ImGui::Button(ICON_FA_BACKWARD_STEP, ImVec2(ancho_boton, 30))) {
             Animacion::pasoAtras(estado.animacion);
         }
         ImGui::SameLine();
 
-        // Play/Pause
+        // play/pausa de la animacion
         const char* btn_pp = estado.animacion.pausada
             ? ICON_FA_PLAY " Play"
             : ICON_FA_PAUSE " Pause";
@@ -536,13 +537,13 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         }
         ImGui::SameLine();
 
-        // Step forward
+        // ir paso a paso en la animacion
         if (ImGui::Button(ICON_FA_FORWARD_STEP, ImVec2(ancho_boton, 30))) {
             Animacion::pasoAdelante(estado.animacion);
         }
         ImGui::SameLine();
 
-        // Skip to end
+        // saltar al final de la animacion
         if (estado.animacion.completa) {
             if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(ancho_boton, 30))) {
                 Animacion::reset(estado.animacion);
@@ -588,17 +589,25 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 ImGui::SameLine();
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
             };
-            if (!estado.animacion.exploradas.empty()) {
-                dibujarLegend(IM_COL32(80, 160, 255, 220), "Explorando");
-            }
-            if (!estado.animacion.procesando.empty()) {
-                dibujarLegend(IM_COL32(255, 220, 50, 220), "Procesando");
-            }
-            if (!estado.animacion.confirmadas.empty()) {
-                dibujarLegend(IM_COL32(0, 255, 100, 220), "Confirmado");
-            }
-            if (!estado.animacion.descartadas.empty()) {
-                dibujarLegend(IM_COL32(255, 80, 80, 180), "Descartado");
+            if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ColorearRegiones) {
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), ICON_FA_CIRCLE_INFO " Que hace esto?");
+                ImGui::PushTextWrapPos(0.0f);
+                ImGui::TextWrapped("Busca el primer color disponible que no esten usando sus vecinos directos. Esto asegura que dos ciudades conectadas nunca tengan el mismo color (util para asignar frecuencias de radio sin interferencia).");
+                ImGui::PopTextWrapPos();
+            } else {
+                if (!estado.animacion.exploradas.empty()) {
+                    dibujarLegend(IM_COL32(80, 160, 255, 220), "Explorando");
+                }
+                if (!estado.animacion.procesando.empty()) {
+                    dibujarLegend(IM_COL32(255, 220, 50, 220), "Procesando");
+                }
+                if (!estado.animacion.confirmadas.empty()) {
+                    dibujarLegend(IM_COL32(0, 255, 100, 220), "Confirmado");
+                }
+                if (!estado.animacion.descartadas.empty()) {
+                    dibujarLegend(IM_COL32(255, 80, 80, 180), "Descartado");
+                }
             }
         }
     }
