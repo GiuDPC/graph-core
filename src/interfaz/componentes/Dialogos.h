@@ -21,8 +21,8 @@ void acercaDe() {
         ImGui::Text("graphCore");
         ImGui::PopStyleColor();
         
-        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v2.0").x) * 0.5f);
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.7f, 1.0f), "graph-core v2.0");
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v3.0").x) * 0.5f);
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.7f, 1.0f), "graph-core v3.0");
         
         ImGui::Spacing();
         ImGui::Separator();
@@ -33,7 +33,7 @@ void acercaDe() {
             "Motor avanzado de visualizacion y analisis de grafos y redes. "
             "Incluye algoritmos de caminos minimos, arboles de expansion, "
             "busqueda, ciclos, coloreo, isomorfismo, simulacion de redes "
-            "y mas.");
+            "y nuevo motor fisico QuadTree (Force Atlas 2).");
         
         ImGui::Spacing();
         ImGui::Separator();

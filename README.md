@@ -1,6 +1,6 @@
 # GraphCore: Analizador Visual de Grafos y Redes Aéreas Mundiales
 
-Versión 2.5.0 (Edición para Proyector / Defensa Académica). Aplicación de escritorio avanzada diseñada para la visualización interactiva y el estudio profundo de algoritmos aplicados sobre grafos matemáticos y redes de transporte reales.
+Versión 3.0.0 (Edición para Proyector / Defensa Académica). Aplicación de escritorio avanzada diseñada para la visualización interactiva y el estudio profundo de algoritmos aplicados sobre grafos matemáticos y redes de transporte reales.
 
 Desarrollada con **C++17**, **Dear ImGui**, **GLFW**, y renderizado acelerado por **OpenGL 3.3**.
 
