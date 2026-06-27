@@ -88,11 +88,10 @@ inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     // Layout para AeroGrafos: mapa mundial ocupa el centro, panel de control a la derecha
     if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
         ImGui::DockBuilderDockWindow("Info del Grafo", izq);
-        ImGui::DockBuilderDockWindow("AeroGrafos", der);
-        ImGui::DockBuilderDockWindow("Mapa FlightNet", main);
-        ImGui::DockBuilderDockWindow("Matrices", main);
+        ImGui::DockBuilderDockWindow("Opciones AeroGrafos", der);
+        ImGui::DockBuilderDockWindow("Mapa AeroGrafos", main);
         ImGui::DockBuilderDockWindow("Registro del Kernel", main);
-        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Mapa FlightNet");
+        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Mapa AeroGrafos");
     }
 }
 
@@ -331,8 +330,8 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
         PanelGrafos::sidebarInfo(*this, red);
         PanelGrafos::panelContextual(*this, red);
         LienzoRed::dibujar(red, *this);
+        Matrices::dibujar(red, *this);
     }
-    Matrices::dibujar(red, *this);
     LogPanel::dibujar(*this);
 
     // dialogos modales 

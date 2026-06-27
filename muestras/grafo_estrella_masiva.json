@@ -1,0 +1,915 @@
+{
+    "nodos": [
+        {
+            "id": 0,
+            "nombre": "Core",
+            "tipo": 2,
+            "estado": 0,
+            "x": 0,
+            "y": 0,
+            "radio": 25
+        },
+        {
+            "id": 1,
+            "nombre": "Edge 1",
+            "tipo": 4,
+            "estado": 0,
+            "x": 297.6344103943434,
+            "y": 37.599970069291274,
+            "radio": 12
+        },
+        {
+            "id": 2,
+            "nombre": "Edge 2",
+            "tipo": 4,
+            "estado": 0,
+            "x": 290.5749483385893,
+            "y": 74.60696614945644,
+            "radio": 12
+        },
+        {
+            "id": 3,
+            "nombre": "Edge 3",
+            "tipo": 4,
+            "estado": 0,
+            "x": 278.9329457664754,
+            "y": 110.43736580540337,
+            "radio": 12
+        },
+        {
+            "id": 4,
+            "nombre": "Edge 4",
+            "tipo": 4,
+            "estado": 0,
+            "x": 262.89200401315907,
+            "y": 144.5261022305146,
+            "radio": 12
+        },
+        {
+            "id": 5,
+            "nombre": "Edge 5",
+            "tipo": 4,
+            "estado": 0,
+            "x": 242.70509831248424,
+            "y": 176.33557568774194,
+            "radio": 12
+        },
+        {
+            "id": 6,
+            "nombre": "Edge 6",
+            "tipo": 4,
+            "estado": 0,
+            "x": 218.69058822642347,
+            "y": 205.36413177860658,
+            "radio": 12
+        },
+        {
+            "id": 7,
+            "nombre": "Edge 7",
+            "tipo": 4,
+            "estado": 0,
+            "x": 191.2271969246069,
+            "y": 231.15397283273677,
+            "radio": 12
+        },
+        {
+            "id": 8,
+            "nombre": "Edge 8",
+            "tipo": 4,
+            "estado": 0,
+            "x": 160.74803849369897,
+            "y": 253.29837765060452,
+            "radio": 12
+        },
+        {
+            "id": 9,
+            "nombre": "Edge 9",
+            "tipo": 4,
+            "estado": 0,
+            "x": 127.7337874695218,
+            "y": 271.44811573980587,
+            "radio": 12
+        },
+        {
+            "id": 10,
+            "nombre": "Edge 10",
+            "tipo": 4,
+            "estado": 0,
+            "x": 92.70509831248424,
+            "y": 285.31695488854604,
+            "radio": 12
+        },
+        {
+            "id": 11,
+            "nombre": "Edge 11",
+            "tipo": 4,
+            "estado": 0,
+            "x": 56.21439437571742,
+            "y": 294.6861752186066,
+            "radio": 12
+        },
+        {
+            "id": 12,
+            "nombre": "Edge 12",
+            "tipo": 4,
+            "estado": 0,
+            "x": 18.83715585879406,
+            "y": 299.4080185284815,
+            "radio": 12
+        },
+        {
+            "id": 13,
+            "nombre": "Edge 13",
+            "tipo": 4,
+            "estado": 0,
+            "x": -18.83715585879402,
+            "y": 299.4080185284815,
+            "radio": 12
+        },
+        {
+            "id": 14,
+            "nombre": "Edge 14",
+            "tipo": 4,
+            "estado": 0,
+            "x": -56.21439437571745,
+            "y": 294.6861752186066,
+            "radio": 12
+        },
+        {
+            "id": 15,
+            "nombre": "Edge 15",
+            "tipo": 4,
+            "estado": 0,
+            "x": -92.7050983124842,
+            "y": 285.3169548885461,
+            "radio": 12
+        },
+        {
+            "id": 16,
+            "nombre": "Edge 16",
+            "tipo": 4,
+            "estado": 0,
+            "x": -127.73378746952181,
+            "y": 271.4481157398058,
+            "radio": 12
+        },
+        {
+            "id": 17,
+            "nombre": "Edge 17",
+            "tipo": 4,
+            "estado": 0,
+            "x": -160.74803849369906,
+            "y": 253.2983776506045,
+            "radio": 12
+        },
+        {
+            "id": 18,
+            "nombre": "Edge 18",
+            "tipo": 4,
+            "estado": 0,
+            "x": -191.22719692460691,
+            "y": 231.15397283273677,
+            "radio": 12
+        },
+        {
+            "id": 19,
+            "nombre": "Edge 19",
+            "tipo": 4,
+            "estado": 0,
+            "x": -218.6905882264234,
+            "y": 205.36413177860666,
+            "radio": 12
+        },
+        {
+            "id": 20,
+            "nombre": "Edge 20",
+            "tipo": 4,
+            "estado": 0,
+            "x": -242.7050983124842,
+            "y": 176.33557568774197,
+            "radio": 12
+        },
+        {
+            "id": 21,
+            "nombre": "Edge 21",
+            "tipo": 4,
+            "estado": 0,
+            "x": -262.892004013159,
+            "y": 144.52610223051468,
+            "radio": 12
+        },
+        {
+            "id": 22,
+            "nombre": "Edge 22",
+            "tipo": 4,
+            "estado": 0,
+            "x": -278.9329457664754,
+            "y": 110.43736580540345,
+            "radio": 12
+        },
+        {
+            "id": 23,
+            "nombre": "Edge 23",
+            "tipo": 4,
+            "estado": 0,
+            "x": -290.5749483385893,
+            "y": 74.60696614945644,
+            "radio": 12
+        },
+        {
+            "id": 24,
+            "nombre": "Edge 24",
+            "tipo": 4,
+            "estado": 0,
+            "x": -297.6344103943433,
+            "y": 37.59997006929136,
+            "radio": 12
+        },
+        {
+            "id": 25,
+            "nombre": "Edge 25",
+            "tipo": 4,
+            "estado": 0,
+            "x": -300.0,
+            "y": 3.6739403974420595e-14,
+            "radio": 12
+        },
+        {
+            "id": 26,
+            "nombre": "Edge 26",
+            "tipo": 4,
+            "estado": 0,
+            "x": -297.6344103943434,
+            "y": -37.59997006929129,
+            "radio": 12
+        },
+        {
+            "id": 27,
+            "nombre": "Edge 27",
+            "tipo": 4,
+            "estado": 0,
+            "x": -290.5749483385893,
+            "y": -74.60696614945651,
+            "radio": 12
+        },
+        {
+            "id": 28,
+            "nombre": "Edge 28",
+            "tipo": 4,
+            "estado": 0,
+            "x": -278.93294576647537,
+            "y": -110.43736580540349,
+            "radio": 12
+        },
+        {
+            "id": 29,
+            "nombre": "Edge 29",
+            "tipo": 4,
+            "estado": 0,
+            "x": -262.8920040131591,
+            "y": -144.5261022305145,
+            "radio": 12
+        },
+        {
+            "id": 30,
+            "nombre": "Edge 30",
+            "tipo": 4,
+            "estado": 0,
+            "x": -242.70509831248427,
+            "y": -176.3355756877419,
+            "radio": 12
+        },
+        {
+            "id": 31,
+            "nombre": "Edge 31",
+            "tipo": 4,
+            "estado": 0,
+            "x": -218.69058822642347,
+            "y": -205.3641317786066,
+            "radio": 12
+        },
+        {
+            "id": 32,
+            "nombre": "Edge 32",
+            "tipo": 4,
+            "estado": 0,
+            "x": -191.22719692460686,
+            "y": -231.1539728327368,
+            "radio": 12
+        },
+        {
+            "id": 33,
+            "nombre": "Edge 33",
+            "tipo": 4,
+            "estado": 0,
+            "x": -160.74803849369889,
+            "y": -253.29837765060458,
+            "radio": 12
+        },
+        {
+            "id": 34,
+            "nombre": "Edge 34",
+            "tipo": 4,
+            "estado": 0,
+            "x": -127.73378746952164,
+            "y": -271.4481157398059,
+            "radio": 12
+        },
+        {
+            "id": 35,
+            "nombre": "Edge 35",
+            "tipo": 4,
+            "estado": 0,
+            "x": -92.70509831248427,
+            "y": -285.31695488854604,
+            "radio": 12
+        },
+        {
+            "id": 36,
+            "nombre": "Edge 36",
+            "tipo": 4,
+            "estado": 0,
+            "x": -56.21439437571739,
+            "y": -294.6861752186066,
+            "radio": 12
+        },
+        {
+            "id": 37,
+            "nombre": "Edge 37",
+            "tipo": 4,
+            "estado": 0,
+            "x": -18.837155858793963,
+            "y": -299.4080185284815,
+            "radio": 12
+        },
+        {
+            "id": 38,
+            "nombre": "Edge 38",
+            "tipo": 4,
+            "estado": 0,
+            "x": 18.83715585879385,
+            "y": -299.4080185284815,
+            "radio": 12
+        },
+        {
+            "id": 39,
+            "nombre": "Edge 39",
+            "tipo": 4,
+            "estado": 0,
+            "x": 56.21439437571728,
+            "y": -294.6861752186066,
+            "radio": 12
+        },
+        {
+            "id": 40,
+            "nombre": "Edge 40",
+            "tipo": 4,
+            "estado": 0,
+            "x": 92.70509831248417,
+            "y": -285.3169548885461,
+            "radio": 12
+        },
+        {
+            "id": 41,
+            "nombre": "Edge 41",
+            "tipo": 4,
+            "estado": 0,
+            "x": 127.73378746952154,
+            "y": -271.448115739806,
+            "radio": 12
+        },
+        {
+            "id": 42,
+            "nombre": "Edge 42",
+            "tipo": 4,
+            "estado": 0,
+            "x": 160.7480384936988,
+            "y": -253.29837765060466,
+            "radio": 12
+        },
+        {
+            "id": 43,
+            "nombre": "Edge 43",
+            "tipo": 4,
+            "estado": 0,
+            "x": 191.2271969246068,
+            "y": -231.15397283273688,
+            "radio": 12
+        },
+        {
+            "id": 44,
+            "nombre": "Edge 44",
+            "tipo": 4,
+            "estado": 0,
+            "x": 218.69058822642336,
+            "y": -205.3641317786067,
+            "radio": 12
+        },
+        {
+            "id": 45,
+            "nombre": "Edge 45",
+            "tipo": 4,
+            "estado": 0,
+            "x": 242.7050983124842,
+            "y": -176.335575687742,
+            "radio": 12
+        },
+        {
+            "id": 46,
+            "nombre": "Edge 46",
+            "tipo": 4,
+            "estado": 0,
+            "x": 262.89200401315907,
+            "y": -144.5261022305146,
+            "radio": 12
+        },
+        {
+            "id": 47,
+            "nombre": "Edge 47",
+            "tipo": 4,
+            "estado": 0,
+            "x": 278.9329457664753,
+            "y": -110.43736580540362,
+            "radio": 12
+        },
+        {
+            "id": 48,
+            "nombre": "Edge 48",
+            "tipo": 4,
+            "estado": 0,
+            "x": 290.5749483385893,
+            "y": -74.60696614945661,
+            "radio": 12
+        },
+        {
+            "id": 49,
+            "nombre": "Edge 49",
+            "tipo": 4,
+            "estado": 0,
+            "x": 297.6344103943433,
+            "y": -37.599970069291395,
+            "radio": 12
+        },
+        {
+            "id": 50,
+            "nombre": "Edge 50",
+            "tipo": 4,
+            "estado": 0,
+            "x": 300.0,
+            "y": -7.347880794884119e-14,
+            "radio": 12
+        }
+    ],
+    "aristas": [
+        {
+            "origen": 0,
+            "destino": 1,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 2,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 3,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 4,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 5,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 6,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 7,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 8,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 9,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 10,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 11,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 12,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 13,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 14,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 15,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 16,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 17,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 18,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 19,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 20,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 21,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 22,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 23,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 24,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 25,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 26,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 27,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 28,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 29,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 30,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 31,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 32,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 33,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 34,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 35,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 36,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 37,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 38,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 39,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 40,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 41,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 42,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 43,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 44,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 45,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 46,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 47,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 48,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 49,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 50,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        }
+    ]
+}

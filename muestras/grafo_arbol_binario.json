@@ -1,0 +1,2283 @@
+{
+    "nodos": [
+        {
+            "id": 0,
+            "nombre": "Nodo 0",
+            "tipo": 0,
+            "estado": 0,
+            "x": 12.614666457972774,
+            "y": 88.8218913705509,
+            "radio": 15
+        },
+        {
+            "id": 1,
+            "nombre": "Nodo 1",
+            "tipo": 1,
+            "estado": 0,
+            "x": 0.9769031030822646,
+            "y": 22.089851487983523,
+            "radio": 15
+        },
+        {
+            "id": 2,
+            "nombre": "Nodo 2",
+            "tipo": 1,
+            "estado": 0,
+            "x": 21.456405486135722,
+            "y": -97.77221705067262,
+            "radio": 15
+        },
+        {
+            "id": 3,
+            "nombre": "Nodo 3",
+            "tipo": 1,
+            "estado": 0,
+            "x": 18.709145659298997,
+            "y": 45.42569202369489,
+            "radio": 15
+        },
+        {
+            "id": 4,
+            "nombre": "Nodo 4",
+            "tipo": 1,
+            "estado": 0,
+            "x": -72.59990089477057,
+            "y": 69.7139647307886,
+            "radio": 15
+        },
+        {
+            "id": 5,
+            "nombre": "Nodo 5",
+            "tipo": 1,
+            "estado": 0,
+            "x": 68.75547990579565,
+            "y": -17.479502509687237,
+            "radio": 15
+        },
+        {
+            "id": 6,
+            "nombre": "Nodo 6",
+            "tipo": 1,
+            "estado": 0,
+            "x": -84.37290285431847,
+            "y": 50.04625862293801,
+            "radio": 15
+        },
+        {
+            "id": 7,
+            "nombre": "Nodo 7",
+            "tipo": 1,
+            "estado": 0,
+            "x": 17.16800131793326,
+            "y": -27.00419658738842,
+            "radio": 15
+        },
+        {
+            "id": 8,
+            "nombre": "Nodo 8",
+            "tipo": 1,
+            "estado": 0,
+            "x": 99.8734043362459,
+            "y": -96.03788597833494,
+            "radio": 15
+        },
+        {
+            "id": 9,
+            "nombre": "Nodo 9",
+            "tipo": 1,
+            "estado": 0,
+            "x": -95.6732543106886,
+            "y": -51.91737980263622,
+            "radio": 15
+        },
+        {
+            "id": 10,
+            "nombre": "Nodo 10",
+            "tipo": 1,
+            "estado": 0,
+            "x": -36.857264929644074,
+            "y": -11.154467001051799,
+            "radio": 15
+        },
+        {
+            "id": 11,
+            "nombre": "Nodo 11",
+            "tipo": 1,
+            "estado": 0,
+            "x": -58.67013142656066,
+            "y": -1.2754884255450065,
+            "radio": 15
+        },
+        {
+            "id": 12,
+            "nombre": "Nodo 12",
+            "tipo": 1,
+            "estado": 0,
+            "x": 48.932004087866346,
+            "y": -44.48344286938013,
+            "radio": 15
+        },
+        {
+            "id": 13,
+            "nombre": "Nodo 13",
+            "tipo": 1,
+            "estado": 0,
+            "x": 67.97910703969282,
+            "y": 5.756792779854123,
+            "radio": 15
+        },
+        {
+            "id": 14,
+            "nombre": "Nodo 14",
+            "tipo": 1,
+            "estado": 0,
+            "x": 6.126560493748798,
+            "y": -24.151457905406204,
+            "radio": 15
+        },
+        {
+            "id": 15,
+            "nombre": "Nodo 15",
+            "tipo": 1,
+            "estado": 0,
+            "x": -95.32300024139695,
+            "y": -43.38274813662464,
+            "radio": 15
+        },
+        {
+            "id": 16,
+            "nombre": "Nodo 16",
+            "tipo": 1,
+            "estado": 0,
+            "x": 77.1113212216145,
+            "y": 80.4541903438421,
+            "radio": 15
+        },
+        {
+            "id": 17,
+            "nombre": "Nodo 17",
+            "tipo": 1,
+            "estado": 0,
+            "x": 52.936452352322334,
+            "y": -61.339851317230234,
+            "radio": 15
+        },
+        {
+            "id": 18,
+            "nombre": "Nodo 18",
+            "tipo": 1,
+            "estado": 0,
+            "x": 42.193862949133376,
+            "y": 92.9207036643462,
+            "radio": 15
+        },
+        {
+            "id": 19,
+            "nombre": "Nodo 19",
+            "tipo": 1,
+            "estado": 0,
+            "x": -34.42962719458214,
+            "y": -97.13450039469083,
+            "radio": 15
+        },
+        {
+            "id": 20,
+            "nombre": "Nodo 20",
+            "tipo": 1,
+            "estado": 0,
+            "x": 25.042380888598984,
+            "y": -55.90834538639851,
+            "radio": 15
+        },
+        {
+            "id": 21,
+            "nombre": "Nodo 21",
+            "tipo": 1,
+            "estado": 0,
+            "x": -15.82288234568972,
+            "y": 99.9418103417579,
+            "radio": 15
+        },
+        {
+            "id": 22,
+            "nombre": "Nodo 22",
+            "tipo": 1,
+            "estado": 0,
+            "x": -8.498389221309083,
+            "y": 98.28649361210722,
+            "radio": 15
+        },
+        {
+            "id": 23,
+            "nombre": "Nodo 23",
+            "tipo": 1,
+            "estado": 0,
+            "x": 2.794616488940747,
+            "y": -25.455185598422986,
+            "radio": 15
+        },
+        {
+            "id": 24,
+            "nombre": "Nodo 24",
+            "tipo": 1,
+            "estado": 0,
+            "x": 1.1660004440268636,
+            "y": 37.91629223032669,
+            "radio": 15
+        },
+        {
+            "id": 25,
+            "nombre": "Nodo 25",
+            "tipo": 1,
+            "estado": 0,
+            "x": -90.35280902770214,
+            "y": 25.134055889872386,
+            "radio": 15
+        },
+        {
+            "id": 26,
+            "nombre": "Nodo 26",
+            "tipo": 1,
+            "estado": 0,
+            "x": 62.40611271363605,
+            "y": 12.133164991933683,
+            "radio": 15
+        },
+        {
+            "id": 27,
+            "nombre": "Nodo 27",
+            "tipo": 1,
+            "estado": 0,
+            "x": 38.14298620565717,
+            "y": 79.97477336384574,
+            "radio": 15
+        },
+        {
+            "id": 28,
+            "nombre": "Nodo 28",
+            "tipo": 1,
+            "estado": 0,
+            "x": 25.333799218195068,
+            "y": 68.06078538289043,
+            "radio": 15
+        },
+        {
+            "id": 29,
+            "nombre": "Nodo 29",
+            "tipo": 1,
+            "estado": 0,
+            "x": -90.62196915342484,
+            "y": -84.41346517749892,
+            "radio": 15
+        },
+        {
+            "id": 30,
+            "nombre": "Nodo 30",
+            "tipo": 1,
+            "estado": 0,
+            "x": -78.16128228424428,
+            "y": -46.77578310221742,
+            "radio": 15
+        },
+        {
+            "id": 31,
+            "nombre": "Nodo 31",
+            "tipo": 1,
+            "estado": 0,
+            "x": -29.516645279301883,
+            "y": -9.458971914795967,
+            "radio": 15
+        },
+        {
+            "id": 32,
+            "nombre": "Nodo 32",
+            "tipo": 1,
+            "estado": 0,
+            "x": 33.8205862019895,
+            "y": 18.46760347698111,
+            "radio": 15
+        },
+        {
+            "id": 33,
+            "nombre": "Nodo 33",
+            "tipo": 1,
+            "estado": 0,
+            "x": 43.82259076132715,
+            "y": 44.13200239510883,
+            "radio": 15
+        },
+        {
+            "id": 34,
+            "nombre": "Nodo 34",
+            "tipo": 1,
+            "estado": 0,
+            "x": 74.82074073202253,
+            "y": 74.13139794469558,
+            "radio": 15
+        },
+        {
+            "id": 35,
+            "nombre": "Nodo 35",
+            "tipo": 1,
+            "estado": 0,
+            "x": -89.49023166233705,
+            "y": 1.6293854736769475,
+            "radio": 15
+        },
+        {
+            "id": 36,
+            "nombre": "Nodo 36",
+            "tipo": 1,
+            "estado": 0,
+            "x": -33.20765918837478,
+            "y": 60.00126870616165,
+            "radio": 15
+        },
+        {
+            "id": 37,
+            "nombre": "Nodo 37",
+            "tipo": 1,
+            "estado": 0,
+            "x": 75.54914740145443,
+            "y": 70.02218294205832,
+            "radio": 15
+        },
+        {
+            "id": 38,
+            "nombre": "Nodo 38",
+            "tipo": 1,
+            "estado": 0,
+            "x": -15.026734916813254,
+            "y": 4.984399693341828,
+            "radio": 15
+        },
+        {
+            "id": 39,
+            "nombre": "Nodo 39",
+            "tipo": 1,
+            "estado": 0,
+            "x": 60.03535960283361,
+            "y": 22.53791088767801,
+            "radio": 15
+        },
+        {
+            "id": 40,
+            "nombre": "Nodo 40",
+            "tipo": 1,
+            "estado": 0,
+            "x": -1.6188679540727122,
+            "y": -21.68553644057934,
+            "radio": 15
+        },
+        {
+            "id": 41,
+            "nombre": "Nodo 41",
+            "tipo": 1,
+            "estado": 0,
+            "x": -98.54854066801668,
+            "y": -91.21580731739687,
+            "radio": 15
+        },
+        {
+            "id": 42,
+            "nombre": "Nodo 42",
+            "tipo": 1,
+            "estado": 0,
+            "x": 74.81133229588195,
+            "y": -22.791639563731977,
+            "radio": 15
+        },
+        {
+            "id": 43,
+            "nombre": "Nodo 43",
+            "tipo": 1,
+            "estado": 0,
+            "x": -52.64115508265912,
+            "y": 73.32387966847233,
+            "radio": 15
+        },
+        {
+            "id": 44,
+            "nombre": "Nodo 44",
+            "tipo": 1,
+            "estado": 0,
+            "x": -5.97041186811434,
+            "y": 34.38709087380752,
+            "radio": 15
+        },
+        {
+            "id": 45,
+            "nombre": "Nodo 45",
+            "tipo": 1,
+            "estado": 0,
+            "x": -41.31662302067287,
+            "y": 85.85059232566019,
+            "radio": 15
+        },
+        {
+            "id": 46,
+            "nombre": "Nodo 46",
+            "tipo": 1,
+            "estado": 0,
+            "x": 28.25218121104797,
+            "y": 88.21658136638706,
+            "radio": 15
+        },
+        {
+            "id": 47,
+            "nombre": "Nodo 47",
+            "tipo": 1,
+            "estado": 0,
+            "x": 40.37304881779667,
+            "y": 65.4812473883413,
+            "radio": 15
+        },
+        {
+            "id": 48,
+            "nombre": "Nodo 48",
+            "tipo": 1,
+            "estado": 0,
+            "x": -52.060110610320585,
+            "y": 20.248692787261092,
+            "radio": 15
+        },
+        {
+            "id": 49,
+            "nombre": "Nodo 49",
+            "tipo": 1,
+            "estado": 0,
+            "x": 34.994423977256474,
+            "y": 56.42547743473773,
+            "radio": 15
+        },
+        {
+            "id": 50,
+            "nombre": "Nodo 50",
+            "tipo": 1,
+            "estado": 0,
+            "x": 52.82814804517557,
+            "y": -63.23541671625461,
+            "radio": 15
+        },
+        {
+            "id": 51,
+            "nombre": "Nodo 51",
+            "tipo": 1,
+            "estado": 0,
+            "x": -74.52624318935379,
+            "y": 48.59683324707592,
+            "radio": 15
+        },
+        {
+            "id": 52,
+            "nombre": "Nodo 52",
+            "tipo": 1,
+            "estado": 0,
+            "x": -78.50684999613722,
+            "y": -37.4372492345741,
+            "radio": 15
+        },
+        {
+            "id": 53,
+            "nombre": "Nodo 53",
+            "tipo": 1,
+            "estado": 0,
+            "x": -59.77924655622542,
+            "y": 74.31234634965926,
+            "radio": 15
+        },
+        {
+            "id": 54,
+            "nombre": "Nodo 54",
+            "tipo": 1,
+            "estado": 0,
+            "x": 82.19951387256543,
+            "y": 53.19019555420596,
+            "radio": 15
+        },
+        {
+            "id": 55,
+            "nombre": "Nodo 55",
+            "tipo": 1,
+            "estado": 0,
+            "x": 19.014954111842727,
+            "y": -29.157497282944703,
+            "radio": 15
+        },
+        {
+            "id": 56,
+            "nombre": "Nodo 56",
+            "tipo": 1,
+            "estado": 0,
+            "x": 95.60029981538574,
+            "y": -95.9773373534477,
+            "radio": 15
+        },
+        {
+            "id": 57,
+            "nombre": "Nodo 57",
+            "tipo": 1,
+            "estado": 0,
+            "x": 63.68568039394626,
+            "y": -20.39650563203719,
+            "radio": 15
+        },
+        {
+            "id": 58,
+            "nombre": "Nodo 58",
+            "tipo": 1,
+            "estado": 0,
+            "x": -88.35631506411046,
+            "y": -40.3713902874862,
+            "radio": 15
+        },
+        {
+            "id": 59,
+            "nombre": "Nodo 59",
+            "tipo": 1,
+            "estado": 0,
+            "x": 38.43505836874755,
+            "y": -74.8903094851781,
+            "radio": 15
+        },
+        {
+            "id": 60,
+            "nombre": "Nodo 60",
+            "tipo": 1,
+            "estado": 0,
+            "x": -38.28102240403375,
+            "y": -76.65303174620566,
+            "radio": 15
+        },
+        {
+            "id": 61,
+            "nombre": "Nodo 61",
+            "tipo": 1,
+            "estado": 0,
+            "x": -6.960737947308388,
+            "y": -71.10064115598604,
+            "radio": 15
+        },
+        {
+            "id": 62,
+            "nombre": "Nodo 62",
+            "tipo": 1,
+            "estado": 0,
+            "x": 4.930627826091154,
+            "y": -82.34475925692908,
+            "radio": 15
+        },
+        {
+            "id": 63,
+            "nombre": "Nodo 63",
+            "tipo": 4,
+            "estado": 0,
+            "x": 4.803384754775664,
+            "y": -96.71483390030151,
+            "radio": 15
+        },
+        {
+            "id": 64,
+            "nombre": "Nodo 64",
+            "tipo": 4,
+            "estado": 0,
+            "x": 93.99979876159844,
+            "y": 57.615982594640656,
+            "radio": 15
+        },
+        {
+            "id": 65,
+            "nombre": "Nodo 65",
+            "tipo": 4,
+            "estado": 0,
+            "x": -22.516904141363668,
+            "y": 30.429089381417896,
+            "radio": 15
+        },
+        {
+            "id": 66,
+            "nombre": "Nodo 66",
+            "tipo": 4,
+            "estado": 0,
+            "x": 56.695525305263914,
+            "y": 33.54060616918474,
+            "radio": 15
+        },
+        {
+            "id": 67,
+            "nombre": "Nodo 67",
+            "tipo": 4,
+            "estado": 0,
+            "x": -35.1423782916181,
+            "y": 80.68122481492694,
+            "radio": 15
+        },
+        {
+            "id": 68,
+            "nombre": "Nodo 68",
+            "tipo": 4,
+            "estado": 0,
+            "x": 13.466381559925281,
+            "y": -82.44480922519261,
+            "radio": 15
+        },
+        {
+            "id": 69,
+            "nombre": "Nodo 69",
+            "tipo": 4,
+            "estado": 0,
+            "x": 69.84811511344213,
+            "y": 71.39607925560279,
+            "radio": 15
+        },
+        {
+            "id": 70,
+            "nombre": "Nodo 70",
+            "tipo": 4,
+            "estado": 0,
+            "x": 12.119980730539794,
+            "y": -7.426692310537518,
+            "radio": 15
+        },
+        {
+            "id": 71,
+            "nombre": "Nodo 71",
+            "tipo": 4,
+            "estado": 0,
+            "x": -55.10608669525625,
+            "y": 80.61447550101383,
+            "radio": 15
+        },
+        {
+            "id": 72,
+            "nombre": "Nodo 72",
+            "tipo": 4,
+            "estado": 0,
+            "x": -99.16206162101307,
+            "y": 49.42694284845473,
+            "radio": 15
+        },
+        {
+            "id": 73,
+            "nombre": "Nodo 73",
+            "tipo": 4,
+            "estado": 0,
+            "x": 20.23574889228263,
+            "y": 77.31937537272665,
+            "radio": 15
+        },
+        {
+            "id": 74,
+            "nombre": "Nodo 74",
+            "tipo": 4,
+            "estado": 0,
+            "x": 19.475816945314477,
+            "y": 10.927173620330848,
+            "radio": 15
+        },
+        {
+            "id": 75,
+            "nombre": "Nodo 75",
+            "tipo": 4,
+            "estado": 0,
+            "x": -73.1871125824966,
+            "y": -21.28640380214955,
+            "radio": 15
+        },
+        {
+            "id": 76,
+            "nombre": "Nodo 76",
+            "tipo": 4,
+            "estado": 0,
+            "x": -21.9430517983279,
+            "y": 89.54276292800753,
+            "radio": 15
+        },
+        {
+            "id": 77,
+            "nombre": "Nodo 77",
+            "tipo": 4,
+            "estado": 0,
+            "x": -90.44523084467926,
+            "y": -25.63859795516248,
+            "radio": 15
+        },
+        {
+            "id": 78,
+            "nombre": "Nodo 78",
+            "tipo": 4,
+            "estado": 0,
+            "x": 83.4349379119283,
+            "y": 52.4124622815292,
+            "radio": 15
+        },
+        {
+            "id": 79,
+            "nombre": "Nodo 79",
+            "tipo": 4,
+            "estado": 0,
+            "x": 80.06294259093752,
+            "y": 61.47695358538522,
+            "radio": 15
+        },
+        {
+            "id": 80,
+            "nombre": "Nodo 80",
+            "tipo": 4,
+            "estado": 0,
+            "x": 29.181617718969818,
+            "y": 27.194005714689112,
+            "radio": 15
+        },
+        {
+            "id": 81,
+            "nombre": "Nodo 81",
+            "tipo": 4,
+            "estado": 0,
+            "x": 57.70325797610579,
+            "y": 49.69328617136,
+            "radio": 15
+        },
+        {
+            "id": 82,
+            "nombre": "Nodo 82",
+            "tipo": 4,
+            "estado": 0,
+            "x": 85.11322331364025,
+            "y": 12.482724992506348,
+            "radio": 15
+        },
+        {
+            "id": 83,
+            "nombre": "Nodo 83",
+            "tipo": 4,
+            "estado": 0,
+            "x": -5.90031282106456,
+            "y": -17.72857397529978,
+            "radio": 15
+        },
+        {
+            "id": 84,
+            "nombre": "Nodo 84",
+            "tipo": 4,
+            "estado": 0,
+            "x": 57.73145350447243,
+            "y": -23.896371070418752,
+            "radio": 15
+        },
+        {
+            "id": 85,
+            "nombre": "Nodo 85",
+            "tipo": 4,
+            "estado": 0,
+            "x": -76.22728545599486,
+            "y": -43.94654499919992,
+            "radio": 15
+        },
+        {
+            "id": 86,
+            "nombre": "Nodo 86",
+            "tipo": 4,
+            "estado": 0,
+            "x": 13.351412034146776,
+            "y": -60.02091653125121,
+            "radio": 15
+        },
+        {
+            "id": 87,
+            "nombre": "Nodo 87",
+            "tipo": 4,
+            "estado": 0,
+            "x": -64.43452823506601,
+            "y": -24.816415749891064,
+            "radio": 15
+        },
+        {
+            "id": 88,
+            "nombre": "Nodo 88",
+            "tipo": 4,
+            "estado": 0,
+            "x": -2.2221802081955104,
+            "y": -77.33031465701059,
+            "radio": 15
+        },
+        {
+            "id": 89,
+            "nombre": "Nodo 89",
+            "tipo": 4,
+            "estado": 0,
+            "x": 26.299543277434267,
+            "y": -64.62608828737862,
+            "radio": 15
+        },
+        {
+            "id": 90,
+            "nombre": "Nodo 90",
+            "tipo": 4,
+            "estado": 0,
+            "x": 89.59068001803101,
+            "y": -32.76722394827014,
+            "radio": 15
+        },
+        {
+            "id": 91,
+            "nombre": "Nodo 91",
+            "tipo": 4,
+            "estado": 0,
+            "x": 67.51799835136052,
+            "y": -38.41679655336829,
+            "radio": 15
+        },
+        {
+            "id": 92,
+            "nombre": "Nodo 92",
+            "tipo": 4,
+            "estado": 0,
+            "x": -80.99797463330995,
+            "y": -36.315265697558054,
+            "radio": 15
+        },
+        {
+            "id": 93,
+            "nombre": "Nodo 93",
+            "tipo": 4,
+            "estado": 0,
+            "x": 79.48207381189408,
+            "y": 15.83875278673787,
+            "radio": 15
+        },
+        {
+            "id": 94,
+            "nombre": "Nodo 94",
+            "tipo": 4,
+            "estado": 0,
+            "x": 91.9711427230433,
+            "y": -40.75521384689149,
+            "radio": 15
+        },
+        {
+            "id": 95,
+            "nombre": "Nodo 95",
+            "tipo": 4,
+            "estado": 0,
+            "x": -80.78314202334627,
+            "y": 35.49202027219883,
+            "radio": 15
+        },
+        {
+            "id": 96,
+            "nombre": "Nodo 96",
+            "tipo": 4,
+            "estado": 0,
+            "x": -97.11489117115228,
+            "y": -55.09098499435379,
+            "radio": 15
+        },
+        {
+            "id": 97,
+            "nombre": "Nodo 97",
+            "tipo": 4,
+            "estado": 0,
+            "x": 92.91903443402859,
+            "y": -23.758804839206164,
+            "radio": 15
+        },
+        {
+            "id": 98,
+            "nombre": "Nodo 98",
+            "tipo": 4,
+            "estado": 0,
+            "x": -5.805528645685314,
+            "y": 20.468723352054496,
+            "radio": 15
+        },
+        {
+            "id": 99,
+            "nombre": "Nodo 99",
+            "tipo": 4,
+            "estado": 0,
+            "x": 81.34588034833831,
+            "y": 19.84318120340602,
+            "radio": 15
+        },
+        {
+            "id": 100,
+            "nombre": "Nodo 100",
+            "tipo": 4,
+            "estado": 0,
+            "x": 23.006887158455797,
+            "y": -64.42573684873275,
+            "radio": 15
+        },
+        {
+            "id": 101,
+            "nombre": "Nodo 101",
+            "tipo": 4,
+            "estado": 0,
+            "x": 85.4244841126019,
+            "y": -65.23549841201897,
+            "radio": 15
+        },
+        {
+            "id": 102,
+            "nombre": "Nodo 102",
+            "tipo": 4,
+            "estado": 0,
+            "x": -95.18391232824581,
+            "y": 38.58312242829061,
+            "radio": 15
+        },
+        {
+            "id": 103,
+            "nombre": "Nodo 103",
+            "tipo": 4,
+            "estado": 0,
+            "x": 99.4241175404706,
+            "y": -29.30398661903017,
+            "radio": 15
+        },
+        {
+            "id": 104,
+            "nombre": "Nodo 104",
+            "tipo": 4,
+            "estado": 0,
+            "x": 46.26926526676942,
+            "y": -30.106916202002637,
+            "radio": 15
+        },
+        {
+            "id": 105,
+            "nombre": "Nodo 105",
+            "tipo": 4,
+            "estado": 0,
+            "x": 79.30116327728197,
+            "y": -52.618369298369515,
+            "radio": 15
+        },
+        {
+            "id": 106,
+            "nombre": "Nodo 106",
+            "tipo": 4,
+            "estado": 0,
+            "x": 20.166114053430007,
+            "y": 4.2499493225122364,
+            "radio": 15
+        },
+        {
+            "id": 107,
+            "nombre": "Nodo 107",
+            "tipo": 4,
+            "estado": 0,
+            "x": -8.023315628608202,
+            "y": -35.77732784616923,
+            "radio": 15
+        },
+        {
+            "id": 108,
+            "nombre": "Nodo 108",
+            "tipo": 4,
+            "estado": 0,
+            "x": 15.527224673179603,
+            "y": 26.91624365402909,
+            "radio": 15
+        },
+        {
+            "id": 109,
+            "nombre": "Nodo 109",
+            "tipo": 4,
+            "estado": 0,
+            "x": 39.21058152035113,
+            "y": -36.76746295925255,
+            "radio": 15
+        },
+        {
+            "id": 110,
+            "nombre": "Nodo 110",
+            "tipo": 4,
+            "estado": 0,
+            "x": -18.965237726768322,
+            "y": 88.4690344176681,
+            "radio": 15
+        },
+        {
+            "id": 111,
+            "nombre": "Nodo 111",
+            "tipo": 4,
+            "estado": 0,
+            "x": -62.585205733913355,
+            "y": -24.02936026382143,
+            "radio": 15
+        },
+        {
+            "id": 112,
+            "nombre": "Nodo 112",
+            "tipo": 4,
+            "estado": 0,
+            "x": -1.0373835059958196,
+            "y": -21.413923097639184,
+            "radio": 15
+        },
+        {
+            "id": 113,
+            "nombre": "Nodo 113",
+            "tipo": 4,
+            "estado": 0,
+            "x": -10.981510871367476,
+            "y": 98.56345832459758,
+            "radio": 15
+        },
+        {
+            "id": 114,
+            "nombre": "Nodo 114",
+            "tipo": 4,
+            "estado": 0,
+            "x": 61.27958253726638,
+            "y": -96.99219589922396,
+            "radio": 15
+        },
+        {
+            "id": 115,
+            "nombre": "Nodo 115",
+            "tipo": 4,
+            "estado": 0,
+            "x": 50.409718654940406,
+            "y": -45.27046269690573,
+            "radio": 15
+        },
+        {
+            "id": 116,
+            "nombre": "Nodo 116",
+            "tipo": 4,
+            "estado": 0,
+            "x": -49.839511317237786,
+            "y": 98.98052357118345,
+            "radio": 15
+        },
+        {
+            "id": 117,
+            "nombre": "Nodo 117",
+            "tipo": 4,
+            "estado": 0,
+            "x": 88.07544807695223,
+            "y": -45.79600623283262,
+            "radio": 15
+        },
+        {
+            "id": 118,
+            "nombre": "Nodo 118",
+            "tipo": 4,
+            "estado": 0,
+            "x": 17.906164739613132,
+            "y": 2.8941030845104194,
+            "radio": 15
+        },
+        {
+            "id": 119,
+            "nombre": "Nodo 119",
+            "tipo": 4,
+            "estado": 0,
+            "x": 3.9981629214291416,
+            "y": -78.41095623114647,
+            "radio": 15
+        },
+        {
+            "id": 120,
+            "nombre": "Nodo 120",
+            "tipo": 4,
+            "estado": 0,
+            "x": -70.30521526118483,
+            "y": 50.794311703396204,
+            "radio": 15
+        },
+        {
+            "id": 121,
+            "nombre": "Nodo 121",
+            "tipo": 4,
+            "estado": 0,
+            "x": 39.77853793559561,
+            "y": 73.09031642505798,
+            "radio": 15
+        },
+        {
+            "id": 122,
+            "nombre": "Nodo 122",
+            "tipo": 4,
+            "estado": 0,
+            "x": 35.57864975601487,
+            "y": -92.88037672510545,
+            "radio": 15
+        },
+        {
+            "id": 123,
+            "nombre": "Nodo 123",
+            "tipo": 4,
+            "estado": 0,
+            "x": 55.67083240374927,
+            "y": 46.37493762837158,
+            "radio": 15
+        },
+        {
+            "id": 124,
+            "nombre": "Nodo 124",
+            "tipo": 4,
+            "estado": 0,
+            "x": -11.019645038215714,
+            "y": -34.68656663578584,
+            "radio": 15
+        },
+        {
+            "id": 125,
+            "nombre": "Nodo 125",
+            "tipo": 4,
+            "estado": 0,
+            "x": -67.37743698387908,
+            "y": -79.05097141724922,
+            "radio": 15
+        },
+        {
+            "id": 126,
+            "nombre": "Nodo 126",
+            "tipo": 4,
+            "estado": 0,
+            "x": -20.67748531748039,
+            "y": 84.1824688305856,
+            "radio": 15
+        }
+    ],
+    "aristas": [
+        {
+            "origen": 0,
+            "destino": 1,
+            "peso": 5.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 2,
+            "peso": 7.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 3,
+            "peso": 3.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 4,
+            "peso": 2.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 5,
+            "peso": 4.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 6,
+            "peso": 9.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 7,
+            "peso": 9.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 8,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 9,
+            "peso": 8.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 10,
+            "peso": 3.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 11,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 12,
+            "peso": 5.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 13,
+            "peso": 9.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 14,
+            "peso": 5.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 15,
+            "peso": 1.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 16,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 17,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 18,
+            "peso": 1.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 19,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 20,
+            "peso": 5.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 10,
+            "destino": 21,
+            "peso": 4.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 10,
+            "destino": 22,
+            "peso": 1.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 11,
+            "destino": 23,
+            "peso": 3.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 11,
+            "destino": 24,
+            "peso": 5.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 12,
+            "destino": 25,
+            "peso": 9.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 12,
+            "destino": 26,
+            "peso": 3.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 13,
+            "destino": 27,
+            "peso": 4.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 13,
+            "destino": 28,
+            "peso": 1.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 14,
+            "destino": 29,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 14,
+            "destino": 30,
+            "peso": 4.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 15,
+            "destino": 31,
+            "peso": 5.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 15,
+            "destino": 32,
+            "peso": 4.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 16,
+            "destino": 33,
+            "peso": 9.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 16,
+            "destino": 34,
+            "peso": 2.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 17,
+            "destino": 35,
+            "peso": 3.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 17,
+            "destino": 36,
+            "peso": 5.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 18,
+            "destino": 37,
+            "peso": 7.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 18,
+            "destino": 38,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 19,
+            "destino": 39,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 19,
+            "destino": 40,
+            "peso": 9.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 20,
+            "destino": 41,
+            "peso": 4.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 20,
+            "destino": 42,
+            "peso": 8.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 21,
+            "destino": 43,
+            "peso": 8.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 21,
+            "destino": 44,
+            "peso": 3.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 22,
+            "destino": 45,
+            "peso": 3.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 22,
+            "destino": 46,
+            "peso": 1.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 23,
+            "destino": 47,
+            "peso": 7.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 23,
+            "destino": 48,
+            "peso": 9.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 24,
+            "destino": 49,
+            "peso": 2.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 24,
+            "destino": 50,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 25,
+            "destino": 51,
+            "peso": 2.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 25,
+            "destino": 52,
+            "peso": 4.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 26,
+            "destino": 53,
+            "peso": 6.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 26,
+            "destino": 54,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 27,
+            "destino": 55,
+            "peso": 9.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 27,
+            "destino": 56,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 28,
+            "destino": 57,
+            "peso": 2.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 28,
+            "destino": 58,
+            "peso": 1.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 29,
+            "destino": 59,
+            "peso": 4.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 29,
+            "destino": 60,
+            "peso": 5.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 30,
+            "destino": 61,
+            "peso": 2.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 30,
+            "destino": 62,
+            "peso": 5.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 31,
+            "destino": 63,
+            "peso": 5.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 31,
+            "destino": 64,
+            "peso": 8.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 32,
+            "destino": 65,
+            "peso": 8.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 32,
+            "destino": 66,
+            "peso": 3.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 33,
+            "destino": 67,
+            "peso": 4.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 33,
+            "destino": 68,
+            "peso": 5.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 34,
+            "destino": 69,
+            "peso": 5.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 34,
+            "destino": 70,
+            "peso": 6.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 35,
+            "destino": 71,
+            "peso": 8.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 35,
+            "destino": 72,
+            "peso": 1.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 36,
+            "destino": 73,
+            "peso": 4.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 36,
+            "destino": 74,
+            "peso": 7.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 37,
+            "destino": 75,
+            "peso": 6.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 37,
+            "destino": 76,
+            "peso": 3.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 38,
+            "destino": 77,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 38,
+            "destino": 78,
+            "peso": 8.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 39,
+            "destino": 79,
+            "peso": 2.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 39,
+            "destino": 80,
+            "peso": 8.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 40,
+            "destino": 81,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 40,
+            "destino": 82,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 41,
+            "destino": 83,
+            "peso": 9.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 41,
+            "destino": 84,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 42,
+            "destino": 85,
+            "peso": 4.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 42,
+            "destino": 86,
+            "peso": 4.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 43,
+            "destino": 87,
+            "peso": 1.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 43,
+            "destino": 88,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 44,
+            "destino": 89,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 44,
+            "destino": 90,
+            "peso": 1.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 45,
+            "destino": 91,
+            "peso": 2.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 45,
+            "destino": 92,
+            "peso": 4.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 46,
+            "destino": 93,
+            "peso": 4.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 46,
+            "destino": 94,
+            "peso": 8.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 47,
+            "destino": 95,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 47,
+            "destino": 96,
+            "peso": 8.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 48,
+            "destino": 97,
+            "peso": 6.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 48,
+            "destino": 98,
+            "peso": 7.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 49,
+            "destino": 99,
+            "peso": 3.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 49,
+            "destino": 100,
+            "peso": 8.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 50,
+            "destino": 101,
+            "peso": 2.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 50,
+            "destino": 102,
+            "peso": 9.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 51,
+            "destino": 103,
+            "peso": 1.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 51,
+            "destino": 104,
+            "peso": 7.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 52,
+            "destino": 105,
+            "peso": 7.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 52,
+            "destino": 106,
+            "peso": 7.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 53,
+            "destino": 107,
+            "peso": 7.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 53,
+            "destino": 108,
+            "peso": 6.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 54,
+            "destino": 109,
+            "peso": 5.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 54,
+            "destino": 110,
+            "peso": 4.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 55,
+            "destino": 111,
+            "peso": 6.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 55,
+            "destino": 112,
+            "peso": 8.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 56,
+            "destino": 113,
+            "peso": 1.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 56,
+            "destino": 114,
+            "peso": 7.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 57,
+            "destino": 115,
+            "peso": 7.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 57,
+            "destino": 116,
+            "peso": 1.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 58,
+            "destino": 117,
+            "peso": 2.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 58,
+            "destino": 118,
+            "peso": 3.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 59,
+            "destino": 119,
+            "peso": 2.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 59,
+            "destino": 120,
+            "peso": 4.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 60,
+            "destino": 121,
+            "peso": 9.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 60,
+            "destino": 122,
+            "peso": 5.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 61,
+            "destino": 123,
+            "peso": 4.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 61,
+            "destino": 124,
+            "peso": 5.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 62,
+            "destino": 125,
+            "peso": 3.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 62,
+            "destino": 126,
+            "peso": 9.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        }
+    ]
+}

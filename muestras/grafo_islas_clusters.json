@@ -1,0 +1,1581 @@
+{
+    "nodos": [
+        {
+            "id": 0,
+            "nombre": "C0-N0",
+            "tipo": 1,
+            "estado": 0,
+            "x": 461.4491865345201,
+            "y": -73.16740415521102,
+            "radio": 12
+        },
+        {
+            "id": 1,
+            "nombre": "C0-N1",
+            "tipo": 1,
+            "estado": 0,
+            "x": 525.7793995025315,
+            "y": 35.3745831290029,
+            "radio": 12
+        },
+        {
+            "id": 2,
+            "nombre": "C0-N2",
+            "tipo": 1,
+            "estado": 0,
+            "x": 463.28402492359953,
+            "y": -18.756642722333197,
+            "radio": 12
+        },
+        {
+            "id": 3,
+            "nombre": "C0-N3",
+            "tipo": 1,
+            "estado": 0,
+            "x": 568.8337127215804,
+            "y": -50.39179133909186,
+            "radio": 12
+        },
+        {
+            "id": 4,
+            "nombre": "C0-N4",
+            "tipo": 1,
+            "estado": 0,
+            "x": 589.7186865478355,
+            "y": 50.588143991930195,
+            "radio": 12
+        },
+        {
+            "id": 5,
+            "nombre": "C0-N5",
+            "tipo": 1,
+            "estado": 0,
+            "x": 542.5768899068627,
+            "y": 29.757041268712186,
+            "radio": 12
+        },
+        {
+            "id": 6,
+            "nombre": "C0-N6",
+            "tipo": 1,
+            "estado": 0,
+            "x": 589.1817746153797,
+            "y": 38.87785386802983,
+            "radio": 12
+        },
+        {
+            "id": 7,
+            "nombre": "C0-N7",
+            "tipo": 1,
+            "estado": 0,
+            "x": 560.9233148671782,
+            "y": 38.30242197073207,
+            "radio": 12
+        },
+        {
+            "id": 8,
+            "nombre": "C0-N8",
+            "tipo": 1,
+            "estado": 0,
+            "x": 478.6461058537086,
+            "y": -99.6408386218426,
+            "radio": 12
+        },
+        {
+            "id": 9,
+            "nombre": "C0-N9",
+            "tipo": 1,
+            "estado": 0,
+            "x": 428.22686957116935,
+            "y": -45.201859112515685,
+            "radio": 12
+        },
+        {
+            "id": 10,
+            "nombre": "C0-N10",
+            "tipo": 1,
+            "estado": 0,
+            "x": 504.5977853409727,
+            "y": -12.979627906268519,
+            "radio": 12
+        },
+        {
+            "id": 11,
+            "nombre": "C0-N11",
+            "tipo": 1,
+            "estado": 0,
+            "x": 440.9916544419372,
+            "y": -80.40888863917334,
+            "radio": 12
+        },
+        {
+            "id": 12,
+            "nombre": "C0-N12",
+            "tipo": 1,
+            "estado": 0,
+            "x": 580.078159421857,
+            "y": 73.60173572322469,
+            "radio": 12
+        },
+        {
+            "id": 13,
+            "nombre": "C0-N13",
+            "tipo": 1,
+            "estado": 0,
+            "x": 409.61320626202587,
+            "y": -28.746048814685082,
+            "radio": 12
+        },
+        {
+            "id": 14,
+            "nombre": "C0-N14",
+            "tipo": 1,
+            "estado": 0,
+            "x": 469.44171460933615,
+            "y": 14.00292060258657,
+            "radio": 12
+        },
+        {
+            "id": 15,
+            "nombre": "C1-N0",
+            "tipo": 1,
+            "estado": 0,
+            "x": 178.98883211362022,
+            "y": 536.8798302990181,
+            "radio": 12
+        },
+        {
+            "id": 16,
+            "nombre": "C1-N1",
+            "tipo": 1,
+            "estado": 0,
+            "x": 194.07036581691713,
+            "y": 492.32969641317663,
+            "radio": 12
+        },
+        {
+            "id": 17,
+            "nombre": "C1-N2",
+            "tipo": 1,
+            "estado": 0,
+            "x": 180.0409471351203,
+            "y": 463.04324073959975,
+            "radio": 12
+        },
+        {
+            "id": 18,
+            "nombre": "C1-N3",
+            "tipo": 1,
+            "estado": 0,
+            "x": 236.07559842122,
+            "y": 442.0383637035985,
+            "radio": 12
+        },
+        {
+            "id": 19,
+            "nombre": "C1-N4",
+            "tipo": 1,
+            "estado": 0,
+            "x": 226.2249977392464,
+            "y": 505.7820321755269,
+            "radio": 12
+        },
+        {
+            "id": 20,
+            "nombre": "C1-N5",
+            "tipo": 1,
+            "estado": 0,
+            "x": 86.51461887569462,
+            "y": 477.84491581772687,
+            "radio": 12
+        },
+        {
+            "id": 21,
+            "nombre": "C1-N6",
+            "tipo": 1,
+            "estado": 0,
+            "x": 170.6940912714854,
+            "y": 481.4753655986225,
+            "radio": 12
+        },
+        {
+            "id": 22,
+            "nombre": "C1-N7",
+            "tipo": 1,
+            "estado": 0,
+            "x": 111.5765939695055,
+            "y": 489.363620006459,
+            "radio": 12
+        },
+        {
+            "id": 23,
+            "nombre": "C1-N8",
+            "tipo": 1,
+            "estado": 0,
+            "x": 58.53308877478311,
+            "y": 535.9840055873466,
+            "radio": 12
+        },
+        {
+            "id": 24,
+            "nombre": "C1-N9",
+            "tipo": 1,
+            "estado": 0,
+            "x": 62.66722421250705,
+            "y": 380.1379436621313,
+            "radio": 12
+        },
+        {
+            "id": 25,
+            "nombre": "C1-N10",
+            "tipo": 1,
+            "estado": 0,
+            "x": 214.93754810008448,
+            "y": 540.9903158030362,
+            "radio": 12
+        },
+        {
+            "id": 26,
+            "nombre": "C1-N11",
+            "tipo": 1,
+            "estado": 0,
+            "x": 196.93329409718228,
+            "y": 394.2688652592883,
+            "radio": 12
+        },
+        {
+            "id": 27,
+            "nombre": "C1-N12",
+            "tipo": 1,
+            "estado": 0,
+            "x": 161.15169435951498,
+            "y": 563.6713302527128,
+            "radio": 12
+        },
+        {
+            "id": 28,
+            "nombre": "C1-N13",
+            "tipo": 1,
+            "estado": 0,
+            "x": 164.0629025791994,
+            "y": 476.6376535636723,
+            "radio": 12
+        },
+        {
+            "id": 29,
+            "nombre": "C1-N14",
+            "tipo": 1,
+            "estado": 0,
+            "x": 184.3581614924043,
+            "y": 561.4527524422867,
+            "radio": 12
+        },
+        {
+            "id": 30,
+            "nombre": "C2-N0",
+            "tipo": 1,
+            "estado": 0,
+            "x": -327.1715331987041,
+            "y": 274.1960901390792,
+            "radio": 12
+        },
+        {
+            "id": 31,
+            "nombre": "C2-N1",
+            "tipo": 1,
+            "estado": 0,
+            "x": -492.29217891373816,
+            "y": 298.58968853423744,
+            "radio": 12
+        },
+        {
+            "id": 32,
+            "nombre": "C2-N2",
+            "tipo": 1,
+            "estado": 0,
+            "x": -314.14289305324064,
+            "y": 288.6626466390052,
+            "radio": 12
+        },
+        {
+            "id": 33,
+            "nombre": "C2-N3",
+            "tipo": 1,
+            "estado": 0,
+            "x": -347.10798012503557,
+            "y": 340.6943485168813,
+            "radio": 12
+        },
+        {
+            "id": 34,
+            "nombre": "C2-N4",
+            "tipo": 1,
+            "estado": 0,
+            "x": -457.8988628961085,
+            "y": 292.24691194878994,
+            "radio": 12
+        },
+        {
+            "id": 35,
+            "nombre": "C2-N5",
+            "tipo": 1,
+            "estado": 0,
+            "x": -436.78238027493734,
+            "y": 265.29068311764365,
+            "radio": 12
+        },
+        {
+            "id": 36,
+            "nombre": "C2-N6",
+            "tipo": 1,
+            "estado": 0,
+            "x": -374.334072780562,
+            "y": 343.7377699504361,
+            "radio": 12
+        },
+        {
+            "id": 37,
+            "nombre": "C2-N7",
+            "tipo": 1,
+            "estado": 0,
+            "x": -318.9502321916657,
+            "y": 352.0367298764842,
+            "radio": 12
+        },
+        {
+            "id": 38,
+            "nombre": "C2-N8",
+            "tipo": 1,
+            "estado": 0,
+            "x": -504.1695842326674,
+            "y": 313.4573587975026,
+            "radio": 12
+        },
+        {
+            "id": 39,
+            "nombre": "C2-N9",
+            "tipo": 1,
+            "estado": 0,
+            "x": -402.0055482715917,
+            "y": 377.0133506163397,
+            "radio": 12
+        },
+        {
+            "id": 40,
+            "nombre": "C2-N10",
+            "tipo": 1,
+            "estado": 0,
+            "x": -436.3725046552559,
+            "y": 230.4768413703003,
+            "radio": 12
+        },
+        {
+            "id": 41,
+            "nombre": "C2-N11",
+            "tipo": 1,
+            "estado": 0,
+            "x": -317.80321765842905,
+            "y": 337.9766916508722,
+            "radio": 12
+        },
+        {
+            "id": 42,
+            "nombre": "C2-N12",
+            "tipo": 1,
+            "estado": 0,
+            "x": -412.94361003199566,
+            "y": 376.7743301307082,
+            "radio": 12
+        },
+        {
+            "id": 43,
+            "nombre": "C2-N13",
+            "tipo": 1,
+            "estado": 0,
+            "x": -501.10511096217607,
+            "y": 215.25964010282678,
+            "radio": 12
+        },
+        {
+            "id": 44,
+            "nombre": "C2-N14",
+            "tipo": 1,
+            "estado": 0,
+            "x": -305.4126179566631,
+            "y": 229.6713876853447,
+            "radio": 12
+        },
+        {
+            "id": 45,
+            "nombre": "C3-N0",
+            "tipo": 1,
+            "estado": 0,
+            "x": -441.7416945083338,
+            "y": -290.1674489492066,
+            "radio": 12
+        },
+        {
+            "id": 46,
+            "nombre": "C3-N1",
+            "tipo": 1,
+            "estado": 0,
+            "x": -412.9146867756449,
+            "y": -316.2723226717188,
+            "radio": 12
+        },
+        {
+            "id": 47,
+            "nombre": "C3-N2",
+            "tipo": 1,
+            "estado": 0,
+            "x": -475.0921167071892,
+            "y": -315.83511392511093,
+            "radio": 12
+        },
+        {
+            "id": 48,
+            "nombre": "C3-N3",
+            "tipo": 1,
+            "estado": 0,
+            "x": -484.05896962807617,
+            "y": -320.7119312442604,
+            "radio": 12
+        },
+        {
+            "id": 49,
+            "nombre": "C3-N4",
+            "tipo": 1,
+            "estado": 0,
+            "x": -324.957896415156,
+            "y": -369.05169382579953,
+            "radio": 12
+        },
+        {
+            "id": 50,
+            "nombre": "C3-N5",
+            "tipo": 1,
+            "estado": 0,
+            "x": -499.6625638653294,
+            "y": -194.5188630809674,
+            "radio": 12
+        },
+        {
+            "id": 51,
+            "nombre": "C3-N6",
+            "tipo": 1,
+            "estado": 0,
+            "x": -358.00249057361754,
+            "y": -291.87863509672013,
+            "radio": 12
+        },
+        {
+            "id": 52,
+            "nombre": "C3-N7",
+            "tipo": 1,
+            "estado": 0,
+            "x": -412.56437700735574,
+            "y": -308.96526904529594,
+            "radio": 12
+        },
+        {
+            "id": 53,
+            "nombre": "C3-N8",
+            "tipo": 1,
+            "estado": 0,
+            "x": -313.10261748641926,
+            "y": -220.35009374276243,
+            "radio": 12
+        },
+        {
+            "id": 54,
+            "nombre": "C3-N9",
+            "tipo": 1,
+            "estado": 0,
+            "x": -401.1857419134141,
+            "y": -275.71643986238894,
+            "radio": 12
+        },
+        {
+            "id": 55,
+            "nombre": "C3-N10",
+            "tipo": 1,
+            "estado": 0,
+            "x": -401.76629440949984,
+            "y": -329.731881329573,
+            "radio": 12
+        },
+        {
+            "id": 56,
+            "nombre": "C3-N11",
+            "tipo": 1,
+            "estado": 0,
+            "x": -450.32109142391914,
+            "y": -222.9937471922493,
+            "radio": 12
+        },
+        {
+            "id": 57,
+            "nombre": "C3-N12",
+            "tipo": 1,
+            "estado": 0,
+            "x": -392.40322476720763,
+            "y": -287.7906568035078,
+            "radio": 12
+        },
+        {
+            "id": 58,
+            "nombre": "C3-N13",
+            "tipo": 1,
+            "estado": 0,
+            "x": -380.7470768880681,
+            "y": -355.7822038566343,
+            "radio": 12
+        },
+        {
+            "id": 59,
+            "nombre": "C3-N14",
+            "tipo": 1,
+            "estado": 0,
+            "x": -351.9447330767341,
+            "y": -330.97717496009193,
+            "radio": 12
+        },
+        {
+            "id": 60,
+            "nombre": "C4-N0",
+            "tipo": 1,
+            "estado": 0,
+            "x": 159.36102466332562,
+            "y": -488.6490345051502,
+            "radio": 12
+        },
+        {
+            "id": 61,
+            "nombre": "C4-N1",
+            "tipo": 1,
+            "estado": 0,
+            "x": 178.90280414575636,
+            "y": -380.5046279489553,
+            "radio": 12
+        },
+        {
+            "id": 62,
+            "nombre": "C4-N2",
+            "tipo": 1,
+            "estado": 0,
+            "x": 166.56820563870642,
+            "y": -385.12751980561114,
+            "radio": 12
+        },
+        {
+            "id": 63,
+            "nombre": "C4-N3",
+            "tipo": 1,
+            "estado": 0,
+            "x": 165.25952061297414,
+            "y": -516.3175722098146,
+            "radio": 12
+        },
+        {
+            "id": 64,
+            "nombre": "C4-N4",
+            "tipo": 1,
+            "estado": 0,
+            "x": 228.71918626686912,
+            "y": -432.681368780237,
+            "radio": 12
+        },
+        {
+            "id": 65,
+            "nombre": "C4-N5",
+            "tipo": 1,
+            "estado": 0,
+            "x": 194.8658338654448,
+            "y": -392.3914022253104,
+            "radio": 12
+        },
+        {
+            "id": 66,
+            "nombre": "C4-N6",
+            "tipo": 1,
+            "estado": 0,
+            "x": 183.3330487909398,
+            "y": -502.3161835441608,
+            "radio": 12
+        },
+        {
+            "id": 67,
+            "nombre": "C4-N7",
+            "tipo": 1,
+            "estado": 0,
+            "x": 192.533390419862,
+            "y": -538.369046237009,
+            "radio": 12
+        },
+        {
+            "id": 68,
+            "nombre": "C4-N8",
+            "tipo": 1,
+            "estado": 0,
+            "x": 135.22766138704034,
+            "y": -389.06242176335627,
+            "radio": 12
+        },
+        {
+            "id": 69,
+            "nombre": "C4-N9",
+            "tipo": 1,
+            "estado": 0,
+            "x": 131.88950991350202,
+            "y": -539.7213301241559,
+            "radio": 12
+        },
+        {
+            "id": 70,
+            "nombre": "C4-N10",
+            "tipo": 1,
+            "estado": 0,
+            "x": 235.07726325231985,
+            "y": -456.85364533986086,
+            "radio": 12
+        },
+        {
+            "id": 71,
+            "nombre": "C4-N11",
+            "tipo": 1,
+            "estado": 0,
+            "x": 205.7114024637336,
+            "y": -454.09241855955145,
+            "radio": 12
+        },
+        {
+            "id": 72,
+            "nombre": "C4-N12",
+            "tipo": 1,
+            "estado": 0,
+            "x": 123.4845828045971,
+            "y": -536.7978354772252,
+            "radio": 12
+        },
+        {
+            "id": 73,
+            "nombre": "C4-N13",
+            "tipo": 1,
+            "estado": 0,
+            "x": 74.88905297103629,
+            "y": -392.91200213267734,
+            "radio": 12
+        },
+        {
+            "id": 74,
+            "nombre": "C4-N14",
+            "tipo": 1,
+            "estado": 0,
+            "x": 112.45394815393381,
+            "y": -506.85869649148515,
+            "radio": 12
+        }
+    ],
+    "aristas": [
+        {
+            "origen": 1,
+            "destino": 0,
+            "peso": 2.8298502740905054,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 0,
+            "peso": 2.186759977521847,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 1,
+            "peso": 2.9344618583132442,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 0,
+            "peso": 1.3358124796213644,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 0,
+            "peso": 2.793659490519541,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 0,
+            "peso": 2.246908355074579,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 1,
+            "peso": 2.1603866309437887,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 2,
+            "peso": 2.202535368100206,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 1,
+            "peso": 1.8348093867696764,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 4,
+            "peso": 1.2562375324428519,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 3,
+            "peso": 1.6901132093924072,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 2,
+            "peso": 1.1540360774754332,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 7,
+            "peso": 2.6335170051426458,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 3,
+            "peso": 1.5142544388425507,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 10,
+            "destino": 5,
+            "peso": 2.380412377916315,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 11,
+            "destino": 1,
+            "peso": 2.0127625141363037,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 12,
+            "destino": 1,
+            "peso": 1.8168075423354797,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 12,
+            "destino": 10,
+            "peso": 2.315941473374293,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 13,
+            "destino": 9,
+            "peso": 1.9186661973895058,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 14,
+            "destino": 13,
+            "peso": 1.1826744095705946,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 15,
+            "peso": 40.300562493927494,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 16,
+            "destino": 15,
+            "peso": 2.4013233686391526,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 17,
+            "destino": 15,
+            "peso": 2.5925014309849965,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 17,
+            "destino": 16,
+            "peso": 1.4915079321068274,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 18,
+            "destino": 15,
+            "peso": 1.913591414396932,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 19,
+            "destino": 18,
+            "peso": 2.354074568610545,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 20,
+            "destino": 15,
+            "peso": 1.3923917236400347,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 20,
+            "destino": 18,
+            "peso": 1.3800435161220186,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 21,
+            "destino": 19,
+            "peso": 1.3810775947473928,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 22,
+            "destino": 16,
+            "peso": 1.6977812086607746,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 23,
+            "destino": 17,
+            "peso": 2.4939037770181534,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 24,
+            "destino": 19,
+            "peso": 1.73919541046698,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 25,
+            "destino": 16,
+            "peso": 2.0919918478501263,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 26,
+            "destino": 16,
+            "peso": 1.023470082039512,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 27,
+            "destino": 26,
+            "peso": 1.4577458822517126,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 27,
+            "destino": 21,
+            "peso": 2.326584356255206,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 28,
+            "destino": 26,
+            "peso": 1.5792926638853568,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 28,
+            "destino": 23,
+            "peso": 2.2596361892288295,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 29,
+            "destino": 26,
+            "peso": 1.3936993132979598,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 29,
+            "destino": 21,
+            "peso": 2.8410837037822625,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 15,
+            "destino": 30,
+            "peso": 32.012549746684655,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 31,
+            "destino": 30,
+            "peso": 2.1250731361907595,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 32,
+            "destino": 30,
+            "peso": 1.5229130587065023,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 32,
+            "destino": 31,
+            "peso": 1.9359756579498615,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 33,
+            "destino": 31,
+            "peso": 2.2818299659662316,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 34,
+            "destino": 33,
+            "peso": 2.888444811088223,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 35,
+            "destino": 30,
+            "peso": 2.01472066148304,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 36,
+            "destino": 30,
+            "peso": 1.0859866851939868,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 37,
+            "destino": 33,
+            "peso": 2.4903763627457343,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 38,
+            "destino": 34,
+            "peso": 2.063907636612016,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 39,
+            "destino": 32,
+            "peso": 1.2575754621364634,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 40,
+            "destino": 36,
+            "peso": 1.9789384356278592,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 41,
+            "destino": 40,
+            "peso": 2.6673686260703704,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 41,
+            "destino": 33,
+            "peso": 2.99321745042669,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 42,
+            "destino": 41,
+            "peso": 2.4606222978765224,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 43,
+            "destino": 38,
+            "peso": 2.296629345410207,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 43,
+            "destino": 35,
+            "peso": 2.729386879615995,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 44,
+            "destino": 42,
+            "peso": 2.1338696597962854,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 44,
+            "destino": 42,
+            "peso": 2.340175290152382,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 30,
+            "destino": 45,
+            "peso": 33.98026045898918,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 46,
+            "destino": 45,
+            "peso": 1.607920240933985,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 46,
+            "destino": 45,
+            "peso": 1.224008342504286,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 47,
+            "destino": 45,
+            "peso": 1.8048985736029501,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 47,
+            "destino": 46,
+            "peso": 2.323979327900438,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 48,
+            "destino": 46,
+            "peso": 2.7238894733187626,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 48,
+            "destino": 46,
+            "peso": 2.9958485763082994,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 49,
+            "destino": 46,
+            "peso": 2.4949969829094245,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 50,
+            "destino": 48,
+            "peso": 2.8391253599516366,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 51,
+            "destino": 46,
+            "peso": 2.379877433267529,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 51,
+            "destino": 48,
+            "peso": 2.6215985720519996,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 52,
+            "destino": 48,
+            "peso": 1.7776296189312575,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 53,
+            "destino": 47,
+            "peso": 1.9243521806128003,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 54,
+            "destino": 51,
+            "peso": 2.783777987657742,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 55,
+            "destino": 53,
+            "peso": 2.7846242730738777,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 56,
+            "destino": 48,
+            "peso": 2.64004669723534,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 57,
+            "destino": 54,
+            "peso": 2.8221853600986444,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 58,
+            "destino": 46,
+            "peso": 2.3591447649396375,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 59,
+            "destino": 47,
+            "peso": 2.556301027293592,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 45,
+            "destino": 60,
+            "peso": 22.166398282083016,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 61,
+            "destino": 60,
+            "peso": 1.1923613921185094,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 62,
+            "destino": 61,
+            "peso": 2.445707916626298,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 63,
+            "destino": 61,
+            "peso": 2.069986973213724,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 64,
+            "destino": 62,
+            "peso": 2.667336963616986,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 64,
+            "destino": 62,
+            "peso": 1.1757890133859838,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 65,
+            "destino": 62,
+            "peso": 1.5950635299213147,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 66,
+            "destino": 65,
+            "peso": 2.3996266381191194,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 66,
+            "destino": 60,
+            "peso": 2.533807837225714,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 67,
+            "destino": 65,
+            "peso": 2.0984533795626135,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 67,
+            "destino": 66,
+            "peso": 1.55884899566015,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 68,
+            "destino": 62,
+            "peso": 1.8169141693875381,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 69,
+            "destino": 60,
+            "peso": 2.423708572906567,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 69,
+            "destino": 65,
+            "peso": 1.0086510135327933,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 70,
+            "destino": 63,
+            "peso": 2.8680348666374957,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 71,
+            "destino": 67,
+            "peso": 2.026201382728117,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 71,
+            "destino": 64,
+            "peso": 1.3352838524307304,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 72,
+            "destino": 71,
+            "peso": 1.4360613113068794,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 73,
+            "destino": 62,
+            "peso": 1.1598825468657132,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 74,
+            "destino": 71,
+            "peso": 2.89553105444984,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 74,
+            "destino": 64,
+            "peso": 1.209522953989962,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 60,
+            "destino": 0,
+            "peso": 46.41823678671484,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        }
+    ]
+}

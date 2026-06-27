@@ -13,17 +13,17 @@ struct VentanaAyuda {
         
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.08f, 0.08f, 0.11f, 0.98f));
-        if (ImGui::Begin(ICON_FA_BOOK_OPEN " Enciclopedia OptiClusters", &ui.mostrar_ventana_ayuda, ImGuiWindowFlags_NoCollapse)) {
+        if (ImGui::Begin(ICON_FA_BOOK_OPEN " Enciclopedia OptiClusters PRO", &ui.mostrar_ventana_ayuda, ImGuiWindowFlags_NoCollapse)) {
             
             if (ImGui::BeginTable("split_ayuda", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
-                ImGui::TableSetupColumn("nav", ImGuiTableColumnFlags_WidthFixed, 210.0f);
+                ImGui::TableSetupColumn("nav", ImGuiTableColumnFlags_WidthFixed, 220.0f);
                 ImGui::TableSetupColumn("body", ImGuiTableColumnFlags_WidthStretch);
                 ImGui::TableNextRow();
                 
                 ImGui::TableNextColumn();
                 ImGui::BeginChild("nav_ayuda", ImVec2(0, 0), false);
                 
-                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "NAVEGACION");
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "NAVEGACION PRINCIPAL");
                 ImGui::Separator();
                 ImGui::Spacing();
 
@@ -31,19 +31,17 @@ struct VentanaAyuda {
                 SeccionInfo secciones[] = {
                     { ICON_FA_HOUSE,            "Introduccion"         },
                     { ICON_FA_KEYBOARD,         "Controles y Atajos"   },
-                    { ICON_FA_DIAGRAM_PROJECT,  "Modo Grafos"          },
                     { ICON_FA_PLANE,            "Modo AeroGrafos"      },
-                    { ICON_FA_MAGNET,           "Fisicas (FR)"         },
-                    { ICON_FA_PAINTBRUSH,       "Coloreo de Grafos"    },
-                    { ICON_FA_CLONE,            "Isomorfismo"          },
-                    { ICON_FA_ROUTE,            "Dijkstra"             },
+                    { ICON_FA_DIAGRAM_PROJECT,  "Modo Grafos Libres"   },
+                    { ICON_FA_MAGNET,           "Fisicas (ForceAtlas2)"},
+                    { ICON_FA_ROUTE,            "Dijkstra (Corto)"     },
                     { ICON_FA_SITEMAP,          "Kruskal (MST)"        },
                     { ICON_FA_CIRCLE_NODES,     "Euler y Hamilton"     },
-                    { ICON_FA_MAGNIFYING_GLASS, "BFS y DFS"            },
-                    { ICON_FA_CIRCLE_HALF_STROKE, "Bipartito"          },
-                    { ICON_FA_TABLE_CELLS,      "Matrices"             },
-                    { ICON_FA_SLIDERS,          "Panel de Info"        },
-                    { ICON_FA_CHART_LINE,       "Dashboard y Extras"   },
+                    { ICON_FA_MAGNIFYING_GLASS, "Busquedas BFS/DFS"    },
+                    { ICON_FA_PAINTBRUSH,       "Coloreo (Greedy)"     },
+                    { ICON_FA_CLONE,            "Isomorfismo (VF2)"    },
+                    { ICON_FA_GLOBE,            "Analisis de Red"      },
+                    { ICON_FA_TABLE_CELLS,      "Matrices (Ady/Inc)"   },
                 };
                 int total = IM_ARRAYSIZE(secciones);
 
@@ -65,12 +63,10 @@ struct VentanaAyuda {
                 ImGui::EndChild();
                 
                 ImGui::TableNextColumn();
-                ImGui::BeginChild("body_ayuda", ImVec2(0, 0), false);
-                ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x - 15.0f);
+                ImGui::BeginChild("body_ayuda", ImVec2(0, 0), false, ImGuiChildFlags_AlwaysUseWindowPadding);
                 
                 dibujarContenido(ui.seccion_ayuda_actual);
                 
-                ImGui::PopTextWrapPos();
                 ImGui::EndChild();
                 ImGui::EndTable();
             }
@@ -84,7 +80,7 @@ private:
     static void titulo(const char* t) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.85f, 0.7f, 1.0f));
         ImGui::SetWindowFontScale(1.15f);
-        ImGui::Text("%s", t);
+        ImGui::TextWrapped("%s", t);
         ImGui::SetWindowFontScale(1.0f);
         ImGui::PopStyleColor();
         ImGui::Separator();
@@ -93,18 +89,24 @@ private:
     static void subtitulo(const char* t) {
         ImGui::Spacing();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.4f, 1.0f));
-        ImGui::Text("%s", t);
+        ImGui::TextWrapped("%s", t);
         ImGui::PopStyleColor();
         ImGui::Spacing();
     }
+    static void bullet_text_wrapped(const char* fmt) {
+        ImGui::Bullet();
+        ImGui::TextWrapped("%s", fmt);
+    }
     static void tip(const char* t) {
+        ImGui::Spacing();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.9f, 0.5f, 1.0f));
-        ImGui::Text(ICON_FA_LIGHTBULB " Tip: %s", t);
+        ImGui::TextWrapped(ICON_FA_LIGHTBULB " Tip Pro: %s", t);
         ImGui::PopStyleColor();
     }
     static void aviso(const char* t) {
+        ImGui::Spacing();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.3f, 1.0f));
-        ImGui::Text(ICON_FA_TRIANGLE_EXCLAMATION " %s", t);
+        ImGui::TextWrapped(ICON_FA_TRIANGLE_EXCLAMATION " Atencion: %s", t);
         ImGui::PopStyleColor();
     }
 
@@ -112,456 +114,281 @@ private:
         switch (sec) {
         case 0: secIntroduccion(); break;
         case 1: secControles(); break;
-        case 2: secGrafos(); break;
-        case 3: secRedes(); break;
+        case 2: secAeroGrafos(); break;
+        case 3: secGrafos(); break;
         case 4: secFisicas(); break;
-        case 5: secColoreo(); break;
-        case 6: secIsomorfismo(); break;
-        case 7: secDijkstra(); break;
-        case 8: secKruskal(); break;
-        case 9: secEuler(); break;
-        case 10: secBFSDFS(); break;
-        case 11: secBipartito(); break;
+        case 5: secDijkstra(); break;
+        case 6: secKruskal(); break;
+        case 7: secEuler(); break;
+        case 8: secBFSDFS(); break;
+        case 9: secColoreo(); break;
+        case 10: secIsomorfismo(); break;
+        case 11: secAnalizarRed(); break;
         case 12: secMatrices(); break;
-        case 13: secPanelInfo(); break;
-        case 14: secSimulacion(); break;
         default: secIntroduccion(); break;
         }
     }
 
     // secciones
-    
+
     static void secIntroduccion() {
-        titulo(ICON_FA_HOUSE " Bienvenido a OptiClusters");
-        ImGui::Text("OptiClusters es una herramienta profesional de analisis visual para Grafos Matematicos y Redes Computacionales. Permite crear, manipular y analizar estructuras de datos usando algoritmos clasicos de la teoria de grafos.");
+        titulo(ICON_FA_HOUSE " Bienvenido a OptiClusters PRO");
+        ImGui::TextWrapped("OptiClusters es un entorno profesional avanzado para el analisis visual, simulacion termodinamica y resolucion de algoritmos sobre Grafos Matematicos y Redes Computacionales Globales.");
         ImGui::Spacing();
         
-        subtitulo("Que puedes hacer aqui?");
-        ImGui::BulletText("Crear grafos interactivos dibujando nodos y conexiones directamente en el lienzo.");
-        ImGui::BulletText("Ejecutar algoritmos clasicos: Dijkstra, Kruskal, Coloreo, Isomorfismo, BFS, DFS, Euler.");
-        ImGui::BulletText("Simular redes de computadoras con latencias, jitter y perdida de paquetes.");
-        ImGui::BulletText("Visualizar matrices de adyacencia e incidencia en tiempo real.");
-        ImGui::BulletText("Activar fisicas para que el grafo se organice solo de forma armonica.");
+        subtitulo("El Enfoque Dual de OptiClusters");
+        ImGui::TextWrapped("El software se divide estructuralmente en dos motores independientes, seleccionables desde la barra superior:");
+        bullet_text_wrapped("Modo Grafos Libres (Laboratorio Abstracto): Lienzo en blanco, sin restricciones fisicas. Aqui puedes crear desde cero cualquier estructura topologica, aplicar fuerzas fisicas (ForceAtlas2) para desenredarlos, buscar isomorfismos o aplicar coloreos.");
+        bullet_text_wrapped("Modo AeroGrafos (Simulador Logistico Real): Carga una red fija de 63 aeropuertos mundiales reales usando coordenadas geograficas de satelite. Aplica distancias ortodromicas (curvatura terrestre) para encontrar rutas con Dijkstra o Kruskal, enfrentandote a crisis geopoliticas.");
         ImGui::Spacing();
         
-        subtitulo("Dos modos de trabajo");
-        ImGui::BulletText("Modo Grafos: Analisis matematico puro en un lienzo libre. Ideal para estudiar propiedades topologicas (isomorfismo, coloreo, ciclos).");
-        ImGui::BulletText("Modo AeroGrafos: Simulacion global del espacio aereo. 63 hubs mundiales reales con distancias haversine. Ideal para Dijkstra, Kruskal y analisis de densidad.");
-        ImGui::Spacing();
+        subtitulo("Organizacion de la Interfaz Visual");
+        bullet_text_wrapped("Barra Superior (Toolbar): Contiene el switch maestro (Grafos/Redes), el boton para encender/apagar Fisicas (ForceAtlas2) y esta Enciclopedia.");
+        bullet_text_wrapped("Panel Izquierdo (Inspector y Contexto): Muestra propiedades matematicas en tiempo real (Conexo, Euleriano, Bipartito). En el modo AeroGrafos, te permite activar Restricciones Geopoliticas.");
+        bullet_text_wrapped("Lienzo Central (El Workspace): Tu area de dibujo o el mapa del mundo. Totalmente interactivo con el mouse.");
+        bullet_text_wrapped("Consola Inferior (Logs): Un registro tecnico paso a paso de lo que la Inteligencia Artificial esta haciendo internamente.");
+        bullet_text_wrapped("Panel Derecho (El Cerebro): Ahi se encuentran todas las herramientas y algoritmos (Dijkstra, Kruskal, etc).");
         
-        subtitulo("Arquitectura del programa");
-        ImGui::Text("La interfaz se divide en tres zonas principales:");
-        ImGui::BulletText("Panel Izquierdo: Informacion del grafo actual (nodos, aristas, densidad, propiedades).");
-        ImGui::BulletText("Centro: Lienzo interactivo donde dibujas y manipulas el grafo. Tambien tiene pestanas para ver las Matrices y el Registro del Kernel (logs internos).");
-        ImGui::BulletText("Panel Derecho: Algoritmos. Aqui seleccionas y configuras el algoritmo que quieras ejecutar.");
-        ImGui::Spacing();
-        
-        tip("Usa la barra de zoom en la esquina inferior derecha del lienzo para acercarte o alejarte. Tambien puedes usar la rueda del mouse o las teclas +/-.");
+        tip("No tengas miedo de experimentar. Usa Ctrl+N para limpiar el lienzo cuando quieras empezar un nuevo experimento en el Modo Grafos Libres.");
     }
 
     static void secControles() {
-        titulo(ICON_FA_KEYBOARD " Controles y Atajos de Teclado");
+        titulo(ICON_FA_KEYBOARD " Controles Maestros y Shortcuts");
         
-        subtitulo("Mouse");
-        ImGui::BulletText("Clic Izquierdo sobre un nodo: Selecciona el nodo. Por si haces click en otro nodo, se abre el menu de conexion.");
-        ImGui::BulletText("Clic Izquierdo + Arrastrar: Mueve un nodo existente por el lienzo.");
-        ImGui::BulletText("Clic Derecho (en espacio vacio): Crea un nuevo nodo en esa posicion.");
-        ImGui::BulletText("Clic Derecho + Arrastrar (desde un nodo): Activa el laser neon para conectar dos nodos visualmente. Suelta sobre otro nodo para crear la arista.");
-        ImGui::BulletText("Rueda del Mouse: Zoom in / zoom out centrado en el cursor.");
+        subtitulo("Manipulacion del Mouse (Workspace)");
+        bullet_text_wrapped("Crear Nodo (Solo Modo Grafos): Clic Derecho en cualquier zona vacia del lienzo negro.");
+        bullet_text_wrapped("Mover Nodo: Clic Izquierdo sostenido sobre un nodo + Arrastrar. Siente como las aristas elasticas lo siguen.");
+        bullet_text_wrapped("Seleccionar Nodo: Un solo Clic Izquierdo sobre un nodo lo resalta. En el panel izquierdo veras su Grado (numero de conexiones).");
+        bullet_text_wrapped("Conectar Nodos (Crear Arista): Manten Clic Derecho sobre el Nodo A y arrastra el laser neon hasta el Nodo B. Suelta el clic para soldarlos.");
+        bullet_text_wrapped("Zoom Dinamico: Rueda del mouse (Scroll) hacia arriba o hacia abajo. El zoom sigue inteligentemente la posicion de tu cursor.");
         ImGui::Spacing();
         
-        subtitulo("Teclado");
-        ImGui::BulletText("Ctrl + N: Borrar todo el grafo (limpieza completa del lienzo).");
-        ImGui::BulletText("+ / -: Zoom in / zoom out.");
-        ImGui::BulletText("Supr (Delete): Eliminar el nodo seleccionado y todas sus conexiones.");
+        subtitulo("Teclado (Shortcuts de Alta Productividad)");
+        bullet_text_wrapped("Supr / Delete: Elimina instantaneamente el nodo actualmente seleccionado y arranca de raiz todas las conexiones atadas a el.");
+        bullet_text_wrapped("Ctrl + N: Boton del Panico / Reset. Borra absolutamente toda la memoria del grafo libre actual.");
+        bullet_text_wrapped("Teclas [+] y [-]: Alternativas de hardware para hacer Zoom si no tienes rueda de mouse.");
         ImGui::Spacing();
         
-        subtitulo("Barra Superior (Toolbar)");
-        ImGui::BulletText("Grafos / Redes: Cambia el modo de trabajo del programa.");
-        ImGui::BulletText("Enciclopedia: Abre esta ventana de documentacion.");
-        ImGui::BulletText("Fisicas (ON/OFF): Activa o desactiva la simulacion de fuerzas. Al desactivar, los nodos vuelven a sus posiciones originales.");
+        subtitulo("La Barra de Zoom (Mini-HUD inferior derecho)");
+        bullet_text_wrapped("Icono de Casa (Reset Zoom): Presionalo si te perdiste en el espacio o hiciste demasiado zoom. Restaura la camara a las coordenadas (0,0) a escala 1:1 original.");
+        bullet_text_wrapped("Lupa (+ / -): Aumenta o disminuye la escala visual gradualmente.");
+    }
+
+    static void secAeroGrafos() {
+        titulo(ICON_FA_PLANE " Modo AeroGrafos: Simulacion Terrestre Avanzada");
+        
+        ImGui::TextWrapped("El Modo AeroGrafos transforma OptiClusters en un Centro de Control Logistico Global (ATC). El motor grafico proyecta la Tierra utilizando proyeccion equirectangular, mapeando 63 'Hubs' (los aeropuertos internacionales mas masivos del mundo).");
         ImGui::Spacing();
         
-        subtitulo("Barra de Zoom (esquina inferior derecha)");
-        ImGui::BulletText("Lupa (-): Alejar la vista.");
-        ImGui::BulletText("Casita: Resetear el zoom a su valor predeterminado.");
-        ImGui::BulletText("Lupa (+): Acercar la vista.");
+        subtitulo("Matematica de Curvatura (Formula del Semiverseno)");
+        ImGui::TextWrapped("La Tierra no es plana. Si el algoritmo calculara la distancia usando linea recta 2D, el sistema fracasaria. Implementamos la formula Haversine (Ortodromica), que calcula la distancia mas corta sobre la superficie de una esfera usando radios de 6371km. Veras las rutas doblarse graciosamente; esto es la trayectoria balistica real (Gran Circulo).");
         ImGui::Spacing();
         
-        tip("Si las fisicas estan activas y apagas el boton, los nodos regresan a donde estaban antes de activarlas. Util para comparar el antes y despues.");
+        subtitulo("Bloqueos Geopoliticos (La variable del caos)");
+        ImGui::TextWrapped("Al abrir el Panel Izquierdo encontraras un Checkbox llamado 'Bloqueo Geopolitico (Rusia)'.");
+        bullet_text_wrapped("Al activarlo, el programa inyecta un factor de multiplicacion extremo (peso penalizador) a TODAS las rutas de vuelo que crucen el poligono de conflicto (zona roja neon).");
+        bullet_text_wrapped("Dijkstra desviara a los aviones por el polo norte o por el sur de asia automaticamente para evitar la zona de exclusion.");
+        ImGui::Spacing();
+        
+        subtitulo("Guia Paso a Paso en la Interfaz");
+        bullet_text_wrapped("1. Ve al Toolbar superior y asegurate que 'Modo Redes' este activo.");
+        bullet_text_wrapped("2. En el panel izquierdo, activa el 'Modo Noche' para mejorar el contraste de los laseres neon.");
+        bullet_text_wrapped("3. Activa el 'Bloqueo Geopolitico' para estresar los algoritmos.");
+        bullet_text_wrapped("4. Ve al panel derecho y ejecuta Dijkstra o Kruskal para ver como resuelven la conectividad bajo estas restricciones.");
     }
 
     static void secGrafos() {
-        titulo(ICON_FA_DIAGRAM_PROJECT " Modo Grafos: Fundamentos");
+        titulo(ICON_FA_DIAGRAM_PROJECT " Modo Grafos Libres: El Lienzo Topologico");
         
-        ImGui::Text("En matematicas, un grafo G = (V, E) es una estructura compuesta por un conjunto de vertices (V) y un conjunto de aristas (E) que representan conexiones entre pares de vertices.");
+        ImGui::TextWrapped("Este modo es un laboratorio matematico puro y aislado. No existen distancias en kilometros ni aeropuertos, solo Nodos abstractos y Aristas logicas. Su unico proposito es el estudio de la Topologia, la teoria de grafos profunda.");
         ImGui::Spacing();
         
-        subtitulo("Conceptos clave");
-        ImGui::BulletText("Vertice (Nodo): Un punto que representa una entidad. En la app se muestra como un circulo con un nombre (V0, V1...).");
-        ImGui::BulletText("Arista (Conexion): Una linea que une dos vertices, indicando una relacion entre ellos.");
-        ImGui::BulletText("Grado de un nodo: La cantidad de aristas que tocan a ese nodo. Un nodo aislado tiene grado 0.");
-        ImGui::BulletText("Grafo Conexo: Un grafo donde puedes llegar de cualquier nodo a cualquier otro siguiendo aristas.");
-        ImGui::BulletText("Densidad: Proporcion entre aristas existentes y el maximo posible. Un grafo completo tiene densidad 100%%.");
+        subtitulo("Dashboard Izquierdo (Inspector Topologico)");
+        ImGui::TextWrapped("A diferencia del modo AeroGrafos, el panel izquierdo de este modo es un analizador matematico que se recalcula en microsegundos cada vez que agregas una arista o un nodo.");
+        bullet_text_wrapped("Es Conexo?: Dice 'Si' unicamente si existe un camino (directo o indirecto) que vincule a todos los nodos del lienzo sin dejar islas.");
+        bullet_text_wrapped("Es Euleriano?: Dice 'Si' si el grafo tiene 0 o exactamente 2 nodos con cantidad de conexiones impares (Requisito para trazarlo de un solo trazo sin repetir).");
+        bullet_text_wrapped("Es Bipartito?: Dice 'Si' si la IA logro dividir tu red en dos equipos distintos sin que ningun miembro de un equipo se conecte con alguien de su mismo equipo (Carece de ciclos impares).");
         ImGui::Spacing();
         
-        subtitulo("Como crear un grafo en la app");
-        ImGui::Text("1. Asegurate de estar en modo Grafos (boton superior izquierdo).");
-        ImGui::Text("2. Haz clic derecho en el lienzo para crear nodos.");
-        ImGui::Text("3. Para conectar: arrastra con clic derecho desde un nodo hacia otro (laser neon).");
-        ImGui::Text("4. Para eliminar: selecciona un nodo con clic izquierdo y presiona Supr.");
-        ImGui::Spacing();
-        
-        subtitulo("Diferencia con Modo AeroGrafos");
-        ImGui::Text("En Modo Grafos el interes es puramente topologico. En AeroGrafos el interes es geografico y analitico sobre datos fijos mundiales.");
-        ImGui::Spacing();
-        
-        tip("El panel izquierdo te muestra en tiempo real si tu grafo es Conexo, Bipartito o Euleriano.");
-    }
-
-    static void secRedes() {
-        titulo(ICON_FA_PLANE " Modo AeroGrafos: Simulador Geopolitico");
-        
-        ImGui::Text("En este modo, el motor grafico despliega un mapa equirectangular mundial con 63 de los hubs aereos mas importantes del planeta (aeropuertos principales). Las aristas son rutas comerciales reales.");
-        ImGui::Spacing();
-        
-        subtitulo("Conceptos clave");
-        ImGui::BulletText("Distancia Haversine: Las distancias entre aeropuertos se calculan tomando en cuenta la curvatura de la Tierra (kilometros reales).");
-        ImGui::BulletText("Rutas Ortodromicas: Las lineas en el mapa se curvan naturalmente simulando las rutas de vuelo optimas (Great Circle).");
-        ImGui::Spacing();
-        
-        subtitulo("Como usarlo");
-        ImGui::Text("1. Cambia a modo AeroGrafos (boton superior).");
-        ImGui::Text("2. Selecciona un algoritmo en el panel derecho.");
-        ImGui::Text("3. Elige los aeropuertos de origen y destino.");
-        ImGui::Text("4. Haz clic en 'Ejecutar' (con o sin animacion).");
-        ImGui::Spacing();
-        
-        subtitulo("Algoritmos disponibles");
-        ImGui::BulletText("Dijkstra: Encuentra la ruta con menor kilometraje real.");
-        ImGui::BulletText("Kruskal: Conecta todos los aeropuertos mundiales gastando la menor cantidad de asfalto/combustible.");
-        ImGui::BulletText("Coloreo: Asigna aerolineas (colores) evitando monopolios locales.");
-        ImGui::Spacing();
-        
-        tip("En modo AeroGrafos, la interaccion manual es de visualizacion (pan y zoom). Los nodos son fijos y representan la base de datos mundial.");
+        subtitulo("Densidad Porcentual");
+        ImGui::TextWrapped("La barra de progreso de Densidad mide que tan conectada esta tu red respecto al limite fisico posible. Un grafo con 5 nodos y 10 aristas tiene 100% de densidad (Grafo Completo / K5), ya que no cabe ni una sola conexion mas.");
     }
 
     static void secFisicas() {
-        titulo(ICON_FA_MAGNET " Fisicas: Algoritmo Fruchterman-Reingold");
+        titulo(ICON_FA_MAGNET " ForceAtlas2: Termodinamica de Grafos");
         
-        ImGui::Text("El algoritmo de Fruchterman y Reingold (1991) es un metodo de fuerza dirigida para dibujar grafos. Simula fuerzas fisicas para encontrar automaticamente una disposicion visual armonica de los nodos.");
+        ImGui::TextWrapped("ForceAtlas2 (FA2) no es un algoritmo estatico de inicio-fin. Es una simulacion continua de sistemas de particulas interactuando en el vacio. Se utiliza para desenredar automaticamente grafos espagueti caoticos, transformandolos en estructuras visuales intuitivas.");
         ImGui::Spacing();
         
-        subtitulo("Dos fuerzas fundamentales");
-        ImGui::Text("1. REPULSION (Ley de Coulomb):");
-        ImGui::Text("   Todos los nodos se repelen entre si como cargas electricas del mismo signo. Esto evita que se amontonen.");
-        ImGui::Spacing();
-        ImGui::Text("2. ATRACCION (Ley de Hooke):");
-        ImGui::Text("   Cada arista actua como un resorte que tira de sus dos nodos, acercandolos. Esto agrupa a los nodos que estan conectados.");
+        subtitulo("Teoria: Las Dos Fuerzas Universales");
+        bullet_text_wrapped("Ley 1 (Repulsion de Coulomb): Todos los nodos se odian. Tratan de alejarse constantemente para no solaparse en el espacio.");
+        bullet_text_wrapped("Ley 2 (Atraccion de Hooke): Las aristas actuan como resortes tensores elasticos. Atrapan y tiran de los nodos conectados hacia el centro.");
         ImGui::Spacing();
         
-        subtitulo("Que resultado produce?");
-        ImGui::Text("El sistema siempre busca un estado de MINIMA ENERGIA, donde todas las fuerzas se cancelan entre si. Esto produce figuras perfectamente equilibradas y simetricas:");
-        ImGui::BulletText("Un ciclo de N nodos se dibuja como un poligono regular perfecto (circulo).");
-        ImGui::BulletText("Un grafo completo se dibuja como un poligono con todas las diagonales visibles.");
-        ImGui::BulletText("Nodos aislados (sin conexiones) son expulsados hacia los bordes por la repulsion.");
-        ImGui::BulletText("Clusters (grupos densamente conectados) se agrupan visualmente, revelando comunidades ocultas.");
-        ImGui::Spacing();
+        subtitulo("Guia de Interfaz (Como activarlo y controlarlo)");
+        bullet_text_wrapped("Boton 'Fisicas': En la barra superior, haz click en el icono de iman. El boton se iluminara en Verde brillante y el motor FA2 tomara el control animado.");
+        bullet_text_wrapped("Interaccion Manual: MIENTRAS el boton esta verde, haz clic en un nodo y arrastralo bruscamente. Sentiras como los resortes luchan contra tu mouse.");
+        bullet_text_wrapped("Memoria Flash: Apaga el boton 'Fisicas'. Todos los nodos del lienzo regresaran a la velocidad de la luz EXACTAMENTE a las posiciones donde los dibujaste originalmente. Esto te permite desenredar, observar y revertir sin danar tu trabajo.");
         
-        subtitulo("Utilidad practica");
-        ImGui::BulletText("Desenredar grafos desordenados automaticamente.");
-        ImGui::BulletText("Descubrir simetrias ocultas en la estructura.");
-        ImGui::BulletText("Revelar clusters y comunidades.");
-        ImGui::Spacing();
-        
-        subtitulo("Como probarlo paso a paso");
-        ImGui::Text("Prueba 1 - Desenredo:");
-        ImGui::Text("  a) Desactiva las fisicas.");
-        ImGui::Text("  b) Crea 8 nodos y conectalos en un circulo (V0-V1, V1-V2, ..., V7-V0).");
-        ImGui::Text("  c) Arrastra los nodos desordenadamente.");
-        ImGui::Text("  d) Activa las fisicas y observa como se forma un octagono perfecto.");
-        ImGui::Spacing();
-        ImGui::Text("Prueba 2 - Nodo aislado:");
-        ImGui::Text("  a) Con las fisicas activas, crea un nodo SIN conectarlo a nada.");
-        ImGui::Text("  b) Observa como es empujado hacia afuera (solo recibe repulsion, no atraccion).");
-        ImGui::Spacing();
-        ImGui::Text("Prueba 3 - Clusters:");
-        ImGui::Text("  a) Crea dos grupos de 4 nodos, cada grupo completamente interconectado.");
-        ImGui::Text("  b) Conecta los dos grupos con UNA sola arista.");
-        ImGui::Text("  c) Activa las fisicas: veras dos agrupaciones densas unidas por un puente.");
-        ImGui::Spacing();
-        
-        tip("Al desactivar las fisicas, los nodos vuelven a su posicion original (antes de activarlas).");
-    }
-
-    static void secColoreo() {
-        titulo(ICON_FA_PAINTBRUSH " Algoritmo: Coloreo de Grafos");
-        
-        ImGui::Text("El problema del coloreo consiste en asignar un color a cada nodo del grafo de forma que dos nodos adyacentes (conectados por una arista) NUNCA compartan el mismo color, usando la menor cantidad de colores posible.");
-        ImGui::Spacing();
-        
-        subtitulo("Numero Cromatico");
-        ImGui::Text("El numero cromatico X(G) es la menor cantidad de colores necesaria para colorear el grafo correctamente. Calcularlo exactamente es un problema NP-completo (extremadamente dificil para grafos grandes). OptiClusters usa un algoritmo heuristico voraz (greedy) que da resultados muy buenos en la practica.");
-        ImGui::Spacing();
-        
-        subtitulo("Como funciona el algoritmo (Greedy)");
-        ImGui::Text("1. Se toman los nodos uno por uno.");
-        ImGui::Text("2. Para cada nodo, se miran los colores de todos sus vecinos.");
-        ImGui::Text("3. Se le asigna el color con el indice mas bajo que NO este en uso por ningun vecino.");
-        ImGui::Text("4. Si todos los colores existentes estan ocupados, se crea un color nuevo.");
-        ImGui::Spacing();
-        
-        subtitulo("Aplicaciones en la vida real");
-        ImGui::BulletText("Asignacion de frecuencias de radio: dos antenas cercanas no pueden usar la misma frecuencia o se interfieren.");
-        ImGui::BulletText("Programacion de examenes: un alumno no puede tener dos examenes a la misma hora.");
-        ImGui::BulletText("Compiladores: asignar registros del procesador a variables (register allocation).");
-        ImGui::BulletText("Mapas politicos: colorear paises de forma que dos paises fronterizos no compartan color.");
-        ImGui::Spacing();
-        
-        subtitulo("Como usarlo en la app");
-        ImGui::Text("1. Selecciona el algoritmo 'Coloreo' en el panel derecho.");
-        ImGui::Text("2. Haz clic en 'Aplicar Color'.");
-        ImGui::Text("3. Los nodos se tintan y puedes ver cuantos colores se necesitaron.");
-        ImGui::Text("4. El boton 'Aristas' anima paso a paso como el algoritmo recorre el grafo.");
-        ImGui::Spacing();
-        
-        tip("Un grafo bipartito siempre se puede colorear con exactamente 2 colores. Si el coloreo te da 2, comprueba si tu grafo es bipartito en el panel izquierdo.");
-    }
-
-    static void secIsomorfismo() {
-        titulo(ICON_FA_CLONE " Algoritmo: Isomorfismo de Grafos");
-        
-        ImGui::Text("Dos grafos G1 y G2 son isomorfos si existe una forma de renombrar los nodos de G1 para obtener exactamente G2. En otras palabras, tienen la misma estructura de conexiones aunque se vean dibujados de forma diferente.");
-        ImGui::Spacing();
-        
-        subtitulo("Por que es importante?");
-        ImGui::Text("El isomorfismo permite reconocer que dos representaciones aparentemente distintas son el mismo objeto matematico. Es como reconocer que dos caras de una misma moneda son 'la misma moneda'.");
-        ImGui::Spacing();
-        
-        subtitulo("Que verifica el algoritmo");
-        ImGui::BulletText("Mismo numero de nodos.");
-        ImGui::BulletText("Mismo numero de aristas.");
-        ImGui::BulletText("Misma secuencia de grados (ordenados).");
-        ImGui::BulletText("Existencia de un mapeo biyectivo que preserve las conexiones.");
-        ImGui::Spacing();
-        
-        subtitulo("Como usarlo en la app");
-        ImGui::Text("1. Selecciona 'Isomorfismo' en el panel derecho.");
-        ImGui::Text("2. Activa 'Editar G2' para dibujar un segundo grafo.");
-        ImGui::Text("3. Haz clic en 'Analizar'. El resultado te dira si son isomorfos o no, y mostrara el mapeo encontrado.");
-        ImGui::Spacing();
-        
-        subtitulo("Aplicaciones");
-        ImGui::BulletText("Reconocimiento de patrones en quimica (dos moleculas con la misma estructura).");
-        ImGui::BulletText("Verificacion de circuitos digitales (dos circuitos son equivalentes?).");
-        ImGui::BulletText("Biologia computacional (comparar redes de proteinas).");
-        ImGui::Spacing();
-        
-        tip("Si los dos grafos tienen diferente numero de nodos o aristas, son AUTOMATICAMENTE no isomorfos.");
+        aviso("Las Fisicas consumen GPU iterativa. El algoritmo ajusta automaticamente el Global Swing (enfriamiento termico) en grafos inmensos para no colapsar la PC.");
     }
 
     static void secDijkstra() {
-        titulo(ICON_FA_ROUTE " Algoritmo: Dijkstra (Ruta Mas Corta)");
+        titulo(ICON_FA_ROUTE " Algoritmo de Dijkstra: GPS de Inteligencia Artificial");
         
-        ImGui::Text("El algoritmo de Dijkstra (1956) encuentra el camino con menor peso total desde un nodo origen hasta un nodo destino. Es el algoritmo que usan los GPS, Google Maps y los routers de Internet.");
+        ImGui::TextWrapped("El Algoritmo Pathfinding mas famoso del mundo (1956). Dijkstra garantiza encontrar la ruta mas corta (menor costo acumulado) entre un Origen y un Destino.");
         ImGui::Spacing();
         
-        subtitulo("Como funciona (paso a paso)");
-        ImGui::Text("1. Se marca el nodo origen con distancia 0 y todos los demas con distancia infinita.");
-        ImGui::Text("2. Se visita el nodo con menor distancia acumulada.");
-        ImGui::Text("3. Para cada vecino del nodo actual, se calcula: distancia_actual + peso_arista.");
-        ImGui::Text("4. Si ese nuevo costo es menor que la distancia que ya tenia, se actualiza (relajacion: reemplazar un camino por uno mas optimo).");
-        ImGui::Text("5. Se repite hasta llegar al destino o visitar todos los nodos.");
+        subtitulo("Teoria de Relajacion");
+        ImGui::TextWrapped("Dijkstra es como agua derramandose por calles. Al llegar a un nodo, examina todas sus salidas. Si el costo acumulado por una calle nueva es MENOR a lo que conocia previamente, borra el registro viejo y escribe este 'Atajo' (Relajacion de la arista).");
         ImGui::Spacing();
         
-        subtitulo("Requisitos");
-        ImGui::BulletText("Todos los pesos de las aristas deben ser NO NEGATIVOS (>= 0).");
-        ImGui::BulletText("Si hay pesos negativos, Dijkstra puede dar resultados incorrectos.");
-        ImGui::Spacing();
+        subtitulo("Guia de Interfaz (Pasos de Ejecucion)");
+        bullet_text_wrapped("1. Abre el bloque 'Dijkstra' en el panel derecho.");
+        bullet_text_wrapped("2. Selector de Origen: Haz clic en el primer Dropdown y busca tu punto de inicio.");
+        bullet_text_wrapped("3. Selector de Destino: Haz clic en el segundo Dropdown y busca tu meta.");
+        bullet_text_wrapped("4. Boton EJECUTAR: El sistema marcara la ruta ganadora con un trayecto Grueso y Brillante (Verde neon).");
+        bullet_text_wrapped("5. Resultado: Debajo de 'Ejecutar', veras los kilometros totales o el peso numerico exacto de esa ruta.");
+        bullet_text_wrapped("6. Boton LIMPIAR: Apaga las luces neon y devuelve el grafo a la normalidad.");
         
-        subtitulo("Aplicaciones en la vida real");
-        ImGui::BulletText("Navegacion GPS: encontrar la ruta mas rapida entre dos ciudades.");
-        ImGui::BulletText("Enrutamiento IP: los routers OSPF usan Dijkstra para calcular tablas de enrutamiento.");
-        ImGui::BulletText("Juegos: pathfinding (A* es una variante de Dijkstra con heuristica).");
-        ImGui::BulletText("Logistica: minimizar costos de transporte.");
-        ImGui::Spacing();
-        
-        subtitulo("Como usarlo en la app");
-        ImGui::Text("1. En AeroGrafos, selecciona 'Dijkstra' en el panel derecho.");
-        ImGui::Text("2. Elige el aeropuerto de origen y destino.");
-        ImGui::Text("3. Haz clic en 'Ejecutar'. La ruta optima se resalta y la camara viaja automaticamente (Auto-encuadre).");
-        ImGui::Text("4. Revisa la comparativa academica con BFS en el Dashboard de Resultado.");
-        ImGui::Spacing();
-        
-        aviso("Si no existe camino entre origen y destino (grafo no conexo), el algoritmo lo indicara.");
+        tip("En Modo AeroGrafos: Prende el Bloqueo de Rusia y pidele a Dijkstra ir de Londres a Tokyo. Veras como desvia el avion por el Polo Norte (Alaska).");
     }
 
     static void secKruskal() {
-        titulo(ICON_FA_SITEMAP " Algoritmo: Kruskal (Arbol de Expansion Minima)");
+        titulo(ICON_FA_SITEMAP " Kruskal: Arbol de Expansion Minima (MST)");
         
-        ImGui::Text("Kruskal encuentra el subconjunto de aristas que conecta TODOS los nodos del grafo con el menor peso total posible, sin formar ciclos. El resultado es un arbol (Minimum Spanning Tree, MST).");
+        ImGui::TextWrapped("Dijkstra es individualista (A hacia B). Kruskal, en cambio, busca unificar TODA LA RED pavimentando la minima cantidad de calles y gastando la menor cantidad de recursos (Costo total minimo).");
         ImGui::Spacing();
         
-        subtitulo("Como funciona (paso a paso)");
-        ImGui::Text("1. Se ordenan todas las aristas por peso, de menor a mayor.");
-        ImGui::Text("2. Se toma la arista mas barata.");
-        ImGui::Text("3. Si agregarla NO crea un ciclo, se incluye en el MST.");
-        ImGui::Text("4. Si crearia un ciclo, se descarta.");
-        ImGui::Text("5. Se repite hasta tener N-1 aristas (donde N = numero de nodos).");
+        subtitulo("Teoria y Union-Find (Prevencion de Ciclos)");
+        ImGui::TextWrapped("El resultado de Kruskal siempre es un 'Arbol' (red sin anillos/ciclos).");
+        bullet_text_wrapped("Ordena todas las aristas de la mas barata a la mas cara.");
+        bullet_text_wrapped("Intenta soldar la red empezando siempre por la calle mas barata.");
+        bullet_text_wrapped("Union-Find: Antes de soldar A y B, pregunta: '¿Ya estan conectados por otro lado?'. Si la respuesta es Si, desecha la arista porque generaria un ciclo inutil.");
         ImGui::Spacing();
         
-        subtitulo("Union-Find (estructura interna)");
-        ImGui::Text("Para verificar si una arista crea ciclo, Kruskal usa una estructura Union-Find que agrupa nodos en conjuntos disjuntos. Dos nodos en el mismo conjunto ya estan conectados; agregar una arista entre ellos crearia ciclo.");
-        ImGui::Spacing();
-        
-        subtitulo("Aplicaciones en la vida real");
-        ImGui::BulletText("Tender fibra optica: conectar todas las ciudades con el menor kilometraje de cable.");
-        ImGui::BulletText("Redes electricas: disenar el tendido electrico mas economico.");
-        ImGui::BulletText("Clustering: en machine learning, variantes de MST se usan para agrupar datos similares.");
-        ImGui::Spacing();
-        
-        subtitulo("Como usarlo en la app");
-        ImGui::Text("1. Selecciona 'Arbol' en el panel derecho.");
-        ImGui::Text("2. Haz clic en 'Calcular MST'. Las aristas del arbol se resaltan.");
-        ImGui::Text("3. Puedes activar la animacion para ver como el algoritmo evalua cada arista.");
-        ImGui::Spacing();
-        
-        tip("El MST siempre tiene exactamente N-1 aristas para un grafo conexo con N nodos.");
-    }
-
-    static void secEuler() {
-        titulo(ICON_FA_CIRCLE_NODES " Caminos de Euler y Hamilton");
-        
-        ImGui::Text("Son dos de los recorridos mas famosos en la teoria de grafos. Aunque suenan parecidos, sus requisitos matematicos son drasticamente diferentes.");
-        ImGui::Spacing();
-        
-        subtitulo("Camino Euleriano (Ruta de Mantenimiento)");
-        ImGui::Text("Recorre TODAS las ARISTAS (rutas) exactamente una vez.");
-        ImGui::Text("Requisito estricto: El grafo debe ser conexo y tener EXACTAMENTE 0 o 2 nodos con cantidad impar de conexiones.");
-        ImGui::Text("Por que falla en AeroGrafos? En el mundo real, los aeropuertos tienen cantidades caoticas de conexiones (unos tienen 1 vuelo, otros 20). Cumplir la regla de '0 o 2 nodos impares' en un mapa mundial real es practicamente imposible.");
-        ImGui::Spacing();
-        
-        subtitulo("Camino Hamiltoniano (Vuelta al Mundo)");
-        ImGui::Text("Recorre TODOS los NODOS (ciudades) exactamente una vez.");
-        ImGui::Text("Requisito estricto: No existe formula rapida (es NP-Completo), pero si hay 'callejones sin salida' (ciudades con solo 1 conexion), es imposible recorrer el grafo sin quedar atrapado y tener que repetir ciudad para salir.");
-        ImGui::Text("Por que falla en AeroGrafos? El mapa contiene aeropuertos remotos (ej. Isla de Pascua o hubs secundarios) que actuan como callejones sin salida. Si entras a ellos, debes salir por la misma ruta, repitiendo nodos y violando la regla de Hamilton.");
-        ImGui::Spacing();
-        
-        subtitulo("Aplicaciones Reales");
-        ImGui::BulletText("Euler: Rutas de camiones de basura, inspeccion de vias ferreas, barrido de nieve (importan las calles, no las esquinas).");
-        ImGui::BulletText("Hamilton: Problema del Agente Viajero (TSP), logistica de entregas (importan los destinos, no el asfalto).");
-        ImGui::Spacing();
-        
-        tip("En modo Grafos (lienzo libre) puedes dibujar a mano un poligono perfecto o un moño para probar que estos algoritmos si funcionan cuando la topologia es matematicamente perfecta.");
+        subtitulo("Guia de Interfaz (La Animacion es clave)");
+        bullet_text_wrapped("1. Abre 'Kruskal' en el panel derecho.");
+        bullet_text_wrapped("2. Checkbox 'Animacion' (CRITICO): Activalo! El poder de Kruskal se aprecia visualmente.");
+        bullet_text_wrapped("3. Ejecutar: El motor evaluara arista por arista. Las aprobadas se pintan de VERDE NEON. Las que generan un ciclo indeseado se pintan un milisegundo de ROJO SANGRE y son descartadas.");
+        bullet_text_wrapped("4. Resultado: El costo total del Asfalto (peso) se mostrara en el panel. Usa 'Limpiar MST' para borrar el rastro.");
     }
 
     static void secBFSDFS() {
-        titulo(ICON_FA_MAGNIFYING_GLASS " Busqueda: BFS y DFS");
+        titulo(ICON_FA_MAGNIFYING_GLASS " Busquedas Topologicas: BFS y DFS");
         
-        subtitulo("BFS (Breadth-First Search / Busqueda en Anchura)");
-        ImGui::Text("Explora el grafo nivel por nivel, como ondas concentricas. Primero visita todos los vecinos directos, luego los vecinos de los vecinos, y asi sucesivamente.");
-        ImGui::BulletText("Garantiza encontrar el camino mas corto (en numero de aristas).");
-        ImGui::BulletText("Usa una cola (FIFO) internamente.");
-        ImGui::BulletText("Util para: distancias minimas, verificar conectividad, niveles.");
+        ImGui::TextWrapped("Dos paradigmas mentales opuestos para explorar territorios desconocidos.");
         ImGui::Spacing();
         
-        subtitulo("DFS (Depth-First Search / Busqueda en Profundidad)");
-        ImGui::Text("Explora el grafo siguiendo un camino lo mas profundo posible antes de retroceder. Va 'hasta el fondo' de cada rama antes de volver.");
-        ImGui::BulletText("Usa una pila (LIFO) o recursion.");
-        ImGui::BulletText("Util para: deteccion de ciclos, componentes conexas, orden topologico.");
+        subtitulo("BFS (Anchura) - La Onda de Choque");
+        bullet_text_wrapped("Estrategia Radial: Avanza como ondas en un estanque. Revisa primero todo el Nivel 1, luego el Nivel 2.");
+        bullet_text_wrapped("Superpoder: Es el algoritmo supremo para encontrar el camino con la MENOR CANTIDAD DE ESCALAS (saltos), ignorando el kilometraje.");
         ImGui::Spacing();
         
-        subtitulo("BFS vs DFS");
-        ImGui::BulletText("BFS usa mas memoria (guarda todo un nivel en cola) pero encuentra caminos minimos.");
-        ImGui::BulletText("DFS usa menos memoria pero NO garantiza camino minimo.");
+        subtitulo("DFS (Profundidad) - El Hilo de Ariadna");
+        bullet_text_wrapped("Estrategia Suicida: Corre ciegamente por un pasillo hasta chocar con un callejon sin salida. Luego recula (Backtracking) y busca otra rama.");
+        bullet_text_wrapped("Uso: Ideal para detectar ciclos infinitos en dependencias y realizar Ordenamientos Topologicos.");
         ImGui::Spacing();
         
-        subtitulo("Como usarlos en la app");
-        ImGui::Text("1. Selecciona 'Busqueda' en el panel derecho.");
-        ImGui::Text("2. Elige el nodo de inicio.");
-        ImGui::Text("3. Ejecuta BFS o DFS. Los resultados muestran el orden de visita y el arbol de busqueda.");
+        subtitulo("Guia de Interfaz");
+        bullet_text_wrapped("1. Abre 'Busquedas' en el panel derecho.");
+        bullet_text_wrapped("2. Selector de Estrategia: Elige 'BFS (Anchura)' o 'DFS (Profundidad)'.");
+        bullet_text_wrapped("3. Nodo Inicial: Elige de donde va a salir el rayo escaneador.");
+        bullet_text_wrapped("4. Toggle 'Animado': Activalo obligatoriamente. Veras a la IA pensar paso a paso.");
+        bullet_text_wrapped("5. Ejecutar: Compara visualmente la onda radial expansiva de BFS contra el rayo zigzagueante y caotico de DFS en color Cian.");
     }
 
-    static void secBipartito() {
-        titulo(ICON_FA_CIRCLE_HALF_STROKE " Grafo Bipartito");
+    static void secColoreo() {
+        titulo(ICON_FA_PAINTBRUSH " Coloreo (Heuristica Voraz / Greedy)");
         
-        ImGui::Text("Un grafo es bipartito si sus nodos se pueden dividir en dos conjuntos A y B de forma que TODAS las aristas van de un nodo de A a un nodo de B. Ninguna arista conecta dos nodos del mismo conjunto.");
+        ImGui::TextWrapped("Las reglas: Ningun par de nodos conectados por una arista puede tener el mismo color. El objetivo es usar la menor cantidad posible de colores (Numero Cromatico).");
         ImGui::Spacing();
         
-        subtitulo("Propiedad fundamental");
-        ImGui::Text("Un grafo es bipartito si y solo si NO contiene ciclos de longitud impar. Esto se puede verificar con una busqueda BFS intentando colorear con 2 colores.");
+        subtitulo("Teoria: Greedy (Voraz)");
+        ImGui::TextWrapped("OptiClusters revisa a los vecinos de un nodo: 'Si no usan Rojo, te pinto Rojo. Si ya lo usan, pruebo Azul. Si todos estan ocupados, invento Verde'. Es local (no planea a futuro), pero es veloz.");
         ImGui::Spacing();
         
-        subtitulo("Aplicaciones");
-        ImGui::BulletText("Matching (asignacion): asignar trabajadores a tareas, alumnos a proyectos.");
-        ImGui::BulletText("Recomendaciones: grafos usuario-producto (bipartitos por naturaleza).");
-        ImGui::BulletText("Compiladores: coloreo de grafos de interferencia con 2 registros.");
+        subtitulo("Guia de Interfaz (Modo Grafos Libres)");
+        bullet_text_wrapped("1. Abre el panel de 'Coloreo (Greedy)' a la derecha.");
+        bullet_text_wrapped("2. Velocidad de Animacion (Slider): Izquierda es lentisimo (para estudiar), derecha es instantaneo.");
+        bullet_text_wrapped("3. Ejecutar: El lienzo mostrara cajas de colores neon (Naranja, Cian, Violeta, Verde) asignandose a los nodos.");
+        bullet_text_wrapped("4. Resultado: Debajo del boton, te dira 'Colores Usados: X'. Intenta crear un cuadrado con una diagonal cruzada y observa cuantas cubetas necesita.");
+    }
+
+    static void secEuler() {
+        titulo(ICON_FA_CIRCLE_NODES " Euler & Hamilton: Circuitos");
+        
+        ImGui::TextWrapped("La dualidad de los recorridos matematicos.");
         ImGui::Spacing();
         
-        subtitulo("Como verificarlo en la app");
-        ImGui::Text("El panel izquierdo muestra automaticamente si tu grafo es Bipartito. Si dice 'Si', significa que puedes dividir los nodos en exactamente dos grupos sin conflictos.");
+        subtitulo("Camino Euleriano: La Perfeccion de las Aristas");
+        bullet_text_wrapped("Mision: Caminar por TODAS las aristas del mapa sin repetir ninguna.");
+        bullet_text_wrapped("Regla Dorada: Solo es posible si TODO nodo tiene un grado par, o si hay exactamente 2 nodos de grado impar. La IA de OptiClusters lo sabe al instante comprobando los grados.");
         ImGui::Spacing();
         
-        tip("Todo arbol es bipartito. Todo ciclo par es bipartito. Todo ciclo impar NO es bipartito.");
+        subtitulo("Circuito Hamiltoniano: El Terror NP");
+        bullet_text_wrapped("Mision: Tocar TODOS los nodos exactamente una vez y regresar al inicio.");
+        bullet_text_wrapped("Dificultad: Es el Problema del Agente Viajero. La IA tiene que intentarlo a la fuerza bruta (Backtracking). Requiere altisimo poder de CPU.");
+        ImGui::Spacing();
+        
+        subtitulo("Guia de Interfaz");
+        bullet_text_wrapped("1. Abre 'Recorridos Euler/Hamilton' en el panel derecho.");
+        bullet_text_wrapped("2. Selecciona 'Camino Euleriano' o 'Camino Hamiltoniano'.");
+        bullet_text_wrapped("3. Ejecutar: Si pides Euler y fallas las reglas pares/impares, imprimira un error rojo de inmediato. Si pides Hamilton en grafos medianos, veras a la linea verde recorrer obsesivamente cada permutacion posible.");
+    }
+
+    static void secIsomorfismo() {
+        titulo(ICON_FA_CLONE " Isomorfismo (VF2): Gemelos Estructurales");
+        
+        ImGui::TextWrapped("Dos redes que, aunque esten dibujadas diferente, poseen la EXACTA misma topologia de conexiones (Biyeccion perfecta).");
+        ImGui::Spacing();
+        
+        subtitulo("Guia de Interfaz (El Modo Edicion Dual)");
+        bullet_text_wrapped("1. Entorno: Modo Grafos Libres. Dibuja el Grafo 1 (G1) en el centro de la pantalla (ej. un Cuadrado).");
+        bullet_text_wrapped("2. El Cambio de Fase: Ve al panel 'Isomorfismo' a la derecha. Enciende el interruptor 'Editar G2 (Grafo de Pruebas)'.");
+        bullet_text_wrapped("3. Magia Visual: La interfaz y etiquetas cambiaran a Violeta. G1 esta a salvo en memoria. Ahora todo lo que dibujes es G2. Dibuja un cuadrado aplastado a un costado.");
+        bullet_text_wrapped("4. Veredicto: Presiona 'COMPROBAR ISOMORFISMO'.");
+        bullet_text_wrapped("5. Resultado: Recibiras un cartel verde confirmatorio si ambos son identicos, mostrandote el mapeo exacto de nodos (Ej. V0 = U2).");
     }
 
     static void secMatrices() {
-        titulo(ICON_FA_TABLE_CELLS " Matrices de Adyacencia e Incidencia");
+        titulo(ICON_FA_TABLE_CELLS " Matrices: El ADN Algebraico");
         
-        subtitulo("Matriz de Adyacencia");
-        ImGui::Text("Es una tabla cuadrada NxN (N = numero de nodos). La celda (i,j) vale 1 si existe una arista entre el nodo i y el nodo j, y 0 en caso contrario. En grafos ponderados, el valor es el peso de la arista.");
-        ImGui::BulletText("Es simetrica para grafos no dirigidos.");
-        ImGui::BulletText("La diagonal siempre es 0 (un nodo no se conecta consigo mismo).");
-        ImGui::BulletText("La suma de una fila = grado de ese nodo.");
+        ImGui::TextWrapped("Las computadoras leen Tablas Matemáticas bidimensionales llenas de Ceros y Unos. Esto es la teoria Algebraica.");
         ImGui::Spacing();
         
-        subtitulo("Matriz de Incidencia");
-        ImGui::Text("Es una tabla NxM (N nodos, M aristas). La celda (i,k) vale 1 si el nodo i es uno de los extremos de la arista k, y 0 si no.");
-        ImGui::BulletText("Cada columna tiene exactamente dos 1s (los dos extremos de la arista).");
+        subtitulo("Matriz de Adyacencia (NxN)");
+        bullet_text_wrapped("Mapea Nodos vs Nodos.");
+        bullet_text_wrapped("Si existe una conexion entre Nodo 1 y Nodo 3, en la celda [1][3] habra un '1' (o el peso). Si no, un '0'.");
+        bullet_text_wrapped("La diagonal principal siempre tiene ceros, porque un nodo no se conecta a si mismo.");
         ImGui::Spacing();
         
-        subtitulo("Como verlas en la app");
-        ImGui::Text("Haz clic en la pestana 'Matrices' en la zona central (junto al Lienzo y el Registro del Kernel). Se actualizan en tiempo real conforme modificas el grafo.");
+        subtitulo("Matriz de Incidencia (NxM)");
+        bullet_text_wrapped("Mapea Nodos vs Aristas.");
+        bullet_text_wrapped("En cualquier columna, SIEMPRE habra unicamente dos '1's. Estos marcan los dos extremos de la arista.");
+        ImGui::Spacing();
+        
+        subtitulo("Guia de Interfaz");
+        bullet_text_wrapped("1. En la zona central superior del Lienzo, veras una Pestana llamada 'Matrices'.");
+        bullet_text_wrapped("2. Al hacer clic, estas gigantescas tablas se redibujaran automaticamente en tiempo real mientras agregas nodos o aristas en la otra pestana.");
     }
 
-    static void secPanelInfo() {
-        titulo(ICON_FA_SLIDERS " Panel de Informacion del Grafo");
+    static void secAnalizarRed() {
+        titulo(ICON_FA_GLOBE " Analisis de Red (Escaner de Vulnerabilidad)");
         
-        ImGui::Text("El panel izquierdo muestra informacion en tiempo real sobre el estado actual del grafo:");
-        ImGui::Spacing();
-        ImGui::BulletText("Modo actual: Grafos o AeroGrafos.");
-        ImGui::BulletText("Cantidad de nodos y aristas.");
-        ImGui::BulletText("Densidad del grafo (aristas existentes / aristas posibles).");
-        ImGui::BulletText("Propiedades automaticas:");
-        ImGui::Spacing();
-        ImGui::Text("  - Conexo: Se puede llegar de cualquier nodo a cualquier otro?");
-        ImGui::Text("  - Bipartito: Se pueden dividir los nodos en dos grupos sin conflicto?");
-        ImGui::Text("  - Euleriano: Se pueden recorrer todas las aristas sin repetir?");
-        ImGui::Spacing();
-        ImGui::Text("Estas propiedades se recalculan automaticamente cada vez que agregas o eliminas un nodo o arista.");
-    }
-
-    static void secSimulacion() {
-        titulo(ICON_FA_CHART_LINE " Dashboard y Extras AeroGrafos");
-        
-        ImGui::Text("En modo AeroGrafos, el panel inferior derecho contiene el Dashboard Analitico y controles de visualizacion:");
+        ImGui::TextWrapped("No es un algoritmo, es una suite de auditoria de Defensa e Inteligencia que escanea el mapa para evaluar vulnerabilidades logicas.");
         ImGui::Spacing();
         
-        subtitulo("Dashboard Analitico");
-        ImGui::BulletText("Densidad: Mide la cantidad de rutas existentes vs el maximo teorico.");
-        ImGui::BulletText("Top Hubs: Identifica los 3 aeropuertos con mas conexiones del mundo.");
+        subtitulo("Las Tres Metricas");
+        bullet_text_wrapped("El Super-Hub Principal (SPOF): El nodo con mayor conectividad. Si cae, la red colapsa. El motor grafico lo hara parpadear en ROJO ELECTRICO.");
+        bullet_text_wrapped("Cuello de Botella: Nodos con grado Minimo. Si envias datos aqui, se atascaran.");
+        bullet_text_wrapped("Densidad Ponderada: Porcentaje matematico de conectividad real vs teorica.");
         ImGui::Spacing();
         
-        subtitulo("Visualizacion");
-        ImGui::Text("Puedes desactivar el Grid, ocultar las rutas no activas, o los nombres de las ciudades para ver mejor las rutas dibujadas por los algoritmos.");
-        ImGui::Spacing();
-        
-        subtitulo("Restriccion Geopolitica (Rusia)");
-        ImGui::Text("Puedes simular el cierre del espacio aereo ruso (ej. Moscu SVO) marcando la casilla de restricciones geopoliticas. Al hacer esto:");
-        ImGui::BulletText("Las rutas de transito que tocan Moscu se invalidan automaticamente.");
-        ImGui::BulletText("Los algoritmos como Dijkstra o Kruskal buscaran vias alternas (ej. conectando occidente y oriente via Dubai o Estambul).");
-        ImGui::Spacing();
-        
-        tip("Activa la restriccion y luego ejecuta Dijkstra de Madrid a Tokio para comparar la nueva ruta y el costo extra en kilometros.");
+        subtitulo("Guia de Interfaz");
+        bullet_text_wrapped("1. Excelente para usar en Modo AeroGrafos.");
+        bullet_text_wrapped("2. Abre el modulo 'Analisis de Red' en el panel derecho.");
+        bullet_text_wrapped("3. Presiona 'Analizar Toda la Red'.");
+        bullet_text_wrapped("4. El Super-Hub latira con un radar rojo en el lienzo. El panel de resultados imprimira el diagnostico exacto.");
     }
 };

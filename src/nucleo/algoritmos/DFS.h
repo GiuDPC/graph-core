@@ -42,10 +42,10 @@ ResultadoDFS dfs(const Grafo& g, int inicio_id) {
 }
 
 void dfsPasosHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis,
-                     std::vector<PasoAnimacion>& pasos) {
+                     std::vector<PasoAnimacion>& pasos, int nivel) {
     vis[u] = true;
     pasos.push_back({PasoAnimacion::VISITAR, u, -1, -1,
-        "Visitando " + g.nombreNodo(u)});
+        "Profundizando a " + g.nombreNodo(u), -1, -1.0f, nivel});
 
     for (const auto& a : g.aristas) {
         int v = -1;
@@ -54,24 +54,24 @@ void dfsPasosHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis,
         if (v == -1 || v >= g.rangoIds() || v == padre) continue;
 
         pasos.push_back({PasoAnimacion::EXPLORAR, -1, u, v,
-            "Explorando " + g.nombreNodo(u) + " -> " + g.nombreNodo(v)});
+            "Avanzando " + g.nombreNodo(u) + " -> " + g.nombreNodo(v), -1, -1.0f, nivel});
 
         if (!vis[v]) {
-            dfsPasosHelper(g, v, u, vis, pasos);
+            dfsPasosHelper(g, v, u, vis, pasos, nivel + 1);
         } else {
             pasos.push_back({PasoAnimacion::DESCARTAR, -1, u, v,
-                "Back-edge: " + g.nombreNodo(v) + " ya fue visitado (posible ciclo)"});
+                "Retrocediendo (Back-edge): " + g.nombreNodo(v) + " ya en ruta", -1, -1.0f, nivel});
         }
     }
     pasos.push_back({PasoAnimacion::CONFIRMAR, u, -1, -1,
-        "Completado " + g.nombreNodo(u)});
+        "Ruta agotada en " + g.nombreNodo(u) + ", retrocediendo", -1, -1.0f, nivel});
 }
 
 std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
     std::vector<PasoAnimacion> pasos;
     if (g.estaVacio() || !g.obtenerNodo(inicio_id)) return pasos;
     std::vector<bool> vis(g.rangoIds(), false);
-    dfsPasosHelper(g, inicio_id, -1, vis, pasos);
+    dfsPasosHelper(g, inicio_id, -1, vis, pasos, 0);
     return pasos;
 }
 

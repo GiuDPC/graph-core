@@ -109,14 +109,25 @@ inline ImVec2 puntoEnArista(ImVec2 o, ImVec2 d, ImVec2 pc, bool es_curva, float 
 }
 
 // Dibuja una linea recta o curva segun es_curva
-inline void lineaArista(ImDrawList* dl, ImVec2 o, ImVec2 d, ImVec2 pc, bool es_curva,
-                         ImU32 col, float grosor) {
-    if (es_curva) {
-        dl->PathLineTo(o);
-        dl->PathBezierQuadraticCurveTo(pc, d, 0);
-        dl->PathStroke(col, 0, grosor);
-    } else {
+inline void lineaArista(ImDrawList* dl, ImVec2 o, ImVec2 d, float r_o, float r_d, ImVec2 pc, bool es_curva, ImU32 col, float grosor) {
+    float dx = d.x - o.x;
+    float dy = d.y - o.y;
+    float dist = sqrtf(dx * dx + dy * dy);
+    
+    if (dist <= (r_o + r_d + 1.0f)) return;
+    
+    ImVec2 o_border = o;
+    ImVec2 d_border = d;
+    
+    if (!es_curva) {
+        // Restaurar dibujo de centro a centro (sin recortar al borde)
+        // Esto evita que las esquinas planas de las lineas gruesas se vean feas contra los circulos
         dl->AddLine(o, d, col, grosor);
+    } else {
+        // Restaurar curvas de centro a centro
+        dl->PathLineTo(o);
+        dl->PathBezierQuadraticCurveTo(pc, d, 20);
+        dl->PathStroke(col, 0, grosor);
     }
 }
 
@@ -304,8 +315,11 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     if (self.estado_ui.creando_arista_drag) {
         Nodo* origen = grafo_actual.obtenerNodo(self.estado_ui.drag_arista_origen);
         if (origen) {
-            dl->AddLine(origen->posicion, mouse, IM_COL32(0, 255, 200, 150), 4.0f);
-            dl->AddLine(origen->posicion, mouse, IM_COL32(200, 255, 255, 255), 1.5f);
+            // Fix: Usar screen coordinates para la previsualizacion de la arista
+            ImVec2 screen_origen(origen->posicion.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x,
+                                 origen->posicion.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y);
+            dl->AddLine(screen_origen, mouse, IM_COL32(0, 255, 200, 150), 4.0f);
+            dl->AddLine(screen_origen, mouse, IM_COL32(200, 255, 255, 255), 1.5f);
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             if (self.estado_ui.nodo_hover != -1) {
@@ -464,17 +478,95 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo)
         grafos_a_dibujar.push_back(&iso_dibujo);
 
-    // recorrer grafos
     bool modo_red = (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_redes.sim_inicializada);
+
+    if (editando_g2) {
+        const char* cartel = "[ MODO ISOMORFISMO: DIBUJANDO GRAFO A COMPARAR (G2) ]";
+        ImVec2 ts = ImGui::CalcTextSize(cartel);
+        dl->AddRectFilled(ImVec2(origin.x + tamano.x/2 - ts.x/2 - 15, origin.y + 20),
+                          ImVec2(origin.x + tamano.x/2 + ts.x/2 + 15, origin.y + 20 + ts.y + 15),
+                          IM_COL32(220, 200, 30, 200), 8.0f);
+        dl->AddText(ImVec2(origin.x + tamano.x/2 - ts.x/2, origin.y + 27), IM_COL32(0, 0, 0, 255), cartel);
+    }
+
+    // recorrer grafos
     for (Grafo* ptr_g : grafos_a_dibujar) {
         Grafo& g_dib = *ptr_g;
-        bool es_g2 = (&g_dib == &self.estado_grafos.grafo_iso_g2);
+        bool es_g2 = (&g_dib == &iso_dibujo);
+
+        // Pre-calcular aristas para busqueda O(1)
+        std::unordered_set<uint64_t> edge_lookup;
+        if (!es_g2) {
+            for (const auto& a : g_dib.aristas) {
+                edge_lookup.insert(((uint64_t)a.origen_id << 32) | (uint32_t)a.destino_id);
+            }
+        }
+
+        // ====================================================
+        float rank_size_min = FLT_MAX, rank_size_max = -FLT_MAX;
+        float rank_color_min = FLT_MAX, rank_color_max = -FLT_MAX;
+        bool usar_ranking = (!es_g2 && self.estado_ui.ranking.activo);
+        
+        auto getValorRank = [&](int nid, EstadoUI::EstadoRanking::Atributo attr) -> float {
+            switch (attr) {
+                case EstadoUI::EstadoRanking::GRADO: return (float)g_dib.gradoNodo(nid);
+                default: return 0;
+            }
+        };
+
+        if (usar_ranking) {
+            auto& rk = self.estado_ui.ranking;
+            if (rk.atributo_size != EstadoUI::EstadoRanking::NINGUNO) {
+                for (const auto& nn : g_dib.nodos) {
+                    float v = getValorRank(nn.id, rk.atributo_size);
+                    if (v < rank_size_min) rank_size_min = v;
+                    if (v > rank_size_max) rank_size_max = v;
+                }
+            }
+            if (rk.atributo_color != EstadoUI::EstadoRanking::NINGUNO) {
+                for (const auto& nn : g_dib.nodos) {
+                    float v = getValorRank(nn.id, rk.atributo_color);
+                    if (v < rank_color_min) rank_color_min = v;
+                    if (v > rank_color_max) rank_color_max = v;
+                }
+            }
+        }
+
+        auto get_radio_dibujo = [&](const Nodo* nd) -> float {
+            if (!nd) return 0.0f;
+            float r = nd->radio;
+            if (usar_ranking) {
+                auto& rk = self.estado_ui.ranking;
+                if (rk.atributo_size != EstadoUI::EstadoRanking::NINGUNO) {
+                    float range = std::max(0.001f, rank_size_max - rank_size_min);
+                    float val = getValorRank(nd->id, rk.atributo_size);
+                    float t = (val - rank_size_min) / range;
+                    if (rk.invertir_size) t = 1.0f - t;
+                    t = std::max(0.0f, std::min(1.0f, t));
+                    r = rk.min_size + t * (rk.max_size - rk.min_size);
+                }
+            }
+            if ((!es_g2 && !editando_g2 && nd->id == self.estado_ui.nodo_hover) ||
+                (es_g2 && editando_g2 && nd->id == self.estado_ui.nodo_hover)) {
+                r += 2.0f + sinf(tiempo * 8.0f) * 1.5f;
+            }
+            return r;
+        };
+
 
         // dibujar aristas
         for (size_t idx = 0; idx < g_dib.aristas.size(); idx++) {
             const auto& a = g_dib.aristas[idx];
             Nodo* o = g_dib.obtenerNodo(a.origen_id);
             Nodo* d = g_dib.obtenerNodo(a.destino_id);
+
+            // Frustum Culling
+            if (std::max(o->posicion.x, d->posicion.x) < origin.x - 100.0f ||
+                std::min(o->posicion.x, d->posicion.x) > origin.x + tamano.x + 100.0f ||
+                std::max(o->posicion.y, d->posicion.y) < origin.y - 100.0f ||
+                std::min(o->posicion.y, d->posicion.y) > origin.y + tamano.y + 100.0f) {
+                continue;
+            }
             if (!o || !d) continue;
 
             // ── Self-loop: lazo Bezier simetrico arriba del nodo ─────────
@@ -527,25 +619,28 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     dl->AddTriangle(fp1, fp2, fp3, IM_COL32(255, 255, 255, 80), 1.0f);
                 }
 
-                ImVec2 peso_pos(o->posicion.x, o->posicion.y - r - h * 0.45f);
-                char peso_txt[16];
-                if (modo_red && self_uso > 0.02f)
-                    snprintf(peso_txt, sizeof(peso_txt), "%.0f%%", self_uso * 100.0f);
-                else
-                    snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
-                ImVec2 ts = ImGui::CalcTextSize(peso_txt);
-                dl->AddRectFilled(
-                    ImVec2(peso_pos.x - ts.x*0.5f - 3, peso_pos.y - ts.y*0.5f - 1),
-                    ImVec2(peso_pos.x + ts.x*0.5f + 3, peso_pos.y + ts.y*0.5f + 1),
-                    IM_COL32(20, 20, 25, 200), 3.0f);
-                dl->AddText(ImVec2(peso_pos.x - ts.x*0.5f, peso_pos.y - ts.y*0.5f),
-                    IM_COL32(200, 210, 220, 220), peso_txt);
+                float alpha_lod = std::clamp((self.estado_ui.zoom_lienzo - 0.25f) / 0.25f, 0.0f, 1.0f);
+                if (alpha_lod > 0.0f) {
+                    ImVec2 peso_pos(o->posicion.x, o->posicion.y - r - h * 0.45f);
+                    char peso_txt[16];
+                    if (modo_red && self_uso > 0.02f)
+                        snprintf(peso_txt, sizeof(peso_txt), "%.0f%%", self_uso * 100.0f);
+                    else
+                        snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
+                    ImVec2 ts = ImGui::CalcTextSize(peso_txt);
+                    dl->AddRectFilled(
+                        ImVec2(peso_pos.x - ts.x*0.5f - 3, peso_pos.y - ts.y*0.5f - 1),
+                        ImVec2(peso_pos.x + ts.x*0.5f + 3, peso_pos.y + ts.y*0.5f + 1),
+                        IM_COL32(20, 20, 25, (int)(200 * alpha_lod)), 3.0f);
+                    dl->AddText(ImVec2(peso_pos.x - ts.x*0.5f, peso_pos.y - ts.y*0.5f),
+                        IM_COL32(200, 210, 220, (int)(220 * alpha_lod)), peso_txt);
+                }
 
                 continue;
             }
 
-            ImU32 col = es_g2 ? IM_COL32(200, 200, 50, 150) : IM_COL32(120, 130, 140, 120);
-            float grosor = 2.0f + std::min(a.peso_actual / 10.0f, 4.0f);
+            ImU32 col = es_g2 ? IM_COL32(200, 200, 50, 150) : IM_COL32(120, 130, 140, 70); // Menor opacidad para mallas nítidas
+            float grosor = 1.0f + std::min(a.peso_actual / 20.0f, 2.0f); // Aristas mucho más finas estilo Gephi
 
             auto par = std::make_pair(a.origen_id, a.destino_id);
             auto parR = std::make_pair(a.destino_id, a.origen_id);
@@ -554,14 +649,11 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             bool es_curva = false;
             ImVec2 punto_control(0, 0);
             if (!es_g2 && o != d) {
-                for (const auto& other : g_dib.aristas) {
-                    if (&other == &a) continue;
-                    if (other.origen_id == a.destino_id && other.destino_id == a.origen_id) {
-                        es_curva = true;
-                        float desplazo = a.es_dirigida ? 45.0f : 30.0f;
-                        punto_control = calcularPuntoControlCurva(o->posicion, d->posicion, desplazo);
-                        break;
-                    }
+                uint64_t reverse_key = ((uint64_t)a.destino_id << 32) | (uint32_t)a.origen_id;
+                if (edge_lookup.count(reverse_key)) {
+                    es_curva = true;
+                    float desplazo = a.es_dirigida ? 45.0f : 30.0f;
+                    punto_control = calcularPuntoControlCurva(o->posicion, d->posicion, desplazo);
                 }
             }
 
@@ -573,8 +665,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     bool check_parR_c = !a.es_dirigida && self.estado_grafos.anim_estado.confirmadas.count(parR) != 0;
                     if (check_par_c || check_parR_c) {
                         col = IM_COL32(255, 179, 0, 255); grosor = 5.0f;
-                        lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
-                            IM_COL32(255, 230, 100, 80), grosor + 4.0f);
+                        lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(255, 230, 100, 80), grosor + 4.0f);
                     } else {
                         bool check_par_e = self.estado_grafos.anim_estado.exploradas.count(par) != 0;
                         bool check_parR_e = !a.es_dirigida && self.estado_grafos.anim_estado.exploradas.count(parR) != 0;
@@ -597,8 +688,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                             if ((a.origen_id == self.estado_grafos.ruta_optima[i] && a.destino_id == self.estado_grafos.ruta_optima[i + 1]) ||
                                 (!a.es_dirigida && a.origen_id == self.estado_grafos.ruta_optima[i + 1] && a.destino_id == self.estado_grafos.ruta_optima[i])) {
                                 col = IM_COL32(255, 179, 0, 255); grosor = 6.0f;
-                                lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
-                                    IM_COL32(255, 255, 255, 150), grosor + 4.0f); break;
+                                lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(255, 255, 255, 150), grosor + 4.0f); break;
                             }
                         }
                     }
@@ -648,15 +738,13 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                     float grosor_fondo = 2.0f + bw_factor * 3.0f;
 
                     // Fondo = capacidad (linea base gris representa ancho de banda maximo)
-                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
-                        IM_COL32(60, 65, 75, 100), grosor_fondo);
+                    lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(60, 65, 75, 100), grosor_fondo);
 
                     // Brillo animado
                     float glow_intensity = 0.2f + uso_arista * 0.4f;
                     ImU32 glow_col = colorSaturacion(uso_arista);
                     glow_col = (glow_col & 0x00FFFFFF) | ((int)(glow_intensity * 50) << 24);
-                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
-                        glow_col, grosor_fondo + 4.0f);
+                    lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, glow_col, grosor_fondo + 4.0f);
 
                     // onda viajera
                     float t_onda = fmod(tiempo * (0.5f + uso_arista * 2.0f), 1.0f);
@@ -672,25 +760,26 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 // Si el uso es >92%, borde rojo pulsante
                 if (uso_arista > 0.92f && !arista_caida) {
                     float pulse = sinf(tiempo * 4.0f) * 0.3f + 0.7f;
-                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva,
-                        IM_COL32(255, 50, 50, (int)(80 * pulse)), grosor + 6.0f);
+                    lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(255, 50, 50, (int)(80 * pulse)), grosor + 6.0f);
                 }
             }
 
             // linea base
             if (!arista_caida) {
-                lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva, col, grosor);
+                if (!es_g2 && editando_g2) {
+                    col = (col & 0x00FFFFFF) | (40 << 24);
+                }
+                lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, col, grosor);
 
                 // Flecha para aristas dirigidas
                 if (a.es_dirigida) {
                     ImVec2 fp1, fp2, fp3;
                     if (es_curva) {
-                        // Tangente al final de la curva
                         float t_tang = 0.99f;
                         ImVec2 tan_pt = puntoBezierCuadratico(o->posicion, punto_control, d->posicion, t_tang);
-                        calcularPuntaFlecha(tan_pt, d->posicion, d->radio, fp1, fp2, fp3);
+                        calcularPuntaFlecha(tan_pt, d->posicion, get_radio_dibujo(d), fp1, fp2, fp3);
                     } else {
-                        calcularPuntaFlecha(o->posicion, d->posicion, d->radio, fp1, fp2, fp3);
+                        calcularPuntaFlecha(o->posicion, d->posicion, get_radio_dibujo(d), fp1, fp2, fp3);
                     }
                     dl->AddTriangleFilled(fp1, fp2, fp3, col);
                     dl->AddTriangle(fp1, fp2, fp3, IM_COL32(255, 255, 255, 80), 1.0f);
@@ -698,7 +787,8 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             }
 
             // peso
-            if (!arista_caida) {
+            float alpha_lod = std::clamp((self.estado_ui.zoom_lienzo - 0.25f) / 0.25f, 0.0f, 1.0f);
+            if (!arista_caida && alpha_lod > 0.0f) {
                 ImVec2 mid = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, 0.5f);
                 char peso_txt[16];
                 if (modo_red && uso_arista > 0.02f)
@@ -709,8 +799,9 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 dl->AddRectFilled(
                     ImVec2(mid.x - ts.x * 0.5f - 3, mid.y - ts.y * 0.5f - 1),
                     ImVec2(mid.x + ts.x * 0.5f + 3, mid.y + ts.y * 0.5f + 1),
-                    IM_COL32(20, 20, 25, 200), 3.0f);
-                ImU32 col_txt = (modo_red && uso_arista > 0.02f) ? colorSaturacion(uso_arista) : IM_COL32(200, 210, 220, 220);
+                    IM_COL32(20, 20, 25, (int)(200 * alpha_lod)), 3.0f);
+                ImU32 col_txt = (modo_red && uso_arista > 0.02f) ? colorSaturacion(uso_arista) : IM_COL32(200, 210, 220, 255);
+                col_txt = (col_txt & 0x00FFFFFF) | ((int)(220 * alpha_lod) << 24);
                 dl->AddText(ImVec2(mid.x - ts.x * 0.5f, mid.y - ts.y * 0.5f), col_txt, peso_txt);
             }
 
@@ -726,7 +817,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 if (cruza) {
                     float pulse = sinf(tiempo * 3.0f + idx) * 0.3f + 0.7f;
                     ImU32 col_cruce = IM_COL32(255, 120, 0, (int)(pulse * 120));
-                    lineaArista(dl, o->posicion, d->posicion, punto_control, es_curva, col_cruce, 6.0f);
+                    lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, col_cruce, 6.0f);
                 }
             }
 
@@ -863,38 +954,15 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         }
         // ====================================================
         // PRE-CALCULAR RANGOS DE RANKING PARA EVITAR O(N^2)
-        // ====================================================
-        float rank_size_min = FLT_MAX, rank_size_max = -FLT_MAX;
-        float rank_color_min = FLT_MAX, rank_color_max = -FLT_MAX;
-        bool usar_ranking = (!es_g2 && self.estado_ui.ranking.activo);
-        
-        auto getValorRank = [&](int nid, EstadoUI::EstadoRanking::Atributo attr) -> float {
-            switch (attr) {
-                case EstadoUI::EstadoRanking::GRADO: return (float)g_dib.gradoNodo(nid);
-                default: return 0;
-            }
-        };
-
-        if (usar_ranking) {
-            auto& rk = self.estado_ui.ranking;
-            if (rk.atributo_size != EstadoUI::EstadoRanking::NINGUNO) {
-                for (const auto& nn : g_dib.nodos) {
-                    float v = getValorRank(nn.id, rk.atributo_size);
-                    if (v < rank_size_min) rank_size_min = v;
-                    if (v > rank_size_max) rank_size_max = v;
-                }
-            }
-            if (rk.atributo_color != EstadoUI::EstadoRanking::NINGUNO) {
-                for (const auto& nn : g_dib.nodos) {
-                    float v = getValorRank(nn.id, rk.atributo_color);
-                    if (v < rank_color_min) rank_color_min = v;
-                    if (v > rank_color_max) rank_color_max = v;
-                }
-            }
-        }
-
         // dibujar nodos
         for (auto& n : g_dib.nodos) {
+            // Frustum Culling
+            float r_cull = n.radio + 50.0f;
+            if (n.posicion.x < origin.x - r_cull || n.posicion.x > origin.x + tamano.x + r_cull ||
+                n.posicion.y < origin.y - r_cull || n.posicion.y > origin.y + tamano.y + r_cull) {
+                continue; // no dibujar si esta fuera de pantalla
+            }
+
             ImU32 colorFondo, colorBorde;
             bool es_anim = (!es_g2 && (self.estado_grafos.anim_estado.activa || self.estado_grafos.anim_estado.paso_actual >= 0));
 
@@ -1064,6 +1132,11 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 radio_dibujo += 2.0f + sinf(tiempo * 8.0f) * 1.5f;
             }
 
+            if (!es_g2 && editando_g2) {
+                colorFondo = (colorFondo & 0x00FFFFFF) | (40 << 24);
+                colorBorde = (colorBorde & 0x00FFFFFF) | (40 << 24);
+            }
+
             // circulo del nodo
             dl->AddCircleFilled(n.posicion, radio_dibujo, colorFondo, 32);
             dl->AddCircle(n.posicion, radio_dibujo, colorBorde, 32, 2.5f);
@@ -1074,16 +1147,26 @@ inline void dibujar(Grafo& red, Interfaz& self) {
                 dl->AddCircle(n.posicion, radio_dibujo + 6 + fp * 4, IM_COL32(150, 60, 200, (int)(fp * 120)), 32, 1.5f);
             }
 
-            // texto del nodo
-            if (!es_g2 && self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
-                const char* icono = iconoHardware(n.tipo);
-                ImVec2 is = ImGui::CalcTextSize(icono);
-                dl->AddText(ImVec2(n.posicion.x - is.x * 0.5f, n.posicion.y - is.y * 0.5f), colorBorde, icono);
-                ImVec2 ns = ImGui::CalcTextSize(n.nombre.c_str());
-                dl->AddText(ImVec2(n.posicion.x - ns.x * 0.5f, n.posicion.y + radio_dibujo + 3), IM_COL32(190, 195, 200, 200), n.nombre.c_str());
-            } else {
-                ImVec2 ts = ImGui::CalcTextSize(n.nombre.c_str());
-                dl->AddText(ImVec2(n.posicion.x - ts.x * 0.5f, n.posicion.y - ts.y * 0.5f), IM_COL32(255, 255, 255, 255), n.nombre.c_str());
+            // texto del nodo (LOD con Alpha Blending)
+            float alpha_lod = 1.0f; // std::clamp((self.estado_ui.zoom_lienzo - 0.25f) / 0.25f, 0.0f, 1.0f);
+            if (alpha_lod > 0.0f) {
+                int alpha_base = (!es_g2 && editando_g2) ? 60 : 255;
+                int alpha_texto = (int)(alpha_base * alpha_lod);
+                
+                if (!es_g2 && self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
+                    const char* icono = iconoHardware(n.tipo);
+                    ImVec2 is = ImGui::CalcTextSize(icono);
+                    
+                    ImU32 iconColor = (colorBorde & 0x00FFFFFF) | (alpha_texto << 24);
+                    dl->AddText(ImVec2(n.posicion.x - is.x * 0.5f, n.posicion.y - is.y * 0.5f), iconColor, icono);
+                    
+                    ImVec2 ns = ImGui::CalcTextSize(n.nombre.c_str());
+                    int sub_alpha = (int)(((!es_g2 && editando_g2) ? 40 : 200) * alpha_lod);
+                    dl->AddText(ImVec2(n.posicion.x - ns.x * 0.5f, n.posicion.y + radio_dibujo + 3), IM_COL32(190, 195, 200, sub_alpha), n.nombre.c_str());
+                } else {
+                    ImVec2 ts = ImGui::CalcTextSize(n.nombre.c_str());
+                    dl->AddText(ImVec2(n.posicion.x - ts.x * 0.5f, n.posicion.y - ts.y * 0.5f), IM_COL32(255, 255, 255, alpha_texto), n.nombre.c_str());
+                }
             }
 
             // nodo caido

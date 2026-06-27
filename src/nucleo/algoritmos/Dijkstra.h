@@ -107,14 +107,14 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
     cola.push({0.0f, id_origen});
 
     pasos.push_back({PasoAnimacion::VISITAR, id_origen, -1, -1,
-        "Inicio en " + nombre(id_origen) + " (dist=0)"});
+        "Inicio en " + nombre(id_origen) + " (dist=0)", -1, 0.0f});
 
     while (!cola.empty()) {
         auto [d, u] = cola.top(); cola.pop();
         if (d > dist[u]) continue;
 
         pasos.push_back({PasoAnimacion::CONFIRMAR, u, -1, -1,
-            "Confirmado " + nombre(u) + " (dist=" + std::to_string((int)dist[u]) + ")"});
+            "Confirmado " + nombre(u) + " (dist=" + std::to_string((int)dist[u]) + ")", -1, dist[u]});
 
         if (u == id_destino) break;
 
@@ -146,7 +146,7 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int id_origen, int id_de
                 prev[v] = u;
                 cola.push({nd, v});
                 pasos.push_back({PasoAnimacion::VISITAR, v, -1, -1,
-                    "Mejorado " + nombre(v) + " (dist=" + std::to_string((int)nd) + ")"});
+                    "Mejorado " + nombre(v) + " (dist=" + std::to_string((int)nd) + ")", -1, nd});
             }
         }
     }

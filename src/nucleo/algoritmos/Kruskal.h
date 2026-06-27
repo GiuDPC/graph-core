@@ -53,19 +53,19 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g) {
 
     for (const auto& a : ordenadas) {
         pasos.push_back({PasoAnimacion::EXPLORAR, -1, a.origen_id, a.destino_id,
-            "Evaluando " + g.nombreNodo(a.origen_id) + " - " + g.nombreNodo(a.destino_id) +
-            " (peso=" + std::to_string((int)a.peso) + ")"});
+            "Evaluando ruta más corta disponible: " + g.nombreNodo(a.origen_id) + " -> " + g.nombreNodo(a.destino_id) +
+            " (" + std::to_string((int)a.peso) + " km)", -1, a.peso, -1});
 
         if (uf.unir(a.origen_id, a.destino_id)) {
             pasos.push_back({PasoAnimacion::CONFIRMAR, -1, a.origen_id, a.destino_id,
-                "Aceptada: conecta componentes distintos"});
-            pasos.push_back({PasoAnimacion::CONFIRMAR, a.origen_id, -1, -1, ""});
-            pasos.push_back({PasoAnimacion::CONFIRMAR, a.destino_id, -1, -1, ""});
+                "Aceptada: Conecta nuevas áreas al esqueleto principal", -1, a.peso, -1});
+            pasos.push_back({PasoAnimacion::CONFIRMAR, a.origen_id, -1, -1, "", -1, -1.0f, -1});
+            pasos.push_back({PasoAnimacion::CONFIRMAR, a.destino_id, -1, -1, "", -1, -1.0f, -1});
             aceptadas++;
             if (aceptadas == (int)g.nodos.size() - 1) break;
         } else {
             pasos.push_back({PasoAnimacion::DESCARTAR, -1, a.origen_id, a.destino_id,
-                "Rechazada: crearia ciclo"});
+                "Rechazada: Formaría un ciclo redundante (ya están conectadas)", -1, a.peso, -1});
         }
     }
     return pasos;

@@ -1,0 +1,1581 @@
+{
+    "nodos": [
+        {
+            "id": 0,
+            "nombre": "A0",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": -250.0,
+            "radio": 15
+        },
+        {
+            "id": 1,
+            "nombre": "A1",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": -200.0,
+            "radio": 15
+        },
+        {
+            "id": 2,
+            "nombre": "A2",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": -150.0,
+            "radio": 15
+        },
+        {
+            "id": 3,
+            "nombre": "A3",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": -100.0,
+            "radio": 15
+        },
+        {
+            "id": 4,
+            "nombre": "A4",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": -50.0,
+            "radio": 15
+        },
+        {
+            "id": 5,
+            "nombre": "A5",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": 0.0,
+            "radio": 15
+        },
+        {
+            "id": 6,
+            "nombre": "A6",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": 50.0,
+            "radio": 15
+        },
+        {
+            "id": 7,
+            "nombre": "A7",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": 100.0,
+            "radio": 15
+        },
+        {
+            "id": 8,
+            "nombre": "A8",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": 150.0,
+            "radio": 15
+        },
+        {
+            "id": 9,
+            "nombre": "A9",
+            "tipo": 3,
+            "estado": 0,
+            "x": -200,
+            "y": 200.0,
+            "radio": 15
+        },
+        {
+            "id": 10,
+            "nombre": "B0",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -375.0,
+            "radio": 15
+        },
+        {
+            "id": 11,
+            "nombre": "B1",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -325.0,
+            "radio": 15
+        },
+        {
+            "id": 12,
+            "nombre": "B2",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -275.0,
+            "radio": 15
+        },
+        {
+            "id": 13,
+            "nombre": "B3",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -225.0,
+            "radio": 15
+        },
+        {
+            "id": 14,
+            "nombre": "B4",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -175.0,
+            "radio": 15
+        },
+        {
+            "id": 15,
+            "nombre": "B5",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -125.0,
+            "radio": 15
+        },
+        {
+            "id": 16,
+            "nombre": "B6",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -75.0,
+            "radio": 15
+        },
+        {
+            "id": 17,
+            "nombre": "B7",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": -25.0,
+            "radio": 15
+        },
+        {
+            "id": 18,
+            "nombre": "B8",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 25.0,
+            "radio": 15
+        },
+        {
+            "id": 19,
+            "nombre": "B9",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 75.0,
+            "radio": 15
+        },
+        {
+            "id": 20,
+            "nombre": "B10",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 125.0,
+            "radio": 15
+        },
+        {
+            "id": 21,
+            "nombre": "B11",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 175.0,
+            "radio": 15
+        },
+        {
+            "id": 22,
+            "nombre": "B12",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 225.0,
+            "radio": 15
+        },
+        {
+            "id": 23,
+            "nombre": "B13",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 275.0,
+            "radio": 15
+        },
+        {
+            "id": 24,
+            "nombre": "B14",
+            "tipo": 4,
+            "estado": 0,
+            "x": 200,
+            "y": 325.0,
+            "radio": 15
+        }
+    ],
+    "aristas": [
+        {
+            "origen": 0,
+            "destino": 10,
+            "peso": 5.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 11,
+            "peso": 8.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 12,
+            "peso": 6.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 13,
+            "peso": 7.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 14,
+            "peso": 5.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 15,
+            "peso": 11.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 16,
+            "peso": 13.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 17,
+            "peso": 10.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 18,
+            "peso": 8.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 19,
+            "peso": 8.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 20,
+            "peso": 13.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 21,
+            "peso": 11.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 22,
+            "peso": 8.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 23,
+            "peso": 13.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 0,
+            "destino": 24,
+            "peso": 5.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 10,
+            "peso": 10.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 11,
+            "peso": 11.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 12,
+            "peso": 13.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 13,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 14,
+            "peso": 5.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 15,
+            "peso": 10.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 16,
+            "peso": 9.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 17,
+            "peso": 10.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 18,
+            "peso": 10.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 19,
+            "peso": 6.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 20,
+            "peso": 14.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 21,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 22,
+            "peso": 11.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 23,
+            "peso": 12.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 1,
+            "destino": 24,
+            "peso": 14.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 10,
+            "peso": 6.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 11,
+            "peso": 9.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 12,
+            "peso": 12.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 13,
+            "peso": 11.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 14,
+            "peso": 7.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 15,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 16,
+            "peso": 14.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 17,
+            "peso": 13.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 18,
+            "peso": 7.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 19,
+            "peso": 11.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 20,
+            "peso": 6.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 21,
+            "peso": 11.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 22,
+            "peso": 14.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 23,
+            "peso": 11.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 2,
+            "destino": 24,
+            "peso": 8.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 10,
+            "peso": 13.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 11,
+            "peso": 7.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 12,
+            "peso": 10.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 13,
+            "peso": 7.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 14,
+            "peso": 11.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 15,
+            "peso": 13.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 16,
+            "peso": 8.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 17,
+            "peso": 8.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 18,
+            "peso": 10.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 19,
+            "peso": 11.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 20,
+            "peso": 8.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 21,
+            "peso": 6.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 22,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 23,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 3,
+            "destino": 24,
+            "peso": 10.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 10,
+            "peso": 5.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 11,
+            "peso": 8.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 12,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 13,
+            "peso": 12.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 14,
+            "peso": 8.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 15,
+            "peso": 6.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 16,
+            "peso": 11.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 17,
+            "peso": 14.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 18,
+            "peso": 9.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 19,
+            "peso": 8.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 20,
+            "peso": 9.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 21,
+            "peso": 12.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 22,
+            "peso": 5.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 23,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 4,
+            "destino": 24,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 10,
+            "peso": 6.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 11,
+            "peso": 8.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 12,
+            "peso": 9.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 13,
+            "peso": 5.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 14,
+            "peso": 7.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 15,
+            "peso": 10.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 16,
+            "peso": 7.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 17,
+            "peso": 14.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 18,
+            "peso": 9.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 19,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 20,
+            "peso": 13.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 21,
+            "peso": 7.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 22,
+            "peso": 8.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 23,
+            "peso": 12.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 5,
+            "destino": 24,
+            "peso": 13.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 10,
+            "peso": 8.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 11,
+            "peso": 11.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 12,
+            "peso": 14.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 13,
+            "peso": 8.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 14,
+            "peso": 9.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 15,
+            "peso": 8.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 16,
+            "peso": 7.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 17,
+            "peso": 13.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 18,
+            "peso": 5.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 19,
+            "peso": 12.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 20,
+            "peso": 11.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 21,
+            "peso": 12.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 22,
+            "peso": 12.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 23,
+            "peso": 13.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 6,
+            "destino": 24,
+            "peso": 11.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 10,
+            "peso": 11.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 11,
+            "peso": 8.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 12,
+            "peso": 11.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 13,
+            "peso": 9.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 14,
+            "peso": 10.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 15,
+            "peso": 13.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 16,
+            "peso": 6.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 17,
+            "peso": 15.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 18,
+            "peso": 10.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 19,
+            "peso": 8.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 20,
+            "peso": 10.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 21,
+            "peso": 5.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 22,
+            "peso": 10.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 23,
+            "peso": 7.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 7,
+            "destino": 24,
+            "peso": 5.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 10,
+            "peso": 5.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 11,
+            "peso": 5.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 12,
+            "peso": 7.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 13,
+            "peso": 6.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 14,
+            "peso": 14.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 15,
+            "peso": 6.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 16,
+            "peso": 12.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 17,
+            "peso": 6.6,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 18,
+            "peso": 8.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 19,
+            "peso": 5.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 20,
+            "peso": 7.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 21,
+            "peso": 7.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 22,
+            "peso": 13.0,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 23,
+            "peso": 8.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 8,
+            "destino": 24,
+            "peso": 5.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 10,
+            "peso": 9.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 11,
+            "peso": 11.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 12,
+            "peso": 7.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 13,
+            "peso": 12.5,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 14,
+            "peso": 11.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 15,
+            "peso": 8.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 16,
+            "peso": 12.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 17,
+            "peso": 7.4,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 18,
+            "peso": 14.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 19,
+            "peso": 8.8,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 20,
+            "peso": 11.2,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 21,
+            "peso": 13.3,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 22,
+            "peso": 8.1,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 23,
+            "peso": 10.9,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        },
+        {
+            "origen": 9,
+            "destino": 24,
+            "peso": 13.7,
+            "capacidad": 0.0,
+            "flujo": 0.0,
+            "estado": 0,
+            "es_dirigida": false
+        }
+    ]
+}

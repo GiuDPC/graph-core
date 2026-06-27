@@ -103,4 +103,19 @@ struct EstadoAeroGrafos {
     int ancho_textura = 0;
     int alto_textura = 0;
     bool textura_cargada = false;
+
+    // ── Cache de Análisis de Red (para Popup) ──
+    struct AnalisisCache {
+        int n = 0;
+        int m = 0;
+        float grado_prom = 0.0f;
+        std::string hub_max_nombre;
+        std::string hub_max_iata;
+        int max_grado = 0;
+        std::string hub_min_nombre;
+        std::string hub_min_iata;
+        int min_grado = 0;
+    };
+    AnalisisCache analisis_cache;
+    bool mostrar_popup_analisis = false;
 };

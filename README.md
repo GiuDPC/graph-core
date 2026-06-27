@@ -1,134 +1,225 @@
-# GraphCore: Simulador y Visualizador de Grafos y AeroGrafos
+# GraphCore: Analizador Visual de Grafos y Redes Aéreas Mundiales
 
-Version 2.1.0. Aplicacion de escritorio para la visualizacion interactiva de algoritmos sobre
-grafos matematicos y el analisis de una base de datos mundial de vuelos (AeroGrafos). Construida
-con C++17, Dear ImGui, GLFW y OpenGL 3.3.
+Versión 2.5.0 (Edición para Proyector / Defensa Académica). Aplicación de escritorio avanzada diseñada para la visualización interactiva y el estudio profundo de algoritmos aplicados sobre grafos matemáticos y redes de transporte reales.
 
----
-
-## Caracteristicas
-
-### Algoritmos de Grafos
-
-- Dijkstra: Ruta optima entre dos nodos con animacion paso a paso y sonido sincronizado.
-- Kruskal: Arbol de expansion minima (MST) con visualizacion de Union-Find.
-- BFS y DFS: Busqueda en anchura y profundidad con deteccion de ciclos.
-- Coloreo de grafos: Algoritmo greedy secuencial y Welsh-Powell.
-- Coloreo fractal: Modulacion de colores con un fractal de Mandelbrot animado.
-- Isomorfismo: Verifica si dos grafos comparten la misma estructura topologica.
-- Euler y Hamilton: Busqueda de circuitos eulerianos y caminos hamiltonianos mediante backtracking.
-- Generadores Fractales: Topologias complejas (Triangulo de Sierpinski, Mandala, Arbol Fractal).
-- Detector Automatico: Identificacion en tiempo real (Conexo, Bipartito, Arbol, Regular, Euleriano).
-
-### Modo AeroGrafos (Simulacion Geopolitica y de Rutas Aereas)
-
-- Mapa Global Equirectangular: Despliegue interactivo del globo terráqueo con 63 hubs internacionales.
-- Distancias Reales (Haversine): Las aristas calculan el kilometraje exacto contemplando la curvatura terrestre.
-- Rutas Ortodromicas (Great Circle): Trazado realista de vuelos con curvatura progresiva.
-- Restriccion Geopolitica: Simulador de cierre del espacio aereo de Rusia (ej. Moscu), afectando de inmediato las conexiones entre occidente y oriente.
-- Dashboard Analitico: Tablero de informacion con la densidad de red y top de hubs aereos.
-- Ejecucion Academica: Comparativa de costo logistico entre Dijkstra y busquedas base como BFS en vuelos intercontinentales.
-
-### Sonido y UX
-
-- Motor de audio espacial (miniaudio) con generacion sintetica para eventos (ping suave, acorde de victoria).
-- Dos modos principales: Grafos (libre y puramente matematico) y AeroGrafos (mapa del mundo con datos fijos).
-- Paneles acoplables, layout oscuro profesional ("engineering").
+Desarrollada con **C++17**, **Dear ImGui**, **GLFW**, y renderizado acelerado por **OpenGL 3.3**.
 
 ---
 
-## Requisitos
+## Modos de Operación
 
-- Compilador C++17 (GCC 9+, Clang 10+, MSVC 2019+)
-- CMake 3.20+
-- GPU compatible con OpenGL 3.3
+### 1. Modo AeroGrafos (Simulación Global)
+Modo centrado en una red logística real simulada que incluye **63 hubs aéreos internacionales**. Está diseñado para presentaciones académicas y análisis profundo de redes de transporte.
 
-Dependencias automáticas via FetchContent: GLFW 3.4, Dear ImGui, nlohmann/json 3.11.3, miniaudio, GoogleTest v1.14.0.
+* **Algoritmos y Simulaciones:**
+  * **Dijkstra:** Encuentra la ruta más corta garantizada calculando kilómetros reales mediante distancia Haversine. Incluye animaciones de búsqueda que muestran el progreso mediante ondas expansivas e indicadores de distancia.
+  * **Kruskal (MST):** Construye el Árbol de Expansión Mínima (Minimum Spanning Tree) con animación paso a paso, visualizando el proceso de chequeo de ciclos y la selección óptima de aristas.
+  * **BFS y DFS:** Búsquedas topológicas puras. La búsqueda en anchura (BFS) se ilustra con un efecto concéntrico tipo "sonar". La búsqueda en profundidad (DFS) detalla el avance en la red y las conexiones retrocesivas (back-edges).
+  * **Coloreo Greedy (Aproximación):** Algoritmo secuencial que evita monopolios aéreos, asignando frecuencias o recursos únicos a aeropuertos vecinos para simular restricciones operativas.
+  * **Análisis de Red:** Ejecuta un escaneo topológico de la infraestructura para reportar métricas vitales como densidad, grado promedio de los nodos y los hubs más críticos.
+  * **Caminos de Euler y Hamilton:** Demostración de las limitaciones en la vida real de estos algoritmos sobre mapas mundiales no estructurados, evidenciando problemas de complejidad computacional (NP-Hard).
+* **Restricción Geopolítica:** Sistema interactivo que permite simular el cierre de espacios aéreos (por ejemplo, rutas bloqueadas). El motor recalcula en tiempo real cómo los algoritmos de enrutamiento se adaptan bordeando continentes.
 
-### Linux (Debian/Ubuntu)
-```bash
-sudo apt install cmake libglfw3-dev libxkbcommon-dev
-```
+### 2. Modo Grafos Libres (Laboratorio Matemático)
+Consiste en un entorno interactivo y lienzo libre donde es posible construir, modificar y analizar redes abstractas a medida.
 
-### Windows (MinGW / MSYS2)
-```bash
-pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
+* **Físicas de Partículas (Fruchterman-Reingold):** Motor de ordenamiento automático que desenreda estructuras caóticas aplicando fuerzas de repulsión (Coulomb) y atracción (Hooke).
+* **Detector de Propiedades:** Panel analítico que informa en tiempo real las propiedades del grafo diseñado (ej. si es Bipartito, Euleriano, o Conexo).
+* **Isomorfismo y Generadores:** Prueba de algoritmos matemáticos, incluyendo detección de isomorfismo, y herramientas de autogeneración de mallas fractales y topologías complejas.
+
+---
+
+## Estructura del Proyecto
+
+La arquitectura completa del proyecto está organizada de la siguiente manera:
+
+```text
+.
+├── build-all.sh
+├── CMakeLists.txt
+├── compile_commands.json -> build/compile_commands.json
+├── .gitignore
+├── graph-core
+├── graph-core-logo.png
+├── imgui.ini
+├── mingw-toolchain.cmake
+├── muestras
+│   ├── arbol_binario.json
+│   ├── arbol_jerarquico.json
+│   ├── grafo_bipartito.json
+│   ├── grafo_completo.json
+│   ├── grafo_exotico_espiral.json
+│   ├── grafo_intermedio_anillos.json
+│   ├── grafo_malla.json
+│   ├── grafo_normal_1.json
+│   └── grafo_normal_2.json
+├── README.md
+├── recursos
+│   ├── fuentes
+│   │   ├── Font Awesome 6 Free-Solid-900.otf
+│   │   ├── JetBrainsMono-Regular.ttf
+│   │   └── Roboto-Regular.ttf
+│   └── texturas
+│       └── mundo_equirectangular.jpg
+├── src
+│   ├── audio
+│   │   ├── miniaudio.h
+│   │   ├── miniaudio_impl.cpp
+│   │   └── Sonidos.h
+│   ├── IconsFontAwesome6.h
+│   ├── interfaz
+│   │   ├── componentes
+│   │   │   ├── Dialogos.h
+│   │   │   ├── LogPanel.h
+│   │   │   ├── MenuPrincipal.h
+│   │   │   ├── StatusBar.h
+│   │   │   └── Toolbar.h
+│   │   ├── estado
+│   │   │   ├── EstadoAeroGrafos.h
+│   │   │   ├── EstadoGrafos.h
+│   │   │   ├── EstadoRedes.h
+│   │   │   └── EstadoUI.h
+│   │   ├── Interfaz.h
+│   │   ├── lienzo
+│   │   │   ├── LienzoAeroGrafos.h
+│   │   │   └── LienzoRed.h
+│   │   ├── paneles
+│   │   │   ├── Matrices.h
+│   │   │   ├── PanelAeroGrafos.h
+│   │   │   ├── PanelGrafos.h
+│   │   │   ├── PanelHardware.h
+│   │   │   └── PanelIsomorfismo.h
+│   │   ├── util
+│   │   │   ├── Animacion.h
+│   │   │   ├── AnimacionUI.h
+│   │   │   ├── Colores.h
+│   │   │   ├── Easing.h
+│   │   │   ├── stb_image.h
+│   │   │   └── TextureLoader.h
+│   │   └── ventanas
+│   │       └── VentanaAyuda.h
+│   ├── main.cpp
+│   ├── nucleo
+│   │   ├── algoritmos
+│   │   │   ├── AnalizadorGrafo.h
+│   │   │   ├── Arbol.h
+│   │   │   ├── BFS.h
+│   │   │   ├── Ciclos.h
+│   │   │   ├── Coloreo.h
+│   │   │   ├── ColorFractal.h
+│   │   │   ├── DFS.h
+│   │   │   ├── Dijkstra.h
+│   │   │   ├── EulerHamilton.h
+│   │   │   ├── ForceAtlas2.h
+│   │   │   ├── Isomorfismo.h
+│   │   │   ├── Kruskal.h
+│   │   │   ├── Planaridad.h
+│   │   │   ├── QuadTree.h
+│   │   │   └── TopologiasFractales.h
+│   │   ├── datos
+│   │   │   └── DatosMundo.h
+│   │   ├── Grafo.h
+│   │   ├── SimuladorRed.h
+│   │   ├── tipos
+│   │   │   ├── Arista.h
+│   │   │   ├── EstadoRed.h
+│   │   │   ├── Nodo.h
+│   │   │   ├── PasoAnimacion.h
+│   │   │   └── TipoHardware.h
+│   │   ├── Topologias.h
+│   │   └── UnionFind.h
+│   ├── persistencia
+│   │   ├── SerializadorGEXF.h
+│   │   └── SerializadorJSON.h
+│   └── portable-file-dialogs.h
+└── tests
+    ├── test_bfs.cpp
+    ├── test_ciclos.cpp
+    ├── test_dijkstra.cpp
+    ├── test_grafo.cpp
+    └── test_unionfind.cpp
 ```
 
 ---
 
-## Compilacion
+## Requisitos y Dependencias
 
-### Linux
-```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
-```
+* Compilador compatible con C++17 (GCC 9+, Clang 10+, MSVC 2019+)
+* CMake 3.20 o superior
+* Tarjeta gráfica compatible con OpenGL 3.3
 
-### Windows (MSYS2 / MinGW)
-```bash
-cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
-```
-
-## Ejecucion
-
-- Linux: `./build/graph-core`
-- Windows: `.\build\graph-core.exe`
-
-## Tests
-
-```bash
-cd build && ctest
-```
+*Dependencias integradas y obtenidas automáticamente en la compilación:*
+* GLFW 3.4
+* Dear ImGui
+* nlohmann/json
+* miniaudio
+* GoogleTest
 
 ---
 
-## Estructura del proyecto
+## Instalación y Compilación
 
-src/
-  main.cpp
-  audio/
-    Sonidos.h
-    miniaudio.h
-    miniaudio_impl.cpp
-  interfaz/
-    Interfaz.h
-    componentes/
-      Toolbar.h
-    estado/
-      EstadoUI.h
-      EstadoAeroGrafos.h
-    lienzo/
-      LienzoAeroGrafos.h
-    paneles/
-      PanelGrafos.h
-      PanelAeroGrafos.h
-      Matrices.h
-    ventanas/
-      VentanaAyuda.h
-  nucleo/
-    Grafo.h
-    Topologias.h
-    UnionFind.h
-    algoritmos/
-      Dijkstra.h
-      Kruskal.h
-      BFS.h
-      DFS.h
-      Euler.h
-      Hamilton.h
-      Coloreo.h
-      Isomorfismo.h
-  persistencia/
-    SerializadorJSON.h
-tests/
-  test_grafo.cpp
-  test_dijkstra.cpp
-  test_unionfind.cpp
+### Entornos Linux (Debian / Ubuntu)
+
+1. Instale las herramientas de desarrollo y dependencias básicas del sistema:
+   ```bash
+   sudo apt update
+   sudo apt install cmake gcc g++ libglfw3-dev libxkbcommon-dev build-essential
+   ```
+2. Configure el proyecto utilizando CMake:
+   ```bash
+   cmake -B build -DCMAKE_BUILD_TYPE=Release
+   ```
+3. Compile el código fuente:
+   ```bash
+   cmake --build build -j$(nproc)
+   ```
+4. Ejecute la aplicación:
+   ```bash
+   ./build/graph-core
+   ```
+
+### Entornos Windows (MSYS2 / MinGW)
+
+1. A través de la terminal de MSYS2, instale la cadena de herramientas:
+   ```bash
+   pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
+   ```
+2. Genere los archivos de construcción especificando el generador de MinGW:
+   ```bash
+   cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+   ```
+3. Compile el binario:
+   ```bash
+   cmake --build build -j$(nproc)
+   ```
+4. Ejecute la aplicación generada:
+   ```cmd
+   .\build\graph-core.exe
+   ```
+
+*(Alternativamente, puede utilizar el script `build-all.sh` incluido en la raíz si dispone de un entorno compatible).*
 
 ---
 
-## Licencia
+## Guía de Uso
 
-MIT. Ver el archivo LICENSE para mas informacion.
+Una vez ejecutada la aplicación, se desplegará el menú principal donde podrá navegar entre los distintos modos. 
+
+### Navegación General
+* **Paneles de Control:** Utilice las barras laterales para configurar parámetros de visualización, como la velocidad de las animaciones, la activación del sonido o el modo de representación.
+* **Cámara y Movimiento:** En los entornos gráficos, puede arrastrar el lienzo con el ratón y hacer uso de la rueda de desplazamiento para aplicar zoom sobre secciones específicas del grafo.
+* **Manual Integrado:** Presione en cualquier momento el botón de Ayuda para abrir una enciclopedia detallada con la teoría, casos de uso y la complejidad computacional teórica de cada algoritmo.
+
+### Modo AeroGrafos
+* **Selección de Origen y Destino:** Haga clic sobre los nodos que representan aeropuertos (hubs) para establecer la ruta de partida y el destino deseado.
+* **Ejecución de Algoritmos:** Seleccione un algoritmo específico desde el panel (Dijkstra, BFS, DFS, etc.) y presione iniciar para observar su comportamiento iterativo en tiempo real.
+* **Alteración de Rutas (Cierres de Espacio Aéreo):** Inhabilite selectivamente nodos específicos para simular un cierre de rutas y observar cómo el motor recalcula alternativas inmediatas.
+
+### Modo Laboratorio (Grafos Libres)
+* **Creación Manual:** Añada nodos al hacer clic en zonas vacías del lienzo y genere conexiones (aristas) arrastrando el ratón desde un nodo de origen hasta uno de destino.
+* **Uso de Generadores:** A través del menú de topologías puede cargar modelos predefinidos (ubicados en el directorio `muestras/`) o autogenerar grafos aleatorios, bipartitos y mallas estructurales de forma automatizada.
+* **Análisis en Tiempo Real:** Observe las métricas matemáticas del grafo en el panel lateral. Estas se actualizan instantáneamente con cualquier adición o remoción estructural.
+
+---
+*Desarrollado para la materia de Optimización y Algoritmia Avanzada. Licencia MIT.*

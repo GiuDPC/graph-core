@@ -25,13 +25,17 @@ struct AnalizadorGrafo {
 
         if (num_nodos == 0) return props;
 
+        // Tamaño seguro para vectores indexados por ID de nodo
+        int max_id = g.rangoIds();
+
         // deteccion de conexo usando bfs
-        std::vector<bool> visitado(num_nodos, false);
+        std::vector<bool> visitado(max_id, false);
         int visitados_count = 0;
         
         std::queue<int> q;
-        q.push(0);
-        visitado[0] = true;
+        int start_id = g.nodos[0].id;
+        q.push(start_id);
+        visitado[start_id] = true;
         visitados_count++;
 
         while (!q.empty()) {
@@ -63,11 +67,11 @@ struct AnalizadorGrafo {
 
         // deteccion de regular todos tienen el mismo grado
         if (num_nodos > 0) {
-            int grado_base = (int)g.vecinos(0).size();
+            int grado_base = (int)g.vecinos(g.nodos[0].id).size();
             bool todos_iguales = true;
             bool todos_pares = (grado_base % 2 == 0);
-            for (int i = 1; i < num_nodos; i++) {
-                int grado_actual = (int)g.vecinos(i).size();
+            for (size_t i = 1; i < g.nodos.size(); i++) {
+                int grado_actual = (int)g.vecinos(g.nodos[i].id).size();
                 if (grado_actual != grado_base) todos_iguales = false;
                 if (grado_actual % 2 != 0) todos_pares = false;
             }
@@ -85,10 +89,11 @@ struct AnalizadorGrafo {
         // deteccion de bipartito 2coloreable
         // bfs para intentar colorear con 2 colores 0 y 1
         if (num_nodos > 0) {
-            std::vector<int> color(num_nodos, -1);
+            std::vector<int> color(max_id, -1);
             bool es_bipartito = true;
 
-            for (int start = 0; start < num_nodos; start++) {
+            for (const auto& nodo : g.nodos) {
+                int start = nodo.id;
                 if (color[start] == -1) {
                     std::queue<int> bq;
                     bq.push(start);

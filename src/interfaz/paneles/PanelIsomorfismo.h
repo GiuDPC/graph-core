@@ -27,6 +27,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
 
     if (ImGui::BeginTabBar("IsoTabs")) {
         if (ImGui::BeginTabItem("G1 (Tu Grafo Principal)")) {
+            self.estado_grafos.iso_editando_g2 = false;
             ImGui::Text("Nodos: %d  |  Aristas: %d",
                 (int)red.nodos.size(), (int)red.aristas.size());
             auto degs = Algoritmos::Isomorfismo::secuenciaGrados(red);
@@ -36,6 +37,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("G2 (El Grafo a Comparar)")) {
+            self.estado_grafos.iso_editando_g2 = true;
             ImGui::Text("Nodos: %d  |  Aristas: %d",
                 (int)self.estado_grafos.grafo_iso_g2.nodos.size(), (int)self.estado_grafos.grafo_iso_g2.aristas.size());
             auto degs = Algoritmos::Isomorfismo::secuenciaGrados(self.estado_grafos.grafo_iso_g2);
@@ -81,7 +83,6 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                         self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
                     }
                     self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
-                    self.estado_grafos.iso_editando_g2 = true;
                     self.estado_grafos.iso_analizado = false;
                     self.registrarLog("[OK] G2 generado. Estan desordenados pero identicos.");
                     g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
@@ -90,11 +91,9 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Crea una copia del grafo con permutacion aleatoria.");
 
-            ImGui::Checkbox("Dibujar G2 manualmente", &self.estado_grafos.iso_editando_g2);
-            if (self.estado_grafos.iso_editando_g2) {
-                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f),
-                    ICON_FA_PENCIL " Click derecho en el lienzo para crear nodos/aristas en G2");
-            }
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PENCIL " Click derecho en el lienzo dibuja en G2");
+            ImGui::Spacing();
+            
             if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {
                 self.estado_grafos.grafo_iso_g2.limpiar();
                 self.estado_grafos.iso_analizado = false;
@@ -143,9 +142,51 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             "%s Misma secuencia de grados", icono_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados));
 
         ImGui::Spacing();
+        ImGui::Spacing();
         if (self.estado_grafos.resultado_iso.son_isomorfos) {
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
                 ICON_FA_CHECK " SON ISOMORFOS");
+            
+            // --- Nueva seccion visual de Matrices ---
+            if (ImGui::TreeNode("Ver Matrices de Adyacencia")) {
+                ImGui::Text("Grafo 1 (G1):");
+                for (size_t i = 0; i < red.nodos.size(); i++) {
+                    std::string fila = "[ ";
+                    for (size_t j = 0; j < red.nodos.size(); j++) {
+                        bool hay = red.obtenerArista(red.nodos[i].id, red.nodos[j].id) != nullptr;
+                        fila += (hay ? "1 " : "0 ");
+                    }
+                    fila += "]";
+                    ImGui::TextDisabled("%s", fila.c_str());
+                }
+                ImGui::Spacing();
+                ImGui::Text("Grafo 2 (G2) reordenado por mapeo:");
+                for (size_t i = 0; i < red.nodos.size(); i++) {
+                    std::string fila = "[ ";
+                    for (size_t j = 0; j < red.nodos.size(); j++) {
+                        int id_g1_i = red.nodos[i].id;
+                        int id_g1_j = red.nodos[j].id;
+                        
+                        int id_g2_i = -1;
+                        int id_g2_j = -1;
+                        for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
+                            if (par.first == id_g1_i) id_g2_i = par.second;
+                            if (par.first == id_g1_j) id_g2_j = par.second;
+                        }
+
+                        bool hay = false;
+                        if (id_g2_i != -1 && id_g2_j != -1) {
+                            hay = self.estado_grafos.grafo_iso_g2.obtenerArista(id_g2_i, id_g2_j) != nullptr;
+                        }
+                        fila += (hay ? "1 " : "0 ");
+                    }
+                    fila += "]";
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s", fila.c_str());
+                }
+                ImGui::TreePop();
+            }
+
+            ImGui::Spacing();
             ImGui::Text("Mapeo de nodos:");
             for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
                 ImGui::BulletText("%s (G1) <-> %s (G2)",

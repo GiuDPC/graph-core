@@ -57,7 +57,7 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
     cola.push(inicio_id);
 
     pasos.push_back({PasoAnimacion::VISITAR, inicio_id, -1, -1,
-        "Inicio BFS en " + g.nombreNodo(inicio_id) + " (nivel 0)"});
+        "Inicio BFS en " + g.nombreNodo(inicio_id) + " (nivel 0)", -1, -1.0f, 0});
 
     std::map<int, int> nivel;
     nivel[inicio_id] = 0;
@@ -65,7 +65,7 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
     while (!cola.empty()) {
         int u = cola.front(); cola.pop();
         pasos.push_back({PasoAnimacion::CONFIRMAR, u, -1, -1,
-            "Procesando " + g.nombreNodo(u) + " (nivel " + std::to_string(nivel[u]) + ")"});
+            "Procesando " + g.nombreNodo(u) + " (nivel " + std::to_string(nivel[u]) + ")", -1, -1.0f, nivel[u]});
 
         for (const auto& a : g.aristas) {
             int v = -1;
@@ -81,7 +81,7 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
                 cola.push(v);
                 nivel[v] = nivel[u] + 1;
                 pasos.push_back({PasoAnimacion::VISITAR, v, -1, -1,
-                    "Descubierto " + g.nombreNodo(v) + " (nivel " + std::to_string(nivel[v]) + ")"});
+                    "Descubierto " + g.nombreNodo(v) + " (nivel " + std::to_string(nivel[v]) + ")", -1, -1.0f, nivel[v]});
             }
         }
     }

@@ -369,6 +369,26 @@ inline const std::vector<RutaAerea>& obtenerRutas() {
     return rutas;
 }
 
+// ── Restricciones Geopolíticas ─────────────────────────────────────────────
+inline void aplicarRestriccionesGeopoliticas(Grafo& g) {
+    for (auto& a : g.aristas) {
+        bool toca_rusia = (a.origen_id == 15 || a.destino_id == 15);
+        
+        bool sobrevuelo = 
+            (a.origen_id == 16 && a.destino_id == 21) ||
+            (a.origen_id == 21 && a.destino_id == 16) ||
+            (a.origen_id == 11 && a.destino_id == 21) ||
+            (a.origen_id == 21 && a.destino_id == 11) ||
+            (a.origen_id == 14 && a.destino_id == 21) ||
+            (a.origen_id == 21 && a.destino_id == 14);
+
+        if (toca_rusia || sobrevuelo) {
+            a.peso *= 100000.0f;
+            a.peso_actual *= 100000.0f;
+        }
+    }
+}
+
 // ── Validación ─────────────────────────────────────────────────────────────
 inline bool validarDatos() {
     const auto& ciudades = obtenerCiudades();
@@ -524,9 +544,9 @@ inline Grafo construirGrafoAerografos() {
         float lon_destino = ciudades[r.destino_id].longitud;
         float distancia_base = r.distancia_km;
 
-        // Vuelo de Origen a Destino
+        // AeroGrafos de Origen a Destino
         float peso_ida = (lon_destino > lon_origen) ? (distancia_base * 0.90f) : (distancia_base * 1.10f);
-        // Vuelo de Destino a Origen
+        // AeroGrafos de Destino a Origen
         float peso_vuelta = (lon_origen > lon_destino) ? (distancia_base * 0.90f) : (distancia_base * 1.10f);
 
         // Se usa dirigida = true para insertar ambas direcciones con pesos distintos

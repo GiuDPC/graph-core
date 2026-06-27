@@ -503,10 +503,7 @@ inline void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
             for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
                 dibujarAristaResultado(estado.ruta_resultado[i],
                     estado.ruta_resultado[i+1],
-                    IM_COL32(0, 255, 200, 200), 3.5f);
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(0, 255, 200, 40), 9.0f);
+                    IM_COL32(255, 200, 50, 180), 2.0f);
             }
             break;
         case EstadoAeroGrafos::Algoritmo::VueltaAlMundo:
@@ -541,35 +538,39 @@ inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
         return ImVec2(pos.x + s.x, pos.y + s.y);
     };
 
-    // Lambda: dibujar arista animada (great circle)
-    auto dibujarAristaAnim = [&](int id1, int id2, ImU32 color, float grosor, float alpha) {
+    // Lambda: dibujar arista animada
+    auto dibujarAristaAnim = [&](int id1, int id2, ImU32 color, float grosor, float alpha, bool es_gradiente = false) {
         if (id1 < 0 || id2 < 0 || id1 >= (int)ciudades.size() || id2 >= (int)ciudades.size()) return;
         const auto& c1 = ciudades[id1];
         const auto& c2 = ciudades[id2];
-        auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud,
-                                                  c2.latitud, c2.longitud, 24);
-        int n = (int)pts_latlon.size();
+        auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud, c2.latitud, c2.longitud, 24);
         std::vector<ImVec2> pts_scr;
-        pts_scr.reserve(n);
+        pts_scr.reserve(pts_latlon.size());
         for (const auto& p : pts_latlon) {
             ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x);
             ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
             pts_scr.emplace_back(pos.x + s.x, pos.y + s.y);
         }
+        
         ImU32 col_alpha = (color & 0x00FFFFFF) | ((int)(alpha * 255) << 24);
-        dibujarPolylineSegura(dl, pts_scr, col_alpha, grosor, estado.zoom_mapa);
+        if (es_gradiente && pts_scr.size() > 2) {
+            // Dibujar degradado de origen a destino simulando un rayo laser
+            for (size_t i = 0; i < pts_scr.size() - 1; i++) {
+                float f = (float)i / (pts_scr.size() - 1);
+                ImU32 c = (color & 0x00FFFFFF) | ((int)(alpha * 255 * (0.2f + 0.8f * f)) << 24);
+                dl->AddLine(pts_scr[i], pts_scr[i+1], c, grosor);
+            }
+        } else {
+            dibujarPolylineSegura(dl, pts_scr, col_alpha, grosor, estado.zoom_mapa);
+        }
     };
 
-    // ── 1. Arista en exploración efímera (azul brillante) ──
-    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
-        const auto& paso = anim.pasos[anim.paso_actual];
-        if (paso.accion == PasoAnimacion::EXPLORAR && paso.arista_origen >= 0 && paso.arista_destino >= 0) {
-            float pulsar = sinf(t * 10.0f) * 0.2f + 0.8f;
-            dibujarAristaAnim(paso.arista_origen, paso.arista_destino, IM_COL32(80, 160, 255, 255), 3.0f, pulsar);
-        }
+    // ── Oscurecer mapa de fondo (Efecto Proyector "Neon") ──
+    if (!estado.animacion.completa) {
+        dl->AddRectFilled(pos, ImVec2(pos.x + sz.x, pos.y + sz.y), IM_COL32(0, 0, 0, 160));
     }
 
-    // ── 2. Aristas confirmadas (verde brillante) ──
+    // ── 1. Aristas confirmadas (Esqueleto final, muy grueso y visible) ──
     std::pair<int, int> ultima_confirmada = {-1, -1};
     if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
         for (int i = anim.paso_actual; i >= 0; i--) {
@@ -582,74 +583,119 @@ inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
 
     for (const auto& par : anim.confirmadas) {
         bool es_ultima = (par == ultima_confirmada || (par.first == ultima_confirmada.second && par.second == ultima_confirmada.first));
-        if (es_ultima) {
-            float pulso = sinf(t * 12.0f) * 0.2f + 0.8f;
-            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 255), 6.0f * pulso, 1.0f);
-            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 12.0f * pulso, 0.6f);
+        if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento) {
+            // Euler: Linea delgada amarilla/naranja tipo trazo
+            if (es_ultima) {
+                dibujarAristaAnim(par.first, par.second, IM_COL32(255, 200, 50, 255), 3.0f, 1.0f);
+                dibujarAristaAnim(par.first, par.second, IM_COL32(255, 150, 0, 200), 8.0f, 0.6f);
+            } else {
+                dibujarAristaAnim(par.first, par.second, IM_COL32(255, 200, 50, 180), 2.0f, 0.7f);
+            }
         } else {
-            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 4.0f, 0.9f);
-            dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 10.0f, 0.2f); // glow
+            if (es_ultima) {
+                float pulso = sinf(t * 12.0f) * 0.2f + 0.8f;
+                dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 255), 8.0f * pulso, 1.0f);
+                dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 200), 16.0f * pulso, 0.6f);
+            } else {
+                dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 220), 5.0f, 0.9f);
+                dibujarAristaAnim(par.first, par.second, IM_COL32(0, 255, 100, 150), 12.0f, 0.3f); // glow
+            }
         }
-        // ── 1.5 Partícula viajera (Fluidez) ──
-        if (anim.particula.activa && anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
-            float t_ease = Easing::easeInOutCubic(anim.particula.progreso);
-            int a_o = anim.pasos[anim.paso_actual].arista_origen;
-            int a_d = anim.pasos[anim.paso_actual].arista_destino;
-            if (a_o >= 0 && a_d >= 0) {
-                auto pts_latlon = generarRutaOrtodromica(ciudades[a_o].latitud, ciudades[a_o].longitud,
-                                                          ciudades[a_d].latitud, ciudades[a_d].longitud, 30);
-                if (pts_latlon.size() >= 2) {
-                    float idx_f = t_ease * (pts_latlon.size() - 1);
-                    int idx = (int)idx_f;
-                    float f = idx_f - idx;
-                    ImVec2 p_ll;
-                    if (idx >= (int)pts_latlon.size() - 1) {
-                        p_ll = pts_latlon.back();
-                    } else {
-                        p_ll.x = pts_latlon[idx].x + (pts_latlon[idx+1].x - pts_latlon[idx].x) * f;
-                        p_ll.y = pts_latlon[idx].y + (pts_latlon[idx+1].y - pts_latlon[idx].y) * f;
-                    }
-                    ImVec2 v = DatosMundo::latLonAVirtual(p_ll.y, p_ll.x);
-                    ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
-                    ImVec2 pos_particula(pos.x + s.x, pos.y + s.y);
+    }
 
-                    float halo_r = anim.particula.radio * 4.0f * (1.0f - anim.particula.progreso * 0.3f);
-                    dl->AddCircleFilled(pos_particula, halo_r, (anim.particula.color & 0x00FFFFFF) | (120 << 24), 24);
-                    dl->AddCircleFilled(pos_particula, anim.particula.radio * 1.5f, anim.particula.color, 24);
-                    dl->AddCircleFilled(pos_particula, anim.particula.radio * 0.6f, IM_COL32(255, 255, 255, 220), 16);
+    // ── 2. Aristas descartadas (FADE OUT dinámico en vez de persistente) ──
+    // Buscamos hacia atras los descartes recientes para que desaparezcan
+    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+        int max_history = 15; // Mostrar maximo ultimos 15 descartes, disolviendose
+        int limit = std::max(0, anim.paso_actual - max_history);
+        for (int i = anim.paso_actual; i >= limit; i--) {
+            const auto& p = anim.pasos[i];
+            if (p.accion == PasoAnimacion::DESCARTAR && p.arista_origen >= 0 && p.arista_destino >= 0) {
+                float age = (anim.paso_actual - i);
+                float fade = 1.0f - (age / max_history);
+                if (fade > 0.0f) {
+                    ImU32 col = IM_COL32(255, 50, 50, 255);
+                    // Si es un backedge (DFS), naranja
+                    if (p.descripcion.find("Retrocediendo") != std::string::npos || p.descripcion.find("Back-edge") != std::string::npos) {
+                        col = IM_COL32(255, 140, 0, 255);
+                    }
+                    dibujarAristaAnim(p.arista_origen, p.arista_destino, col, 3.0f, fade * 0.8f);
                 }
             }
         }
     }
 
-    // ── 3. Aristas descartadas (rojo tenue) ──
-    for (const auto& par : anim.descartadas) {
-        float fade = sinf(t * 2.0f + par.first * 3.7f) * 0.1f + 0.3f;
-        dibujarAristaAnim(par.first, par.second, IM_COL32(255, 80, 80, 150), 1.5f, fade);
+    // ── 3. Arista en exploración activa (Efecto Láser / Pulso Direccional) ──
+    if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
+        const auto& paso = anim.pasos[anim.paso_actual];
+        if (paso.accion == PasoAnimacion::EXPLORAR && paso.arista_origen >= 0 && paso.arista_destino >= 0) {
+            float pulsar = sinf(t * 15.0f) * 0.3f + 0.7f;
+            dibujarAristaAnim(paso.arista_origen, paso.arista_destino, IM_COL32(50, 200, 255, 255), 6.0f, pulsar, true); // True = Degradado direccional
+        }
     }
 
-    // ── 4. Nodos visitados/procesando ──
+    // ── 4. Nodos (Ondas expansivas BFS y Badges de Distancia Dijkstra) ──
+    // Recopilar información actual
+    std::map<int, float> distancias;
+    std::map<int, int> niveles;
+    int nivel_actual_max = -1;
+
+    for (int i = 0; i <= anim.paso_actual && i < (int)anim.pasos.size(); i++) {
+        const auto& p = anim.pasos[i];
+        if (p.nodo_id >= 0) {
+            if (p.distancia_acumulada >= 0.0f) distancias[p.nodo_id] = p.distancia_acumulada;
+            if (p.nivel_profundidad >= 0) {
+                niveles[p.nodo_id] = p.nivel_profundidad;
+                if (p.nivel_profundidad > nivel_actual_max) nivel_actual_max = p.nivel_profundidad;
+            }
+        }
+    }
+
     for (int id : anim.visitados) {
         ImVec2 p = ciudadAPantalla(id);
         if (p.x < pos.x - 30 || p.x > pos.x + sz.x + 30) continue;
 
+        // Si es Euler, no resaltamos los nodos visitados de color verde/amarillo porque confunde visualmente
+        if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento ||
+            estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo) {
+            continue;
+        }
+
         bool procesando = anim.procesando.count(id) > 0;
+        
+        // Colores base de nodo
+        ImU32 nodo_color = procesando ? IM_COL32(255, 220, 50, 255) : IM_COL32(0, 255, 120, 220);
 
         if (procesando) {
-            // Pulso amarillo intermitente
-            float pulso = sinf(t * 4.0f) * 0.3f + 0.7f;
-            float radio = 12.0f * pulso;
-            dl->AddCircleFilled(p, radio, IM_COL32(255, 220, 50, (int)(120 * pulso)), 16);
-            dl->AddCircle(p, radio, IM_COL32(255, 220, 50, (int)(200 * pulso)), 16, 2.5f);
+            // Nodo bajo escrutinio
+            float pulso = sinf(t * 8.0f) * 0.4f + 0.8f;
+            dl->AddCircleFilled(p, 10.0f * pulso, nodo_color, 16);
+            dl->AddCircle(p, 18.0f * pulso, nodo_color, 16, 3.0f);
         } else {
-            // Visitado: anillo verde sutil
-            float respiro = sinf(t * 2.0f + id * 1.3f) * 0.1f + 0.5f;
-            dl->AddCircle(p, 10.0f, IM_COL32(0, 255, 120, (int)(100 * respiro)), 16, 2.0f);
-            dl->AddCircle(p, 14.0f, IM_COL32(0, 255, 120, (int)(40 * respiro)), 24, 1.0f);
+            // Nodo ya parte de la red
+            dl->AddCircleFilled(p, 6.0f, nodo_color, 16);
+            dl->AddCircle(p, 10.0f, nodo_color, 16, 2.0f);
+        }
+
+        // Efecto Sonar/Ondas expansivas (BFS)
+        if (procesando && estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles) {
+            float pulso = fmodf(t * 1.5f, 1.0f); // 0 a 1 repetitivo
+            dl->AddCircle(p, 6.0f + 40.0f * pulso, IM_COL32(50, 200, 255, (int)(255 * (1.0f - pulso))), 24, 3.0f);
+        }
+
+        // Badges de Kilometraje (Dijkstra) flotantes gigantes para videobeam
+        if (distancias.count(id)) {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%.0f km", distancias[id]);
+            ImVec2 tsz = ImGui::CalcTextSize(buf);
+            ImVec2 b_pos(p.x - tsz.x * 0.5f, p.y - 30.0f);
+            dl->AddRectFilled(ImVec2(b_pos.x - 6, b_pos.y - 4), ImVec2(b_pos.x + tsz.x + 6, b_pos.y + tsz.y + 4), IM_COL32(20, 30, 40, 240), 4.0f);
+            dl->AddRect(ImVec2(b_pos.x - 6, b_pos.y - 4), ImVec2(b_pos.x + tsz.x + 6, b_pos.y + tsz.y + 4), IM_COL32(255, 255, 255, 180), 4.0f, 0, 1.5f);
+            dl->AddText(b_pos, IM_COL32(255, 255, 255, 255), buf);
         }
     }
 
-    // ── 4.5. Animación de coloreo ──
+    // ── 5. Animación de coloreo ──
     ImU32 paleta[] = {
         IM_COL32(255, 60, 60, 220),   IM_COL32(60, 220, 60, 220),
         IM_COL32(60, 120, 255, 220),  IM_COL32(255, 220, 40, 220),
@@ -666,8 +712,7 @@ inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
                 ImVec2 p = ciudadAPantalla(paso.nodo_id);
                 if (p.x >= pos.x - 20 && p.x <= pos.x + sz.x + 20) {
                     ImU32 col = paleta[paso.color_asignado % num_paleta];
-                    // Si es el nodo que se acaba de colorear (el último), darle un pulso
-                    float r = 8.0f;
+                    float r = 10.0f;
                     if (i == anim.paso_actual) {
                         float pulso = sinf(t * 8.0f) * 0.4f + 1.0f;
                         r *= pulso;
@@ -680,26 +725,56 @@ inline void dibujarAnimacion(ImDrawList* dl, EstadoAeroGrafos& estado,
         }
     }
 
-    // ── 5. Mensaje descriptivo actual del algoritmo ──
+    // ── 6. Mensaje descriptivo actual del algoritmo (Super Gigante para Proyector) ──
     if (anim.paso_actual >= 0 && anim.paso_actual < (int)anim.pasos.size()) {
         const auto& paso = anim.pasos[anim.paso_actual];
         if (!paso.descripcion.empty()) {
+            // Usaremos fuente por defecto pero con escala visual grande
             ImVec2 tam = ImGui::CalcTextSize(paso.descripcion.c_str());
-            float tx = pos.x + (sz.x - tam.x) * 0.5f; // Centrado horizontal
-            float ty = pos.y + 20.0f; // Arriba
+            float tx = pos.x + (sz.x - tam.x) * 0.5f; 
+            float ty = pos.y + 40.0f; 
             
-            dl->AddRectFilled(ImVec2(tx - 20, ty - 10),
-                              ImVec2(tx + tam.x + 20, ty + tam.y + 10),
-                              IM_COL32(15, 20, 30, 230), 8.0f);
-            dl->AddRect(ImVec2(tx - 20, ty - 10),
-                        ImVec2(tx + tam.x + 20, ty + tam.y + 10),
-                        IM_COL32(0, 200, 255, 180), 8.0f, 0, 2.0f);
+            dl->AddRectFilled(ImVec2(tx - 25, ty - 15),
+                              ImVec2(tx + tam.x + 25, ty + tam.y + 15),
+                              IM_COL32(10, 15, 25, 240), 10.0f);
+            dl->AddRect(ImVec2(tx - 25, ty - 15),
+                        ImVec2(tx + tam.x + 25, ty + tam.y + 15),
+                        IM_COL32(0, 255, 150, 220), 10.0f, 0, 3.0f);
             
-            dl->AddText(ImVec2(tx, ty), IM_COL32(230, 245, 255, 255), paso.descripcion.c_str());
+            dl->AddText(ImVec2(tx, ty), IM_COL32(255, 255, 255, 255), paso.descripcion.c_str());
+        }
+    }
+
+    // ── 7. Resaltado Académico de Fallos (Euler/Hamilton) ──
+    if (anim.completa && 
+       (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento || 
+        estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo)) {
+        
+        std::vector<int> grados(63, 0);
+        for (const auto& r : DatosMundo::obtenerRutas()) {
+            grados[r.origen_id]++;
+            grados[r.destino_id]++;
+        }
+
+        for (int id = 0; id < 63; id++) {
+            ImVec2 p = ciudadAPantalla(id);
+            if (p.x < pos.x - 30 || p.x > pos.x + sz.x + 30) continue;
+            
+            float pulso = sinf(t * 10.0f) * 0.5f + 0.5f;
+
+            if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo && grados[id] <= 1) {
+                // Hamiltoniano: Nodos terminales (1 conexion)
+                dl->AddCircleFilled(p, 15.0f + 10.0f * pulso, IM_COL32(255, 0, 0, 150), 16);
+                dl->AddCircle(p, 25.0f + 15.0f * pulso, IM_COL32(255, 50, 50, 255), 16, 4.0f);
+            } 
+            else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento && (grados[id] % 2 != 0)) {
+                // Euleriano: Nodos con grado impar
+                dl->AddCircleFilled(p, 12.0f + 8.0f * pulso, IM_COL32(255, 100, 0, 150), 16);
+                dl->AddCircle(p, 20.0f + 10.0f * pulso, IM_COL32(255, 150, 0, 255), 16, 3.0f);
+            }
         }
     }
 }
-
 // ── Mensajes del canvas ───────────────────────────────────────────────────
 inline void dibujarMensajes(ImDrawList* dl, EstadoAeroGrafos& estado,
                              ImVec2 pos, ImVec2 sz) {
@@ -1016,7 +1091,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     cargarTexturaMundo(estado);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin("Mapa FlightNet", nullptr,
+    ImGui::Begin("Mapa AeroGrafos", nullptr,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImDrawList* dl = ImGui::GetWindowDrawList();

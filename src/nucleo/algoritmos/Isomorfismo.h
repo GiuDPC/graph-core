@@ -47,11 +47,15 @@ bool backtrack(const Grafo& g1, const Grafo& g2,
         for (int k = 0; k < idx && consistente; k++) {
             int v1 = g1.nodos[k].id;
             int v2_mapped = mapeo[k];
-            bool hay_arista_g1 = (g1.obtenerArista(u1, v1) != nullptr ||
-                                   g1.obtenerArista(v1, u1) != nullptr);
-            bool hay_arista_g2 = (g2.obtenerArista(u2, v2_mapped) != nullptr ||
-                                   g2.obtenerArista(v2_mapped, u2) != nullptr);
-            if (hay_arista_g1 != hay_arista_g2) consistente = false;
+            // Verificamos conexión de ida (u -> v)
+            bool arista_ida_g1 = (g1.obtenerArista(u1, v1) != nullptr);
+            bool arista_ida_g2 = (g2.obtenerArista(u2, v2_mapped) != nullptr);
+            if (arista_ida_g1 != arista_ida_g2) consistente = false;
+            
+            // Verificamos conexión de vuelta (v -> u)
+            bool arista_vuelta_g1 = (g1.obtenerArista(v1, u1) != nullptr);
+            bool arista_vuelta_g2 = (g2.obtenerArista(v2_mapped, u2) != nullptr);
+            if (arista_vuelta_g1 != arista_vuelta_g2) consistente = false;
         }
 
         if (consistente) {

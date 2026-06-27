@@ -105,13 +105,13 @@ inline void selectorCiudad(const char* label, int& ciudad_id,
 
 // ── Panel principal ───────────────────────────────────────────────────────
 inline void dibujar(Interfaz& self, Grafo& red) {
-    ImGui::Begin("Opciones FlightNet");
+    ImGui::Begin("Opciones AeroGrafos");
 
     const auto& ciudades = DatosMundo::obtenerCiudades();
     auto& estado = self.estado_aerografos;
 
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
-        ICON_FA_PLANE " FLIGHTNET");
+        ICON_FA_PLANE " AEROGRAFOS");
     ImGui::TextDisabled("Red de rutas aereas mundiales");
     ImGui::Separator();
 
@@ -121,15 +121,57 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     ImGui::Separator();
 
     // ── Selectores de ciudad ──
-    if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta ||
-        estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles ||
-        estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarTodo) {
+    if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta) {
         selectorCiudad(ICON_FA_PLANE_DEPARTURE " Origen:", estado.ciudad_origen, ciudades);
         selectorCiudad(ICON_FA_PLANE_ARRIVAL " Destino:", estado.ciudad_destino, ciudades);
-    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento ||
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles ||
+               estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarTodo ||
+               estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento ||
                estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo) {
-        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Ciudad inicial:", estado.ciudad_origen, ciudades);
+        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Punto de inicio:", estado.ciudad_origen, ciudades);
     }
+    
+    // ── Panel Explicativo Académico ──
+    ImGui::Spacing();
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.15f, 0.2f, 0.6f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 4.0f);
+    
+    // Calcular altura estimada segun algoritmo
+    float altura_caja = 105.0f;
+    if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ColorearRegiones ||
+        estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo ||
+        estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed) {
+        altura_caja = 125.0f;
+    }
+    
+    ImGui::BeginChild("info_algoritmo", ImVec2(0, altura_caja), true, ImGuiWindowFlags_NoScrollbar);
+    
+    ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), ICON_FA_BOOK " Teoria del Algoritmo:");
+    ImGui::PushTextWrapPos(0.0f);
+    
+    if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta) {
+        ImGui::TextWrapped("Dijkstra [O(V + E log V)]: Encuentra la ruta mas corta garantizada sumando kilometros. Si el espacio aereo ruso esta cerrado, el algoritmo bordeara el pais automaticamente.");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ConectarTodo) {
+        ImGui::TextWrapped("Kruskal [O(E log E)]: Construye un Arbol de Expansion Minima (MST). Conecta todos los aeropuertos sin formar bucles (ciclos) usando la menor cantidad de kilometros totales.");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles) {
+        ImGui::TextWrapped("Búsqueda en Anchura (BFS) [O(V + E)]: Explora la red en ondas concentricas, visitando primero a los vecinos directos (Nivel 1), luego a los vecinos de los vecinos (Nivel 2).");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarTodo) {
+        ImGui::TextWrapped("Búsqueda en Profundidad (DFS) [O(V + E)]: Viaja lo mas profundo posible por un camino. Si llega a un callejon sin salida o un ciclo (Back-edge), retrocede (Backtracking) para buscar otra ruta.");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento) {
+        ImGui::TextWrapped("Circuito Euleriano [O(V + E)]: Encuentra una ruta continua que pasa por TODAS LAS RUTAS exactamente una vez y regresa al origen. Solo es posible si cada aeropuerto tiene un numero par de conexiones (Grado par).");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo) {
+        ImGui::TextWrapped("Ciclo Hamiltoniano [NP-Hard O(V!)]: Intenta visitar TODAS LAS CIUDADES exactamente una vez y volver al origen. Es un problema de fuerza bruta masiva, casi imposible de computar rapido en redes globales complejas.");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed) {
+        ImGui::TextWrapped("Escaneo y Analisis [O(V^3)]: Realiza un barrido topologico de toda la red mundial para determinar el grado medio de las conexiones, la densidad del trafico, la ciudad mas conectada (Hub principal) y el aislamiento.");
+    } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ColorearRegiones) {
+        ImGui::TextWrapped("Coloreo Greedy (Aproximacion) [O(V + E)]: Asigna colores secuencialmente garantizando que dos ciudades unidas por un aerografo directo jamas tengan el mismo color (Util para asignar radiofrecuencias de control aereo).");
+    } else {
+        ImGui::TextWrapped("Seleccione un algoritmo para ver su comportamiento teorico y complejidad computacional.");
+    }
+    ImGui::PopTextWrapPos();
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor();
 
     ImGui::Spacing();
 
@@ -195,22 +237,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
 
         // Aplicar restricciones geopolíticas
         if (estado.restricciones_geopoliticas) {
-            for (auto& a : g.aristas) {
-                bool toca_rusia = (a.origen_id == EstadoAeroGrafos::ID_MOSCU || a.destino_id == EstadoAeroGrafos::ID_MOSCU);
-                
-                bool sobrevuelo = 
-                    (a.origen_id == 16 && a.destino_id == 21) ||
-                    (a.origen_id == 21 && a.destino_id == 16) ||
-                    (a.origen_id == 11 && a.destino_id == 21) ||
-                    (a.origen_id == 21 && a.destino_id == 11) ||
-                    (a.origen_id == 14 && a.destino_id == 21) ||
-                    (a.origen_id == 21 && a.destino_id == 14);
-
-                if (toca_rusia || sobrevuelo) {
-                    a.peso *= 100000.0f;
-                    a.peso_actual *= 100000.0f;
-                }
-            }
+            DatosMundo::aplicarRestriccionesGeopoliticas(g);
             estado.agregarMensaje(ICON_FA_TRIANGLE_EXCLAMATION
                 " Restriccion activa: rutas rusas evitadas",
                 IM_COL32(255,160,40,255), 4.0f);
@@ -400,16 +427,18 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                     if (estado.modo_animacion) {
                         auto pasos = Algoritmos::EulerHamilton::generarPasosEuler(g, estado.ciudad_origen);
                         Animacion::iniciar(estado.animacion, pasos);
+                    } else {
+                        estado.animacion.activa = false;
+                        estado.animacion.completa = true;
                     }
                 } else {
                     estado.descripcion_resultado = 
-                        ICON_FA_XMARK " Euleriano Imposible\n"
-                        "Requisito matematico: Todo el mapa debe estar conectado\n"
-                        "y tener exactamente 0 o 2 ciudades con cantidad impar de vuelos.\n"
-                        "La red global de aeropuertos no cumple esta estricta condicion.";
-                    estado.agregarMensaje("No existe camino Euleriano (grafos reales con grado caotico)",
+                        ICON_FA_XMARK " Euleriano Imposible: Nodos impares detectados en la red.";
+                    estado.agregarMensaje("No existe camino Euleriano",
                         IM_COL32(255,100,100,255), 6.0f);
                     estado.algoritmo_ejecutado = true;
+                    estado.animacion.activa = false;
+                    estado.animacion.completa = true;
                 }
                 estado.orden_visita.clear();
                 estado.aristas_mst.clear();
@@ -430,22 +459,19 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                         ICON_FA_CHECK " Hamilton (heuristica): %.0f km", res.distancia_total);
                     estado.agregarMensaje(msg, IM_COL32(100,255,100,255), 5.0f);
                     estado.algoritmo_ejecutado = true;
-                    if (estado.modo_animacion) {
-                        auto pasos = Algoritmos::EulerHamilton::generarPasosHamiltonHeuristico(g, estado.ciudad_origen);
-                        Animacion::iniciar(estado.animacion, pasos);
-                    }
+                    estado.animacion.activa = false;
+                    estado.animacion.completa = true;
                 } else {
                     estado.descripcion_resultado = 
-                        ICON_FA_XMARK " Hamilton Imposible\n"
-                        "Requiere visitar las 63 ciudades sin repetir ninguna.\n"
-                        "Existen 'callejones sin salida' (ciudades con 1 sola conexion)\n"
-                        "que impiden cerrar la ruta sin quedar atrapado.";
+                        ICON_FA_XMARK " Hamilton Imposible: Detectados 'callejones sin salida'.";
                     char msg[192];
                     snprintf(msg, sizeof(msg),
-                        "Hamilton atascado: solo %zu/%zu ciudades visitadas",
-                        res.ruta.size(), g.nodos.size());
+                        "Hamilton atascado: Nodos terminales detectados");
                     estado.agregarMensaje(msg, IM_COL32(255,150,0,255), 6.0f);
                     estado.algoritmo_ejecutado = true;
+                    // Ya no hay animacion para Hamilton, el fallo es matematico instantaneo
+                    estado.animacion.activa = false;
+                    estado.animacion.completa = true; 
                 }
                 estado.orden_visita.clear();
                 estado.aristas_mst.clear();
@@ -471,25 +497,32 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 const auto& c = DatosMundo::obtenerCiudades();
                 char buf[512];
                 snprintf(buf, sizeof(buf),
-                    ICON_FA_MAGNIFYING_GLASS " ANALISIS DE LA RED\n"
-                    "  Ciudades: %d\n  Rutas: %d\n  Grado promedio: %.1f\n"
-                    "  Mayor hub: %s (%s) con %d rutas\n"
-                    "  Menos conectado: %s (%s) con %d rutas\n"
-                    "  Densidad: %.4f\n  Diametro teorico: ~%d saltos",
-                    n, m, grado_prom,
-                    c[id_max].nombre, c[id_max].codigo_iata, max_grado,
-                    c[id_min].nombre, c[id_min].codigo_iata, min_grado,
-                    (2.0f*m)/(n*(n-1.0f)),
-                    (int)ceilf(logf((float)n)/logf(grado_prom)));
+                    ICON_FA_MAGNIFYING_GLASS " ANALISIS DE LA RED (Escaneando...)\n"
+                    "  Espere mientras se completa el barrido global.");
                 estado.descripcion_resultado = buf;
-                char msg[192];
-                snprintf(msg, sizeof(msg),
-                    ICON_FA_CHECK " Red analizada: %d ciudades, %d rutas", n, m);
-                estado.agregarMensaje(msg, IM_COL32(200,200,255,255), 6.0f);
+                
                 estado.algoritmo_ejecutado = true;
                 estado.ruta_resultado.clear();
                 estado.orden_visita.clear();
                 estado.aristas_mst.clear();
+
+                if (estado.modo_animacion) {
+                    std::vector<PasoAnimacion> pasos;
+                    for(int i=0; i<n; i++) {
+                        PasoAnimacion p;
+                        p.accion = PasoAnimacion::COLOREAR;
+                        p.nodo_id = i;
+                        p.color_asignado = 5;
+                        p.descripcion = std::string("Radar escaneando red global... Analizando nodo ") + c[i].codigo_iata;
+                        pasos.push_back(p);
+                    }
+                    Animacion::iniciar(estado.animacion, pasos);
+                    estado.animacion.velocidad = 3.0f; // Animacion rapida para que parezca radar
+                }
+                
+                // Guardamos los datos para el popup que se abrirá después
+                estado.analisis_cache = {n, m, grado_prom, c[id_max].nombre, c[id_max].codigo_iata, max_grado, c[id_min].nombre, c[id_min].codigo_iata, min_grado};
+
                 break;
             }
         }
@@ -506,7 +539,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     if (estado.animacion.activa) {
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f), "%s", ICON_FA_PLAY " ANIMACION");
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.7f, 1.0f), "%s", ICON_FA_PLAY " CONTROL DE ANIMACION");
 
         // Barra de progreso
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.7f, 0.5f, 1.0f));
@@ -523,7 +556,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
         // ir paso atras en la animacion
-        if (ImGui::Button(ICON_FA_BACKWARD_STEP, ImVec2(ancho_boton, 30))) {
+        if (ImGui::Button(ICON_FA_BACKWARD_STEP, ImVec2(ancho_boton, 28))) {
             Animacion::pasoAtras(estado.animacion);
         }
         ImGui::SameLine();
@@ -531,27 +564,27 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         // play/pausa de la animacion
         const char* btn_pp = estado.animacion.pausada
             ? ICON_FA_PLAY " Play"
-            : ICON_FA_PAUSE " Pause";
-        if (ImGui::Button(btn_pp, ImVec2(ancho_boton, 30))) {
+            : ICON_FA_PAUSE " Pausa";
+        if (ImGui::Button(btn_pp, ImVec2(ancho_boton, 28))) {
             Animacion::pausar(estado.animacion);
         }
         ImGui::SameLine();
 
         // ir paso a paso en la animacion
-        if (ImGui::Button(ICON_FA_FORWARD_STEP, ImVec2(ancho_boton, 30))) {
+        if (ImGui::Button(ICON_FA_FORWARD_STEP, ImVec2(ancho_boton, 28))) {
             Animacion::pasoAdelante(estado.animacion);
         }
         ImGui::SameLine();
 
         // saltar al final de la animacion
         if (estado.animacion.completa) {
-            if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(ancho_boton, 30))) {
+            if (ImGui::Button(ICON_FA_ROTATE_LEFT, ImVec2(ancho_boton, 28))) {
                 Animacion::reset(estado.animacion);
                 estado.animacion.activa = true;
                 estado.animacion.pausada = true;
             }
         } else {
-            if (ImGui::Button(ICON_FA_FORWARD_FAST, ImVec2(ancho_boton, 30))) {
+            if (ImGui::Button(ICON_FA_FORWARD_FAST, ImVec2(ancho_boton, 28))) {
                 Animacion::completar(estado.animacion);
             }
         }
@@ -565,21 +598,11 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         ImGui::SliderFloat("##vel", &estado.animacion.velocidad, 0.25f, 4.0f, "");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Velocidad de animacion");
 
-        // Descripción del paso actual
-        std::string desc = Animacion::obtenerDescripcion(estado.animacion);
-        if (!desc.empty()) {
-            ImGui::Spacing();
-            ImGui::PushTextWrapPos(0.0f);
-            ImGui::TextWrapped("%s", desc.c_str());
-            ImGui::PopTextWrapPos();
-        }
-
         // Leyenda de colores
         if (estado.animacion.paso_actual >= 0) {
             ImGui::Spacing();
             ImGui::Separator();
-            ImGui::TextDisabled("Leyenda:");
-            float y_line = ImGui::GetCursorPosY();
+            ImGui::TextDisabled("Leyenda Visual:");
             auto dibujarLegend = [&](ImU32 col, const char* txt) {
                 ImDrawList* dl = ImGui::GetWindowDrawList();
                 ImVec2 p = ImGui::GetCursorScreenPos();
@@ -597,16 +620,16 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 ImGui::PopTextWrapPos();
             } else {
                 if (!estado.animacion.exploradas.empty()) {
-                    dibujarLegend(IM_COL32(80, 160, 255, 220), "Explorando");
+                    dibujarLegend(IM_COL32(80, 160, 255, 220), "Analizando");
                 }
                 if (!estado.animacion.procesando.empty()) {
-                    dibujarLegend(IM_COL32(255, 220, 50, 220), "Procesando");
+                    dibujarLegend(IM_COL32(255, 220, 50, 220), "Activa");
                 }
                 if (!estado.animacion.confirmadas.empty()) {
-                    dibujarLegend(IM_COL32(0, 255, 100, 220), "Confirmado");
+                    dibujarLegend(IM_COL32(0, 255, 100, 220), "Confirmada");
                 }
                 if (!estado.animacion.descartadas.empty()) {
-                    dibujarLegend(IM_COL32(255, 80, 80, 180), "Descartado");
+                    dibujarLegend(IM_COL32(255, 80, 80, 180), "Descartada/Ciclo");
                 }
             }
         }
@@ -761,6 +784,79 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     if (estado.restricciones_geopoliticas) {
         ImGui::TextDisabled("Rutas via Moscu (SVO) bloqueadas");
         ImGui::TextDisabled("Dijkstra evitara el espacio aereo");
+    }
+    
+    // Popup Modal Analizar Red
+    if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed &&
+        estado.algoritmo_ejecutado &&
+        estado.animacion.completa && !estado.mostrar_popup_analisis) {
+        
+        // Actualizar el texto del panel derecho
+        char buf[512];
+        float densidad = 0;
+        if (estado.analisis_cache.n > 1) {
+            densidad = (2.0f * estado.analisis_cache.m) / (estado.analisis_cache.n * (estado.analisis_cache.n - 1.0f));
+        }
+        snprintf(buf, sizeof(buf),
+            ICON_FA_MAGNIFYING_GLASS " ANALISIS COMPLETADO\n"
+            "  Ciudades: %d\n  Rutas: %d\n  Grado prom: %.1f\n"
+            "  Mayor hub: %s (%s) con %d rutas\n"
+            "  Menor hub: %s (%s) con %d rutas\n"
+            "  Densidad: %.4f",
+            estado.analisis_cache.n, estado.analisis_cache.m, estado.analisis_cache.grado_prom,
+            estado.analisis_cache.hub_max_nombre.c_str(), estado.analisis_cache.hub_max_iata.c_str(), estado.analisis_cache.max_grado,
+            estado.analisis_cache.hub_min_nombre.c_str(), estado.analisis_cache.hub_min_iata.c_str(), estado.analisis_cache.min_grado,
+            densidad);
+        estado.descripcion_resultado = buf;
+        
+        estado.mostrar_popup_analisis = true;
+        ImGui::OpenPopup("Reporte Global de Red");
+    }
+
+    // Centrar popup
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Reporte Global de Red", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::SetWindowFontScale(1.2f);
+        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "%s ANALISIS TOPOLOGICO FINALIZADO", ICON_FA_GLOBE);
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        ImGui::Text("Ciudades Escaneadas: %d", estado.analisis_cache.n);
+        ImGui::Text("Rutas Totales: %d", estado.analisis_cache.m);
+        ImGui::Text("Grado Promedio: %.1f aerografos por ciudad", estado.analisis_cache.grado_prom);
+        
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s Hub Principal Global (El mas conectado):", ICON_FA_STAR);
+        ImGui::Text("   %s (%s) - %d conexiones", estado.analisis_cache.hub_max_nombre.c_str(), estado.analisis_cache.hub_max_iata.c_str(), estado.analisis_cache.max_grado);
+        
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s Cuello de Botella (Aislamiento Extremo):", ICON_FA_TRIANGLE_EXCLAMATION);
+        ImGui::Text("   %s (%s) - %d conexiones", estado.analisis_cache.hub_min_nombre.c_str(), estado.analisis_cache.hub_min_iata.c_str(), estado.analisis_cache.min_grado);
+        
+        ImGui::Spacing();
+        float densidad = 0;
+        if (estado.analisis_cache.n > 1) {
+            densidad = (2.0f * estado.analisis_cache.m) / (estado.analisis_cache.n * (estado.analisis_cache.n - 1.0f));
+        }
+        ImGui::Text("Densidad de Red: %.2f%%", densidad * 100.0f);
+        if (densidad < 0.1f) {
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Red dispersa - Tipica del mundo real con distribucion de Pareto)");
+        }
+        
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        if (ImGui::Button("Cerrar y Volver", ImVec2(200, 35))) {
+            estado.mostrar_popup_analisis = false;
+            // Evitar que el popup vuelva a abrirse hasta la proxima ejecucion reseteando la animacion
+            estado.animacion.completa = false; 
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     ImGui::End();
