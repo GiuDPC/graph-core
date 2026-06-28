@@ -182,8 +182,10 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     bool paquete_clickeado = false;
     if (en_canvas && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         self.estado_ui.nodo_seleccionado = self.estado_ui.nodo_hover;
-        if (self.estado_ui.nodo_seleccionado != -1) self.estado_ui.arrastrando = true;
-
+        if (self.estado_ui.nodo_seleccionado != -1) {
+            self.historial.capturar(grafo_actual);
+            self.estado_ui.arrastrando = true;
+        }
         // Detectar click en paquete modo red
         if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos && self.estado_redes.sim_inicializada) {
             int pkt_id = -1;
@@ -339,6 +341,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             self.estado_ui.pos_click_derecho = mouse; // Para UI se usa el real
             float current_radius = grafo_actual.nodos.empty() ? 20.0f : grafo_actual.nodos[0].radio;
             if (editando_g2) {
+                self.historial.capturar(grafo_actual);
                 grafo_actual.agregarNodo(mouse_mundo);
                 grafo_actual.nodos.back().nombre = "U" + std::to_string(grafo_actual.nodos.back().id);
                 grafo_actual.nodos.back().radio = current_radius;
@@ -346,6 +349,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             } else if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
                 ImGui::OpenPopup("CrearEquipo");
             } else {
+                self.historial.capturar(grafo_actual);
                 grafo_actual.agregarNodo(mouse_mundo);
                 grafo_actual.nodos.back().nombre = "V" + std::to_string(grafo_actual.nodos.back().id);
                 grafo_actual.nodos.back().radio = current_radius;
@@ -396,6 +400,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         for (int i = 0; i < 5; i++) {
             char label[64]; snprintf(label, sizeof(label), "%s %s", iconos[i], tipos[i]);
             if (ImGui::Selectable(label)) {
+                self.historial.capturar(grafo_actual);
                 grafo_actual.agregarNodo(self.estado_ui.pos_click_derecho, (TipoHardware)i);
                 self.registrarLog("Hardware desplegado: " + std::string(tipos[i]) + " " + grafo_actual.nodos.back().nombre);
                 self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
@@ -418,6 +423,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             ImGui::Checkbox("Dirigida", &self.estado_ui.pendiente_arista_dirigida);
         }
         if (ImGui::Button(ICON_FA_CHECK " Crear", ImVec2(100, 0))) {
+            self.historial.capturar(grafo_actual);
             grafo_actual.agregarArista(self.estado_ui.pendiente_arista_origen, self.estado_ui.pendiente_arista_destino, self.estado_ui.pendiente_arista_peso, self.estado_ui.pendiente_arista_dirigida);
             if (!editando_g2) {
                 self.registrarLog("Arista creada: " + grafo_actual.nombreNodo(self.estado_ui.pendiente_arista_origen) + " - " +
@@ -956,6 +962,11 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         // PRE-CALCULAR RANGOS DE RANKING PARA EVITAR O(N^2)
         // dibujar nodos
         for (auto& n : g_dib.nodos) {
+            // Check if we should hide vertices in fractal mode
+            if (!es_g2 && self.estado_grafos.ocultar_vertices_fractal && self.estado_ui.herramienta_activa == EstadoUI::CatFractales) {
+                continue;
+            }
+
             // Frustum Culling
             float r_cull = n.radio + 50.0f;
             if (n.posicion.x < origin.x - r_cull || n.posicion.x > origin.x + tamano.x + r_cull ||
@@ -1214,8 +1225,16 @@ inline void dibujar(Grafo& red, Interfaz& self) {
         if ((self.estado_grafos.anim_estado.activa || self.estado_grafos.anim_estado.paso_actual >= 0) && self.estado_grafos.anim_estado.particula.activa && !es_g2) {
             float t_ease = Easing::easeInOutCubic(self.estado_grafos.anim_estado.particula.progreso);
             // Verificar curva para la particula usando datos del paso actual
-            ImVec2 p_inicio = self.estado_grafos.anim_estado.particula.pos_inicio;
-            ImVec2 p_fin = self.estado_grafos.anim_estado.particula.pos_fin;
+            ImVec2 p_inicio_raw = self.estado_grafos.anim_estado.particula.pos_inicio;
+            ImVec2 p_fin_raw = self.estado_grafos.anim_estado.particula.pos_fin;
+            ImVec2 p_inicio(
+                p_inicio_raw.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x,
+                p_inicio_raw.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y
+            );
+            ImVec2 p_fin(
+                p_fin_raw.x * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.x,
+                p_fin_raw.y * self.estado_ui.zoom_lienzo + self.estado_ui.offset_lienzo.y
+            );
             bool p_curvo = false;
             ImVec2 p_pc;
             int paso_cur = self.estado_grafos.anim_estado.paso_actual;
@@ -1378,22 +1397,22 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     // controles de zoom flotantes
     ImVec2 pos_ventana = ImGui::GetWindowPos();
     ImVec2 tam_ventana = ImGui::GetWindowSize();
-    ImVec2 zoom_pos(pos_ventana.x + tam_ventana.x - 110, pos_ventana.y + tam_ventana.y - 60);
-    
+    ImVec2 zoom_pos(pos_ventana.x + tam_ventana.x - 120, pos_ventana.y + tam_ventana.y - 60);
+
     // dibujar el pill shape manuelamente
     ImDrawList* dl_bg = ImGui::GetWindowDrawList();
-    dl_bg->AddRectFilled(zoom_pos, ImVec2(zoom_pos.x + 96, zoom_pos.y + 32), IM_COL32(30, 30, 40, 200), 16.0f);
-    dl_bg->AddRect(zoom_pos, ImVec2(zoom_pos.x + 96, zoom_pos.y + 32), IM_COL32(80, 80, 90, 150), 16.0f, 0, 1.5f);
-
+    dl_bg->AddRectFilled(zoom_pos, ImVec2(zoom_pos.x + 100, zoom_pos.y + 32), IM_COL32(30, 30, 40, 200), 16.0f);
+    dl_bg->AddRect(zoom_pos, ImVec2(zoom_pos.x + 100, zoom_pos.y + 32), IM_COL32(80, 80, 90, 150), 16.0f, 0, 1.5f);
+    
     ImGui::SetNextWindowPos(zoom_pos);
-    if (ImGui::BeginChild("zoom_bar", ImVec2(96, 32), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+    if (ImGui::BeginChild("zoom_bar", ImVec2(100, 32), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(255, 255, 255, 40));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(255, 255, 255, 80));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f); // Botones redondos al hacer hover
-        
+
         // centrado
-        ImGui::SetCursorPos(ImVec2(4, 4));
+        ImGui::SetCursorPos(ImVec2(10, 4));
         if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_MINUS, ImVec2(24, 24))) self.estado_ui.zoom_velocity -= 0.3f;
         ImGui::SameLine(0, 4);
         if (ImGui::Button(ICON_FA_HOUSE, ImVec2(24, 24))) {
@@ -1402,6 +1421,7 @@ inline void dibujar(Grafo& red, Interfaz& self) {
             for (auto& n : self.estado_grafos.grafo_iso_g2.nodos) n.radio = initial_radius;
             self.estado_ui.offset_lienzo = ImVec2(0, 0);
             self.estado_ui.zoom_velocity = 0.0f;
+            self.estado_ui.zoom_lienzo = 1.0f;
         }
         ImGui::SameLine(0, 4);
         if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_PLUS, ImVec2(24, 24))) self.estado_ui.zoom_velocity += 0.3f;

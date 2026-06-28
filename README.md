@@ -25,7 +25,8 @@ Consiste en un entorno interactivo y lienzo libre donde es posible construir, mo
 
 * **Físicas de Partículas (Fruchterman-Reingold):** Motor de ordenamiento automático que desenreda estructuras caóticas aplicando fuerzas de repulsión (Coulomb) y atracción (Hooke).
 * **Detector de Propiedades:** Panel analítico que informa en tiempo real las propiedades del grafo diseñado (ej. si es Bipartito, Euleriano, o Conexo).
-* **Isomorfismo y Generadores:** Prueba de algoritmos matemáticos, incluyendo detección de isomorfismo, y herramientas de autogeneración de mallas fractales y topologías complejas.
+* **Isomorfismo (Gemelos Estructurales):** Herramienta que permite editar dos grafos simultáneamente (G1 y G2) en el mismo lienzo, pudiendo generar formas geométricas automáticamente para verificar biyecciones topológicas.
+* **Muestras Topológicas Interactivas:** El repositorio incluye muestras diseñadas específicamente para presentaciones (`Muestra_ForceAtlas_Magia.json`, `Muestra_Dijkstra_Caminos.json`, etc.) que permiten explicar de forma visual parámetros complejos como la *Gravedad Fuerte* o el modo *LinLog*.
 
 ---
 

@@ -92,7 +92,7 @@ inline void controlesAnimacion(Interfaz& self) {
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Tiempo entre cada paso. Mas rapido = menos sonidos para no saturar.");
 
-    float bw = (ancho - 16) / 3.0f;
+    float bw = (ancho - 24) / 4.0f;
     if (self.estado_grafos.anim_estado.activa && !self.estado_grafos.anim_estado.pausada) {
             if (ImGui::Button(ICON_FA_PAUSE " Pausar", ImVec2(bw, 32))) {
             self.estado_grafos.anim_estado.pausada = true;
@@ -117,6 +117,14 @@ inline void controlesAnimacion(Interfaz& self) {
     }
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Avanza UN paso manualmente (con sonido y efecto).");
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_STOP " Finalizar", ImVec2(bw, 32))) {
+        self.estado_grafos.anim_estado.paso_actual = (int)self.estado_grafos.anim_estado.pasos.size() - 1;
+        self.estado_grafos.anim_estado.activa = false;
+        AnimacionUI::finalizar(self);
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Finaliza instantaneamente la animacion.");
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_LEFT " Reset", ImVec2(bw, 32))) {
         AnimacionUI::reset(self);
@@ -352,7 +360,7 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
     }
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Muestra cada paso del algoritmo con particulas animadas y sonido.");
-    if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
+    if (ImGui::Button(ICON_FA_BOLT " Instantaneo##Dijkstra", ImVec2(-1, 32))) {
         auto res = Algoritmos::dijkstra(
             red, self.estado_grafos.dijkstra_origen, self.estado_grafos.dijkstra_destino, self.estado_grafos.dijkstra_usar_latencia);
         self.estado_grafos.ruta_optima = res.ruta;
@@ -438,7 +446,7 @@ inline void subpanelKruskal(Interfaz& self, Grafo& red) {
     }
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Visualiza paso a paso como se construye el arbol de expansion minima.");
-    if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
+    if (ImGui::Button(ICON_FA_BOLT " Instantaneo##Kruskal", ImVec2(-1, 32))) {
         auto res = Algoritmos::Kruskal::kruskal(red);
         self.estado_grafos.aristas_mst = res.aristas_mst;
         self.estado_grafos.mostrar_mst = true;
@@ -494,11 +502,18 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
 
     ImGui::Text("Nodo de inicio:");
     ImGui::SetNextItemWidth(-1);
+    bool inicio_valido = red.obtenerNodo(self.estado_grafos.bfs_nodo_inicio) != nullptr;
     if (red.nodos.empty()) {
         ImGui::TextDisabled("No hay nodos");
     } else {
-        if (!red.obtenerNodo(self.estado_grafos.bfs_nodo_inicio) && !red.nodos.empty())
-            self.estado_grafos.bfs_nodo_inicio = red.nodos[0].id;
+        if (!inicio_valido) {
+            if (self.estado_ui.nodo_seleccionado != -1) {
+                self.estado_grafos.bfs_nodo_inicio = self.estado_ui.nodo_seleccionado;
+            } else {
+                self.estado_grafos.bfs_nodo_inicio = red.nodos[0].id;
+            }
+            inicio_valido = red.obtenerNodo(self.estado_grafos.bfs_nodo_inicio) != nullptr;
+        }
 
         if (ImGui::BeginCombo("##inicio_bfs", red.nombreNodo(self.estado_grafos.bfs_nodo_inicio).c_str())) {
             for (const auto& n : red.nodos) {
@@ -512,6 +527,7 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
         }
         ImGui::Spacing();
 
+        ImGui::BeginDisabled(!inicio_valido);
         if (ImGui::Button(ICON_FA_PLAY " Animacion BFS", ImVec2(-1, 32))) {
             auto pasos = Algoritmos::BFS::generarPasos(red, self.estado_grafos.bfs_nodo_inicio);
             AnimacionUI::iniciar(self, pasos);
@@ -519,17 +535,18 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
             self.registrarLog("[BFS] Iniciado desde " + red.nombreNodo(self.estado_grafos.bfs_nodo_inicio));
             g_sonidos.reproducir(Sonidos::VISITAR_NODO);
         }
-        if (ImGui::IsItemHovered())
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             ImGui::SetTooltip("Recorre el grafo por niveles, visitando todos los vecinos antes de avanzar.");
-        if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
+        if (ImGui::Button(ICON_FA_BOLT " Instantaneo##BFS", ImVec2(-1, 32))) {
             self.estado_grafos.bfs_resultado = Algoritmos::BFS::bfs(red, self.estado_grafos.bfs_nodo_inicio);
             AnimacionUI::reset(self);
             self.registrarLog("[OK] BFS: " + std::to_string(self.estado_grafos.bfs_resultado.orden_visita.size()) +
                 " nodos visitados");
             g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
         }
-        if (ImGui::IsItemHovered())
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             ImGui::SetTooltip("Ejecuta la busqueda en anchura y muestra el resultado.");
+        ImGui::EndDisabled();
 
         if (!self.estado_grafos.bfs_resultado.nivel.empty()) {
             ImGui::Separator();
@@ -565,12 +582,22 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
         "Las aristas que vuelven a un nodo ya visitado (back-edges) indican ciclos.");
     ImGui::Spacing();
 
-    if (!red.obtenerNodo(self.estado_grafos.dfs_nodo_inicio) && !red.nodos.empty())
-        self.estado_grafos.dfs_nodo_inicio = red.nodos[0].id;
-
     ImGui::Text("Nodo de inicio:");
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::BeginCombo("##inicio_dfs", red.nombreNodo(self.estado_grafos.dfs_nodo_inicio).c_str())) {
+    bool inicio_valido_dfs = red.obtenerNodo(self.estado_grafos.dfs_nodo_inicio) != nullptr;
+    if (red.nodos.empty()) {
+        ImGui::TextDisabled("No hay nodos");
+    } else {
+        if (!inicio_valido_dfs) {
+            if (self.estado_ui.nodo_seleccionado != -1) {
+                self.estado_grafos.dfs_nodo_inicio = self.estado_ui.nodo_seleccionado;
+            } else {
+                self.estado_grafos.dfs_nodo_inicio = red.nodos[0].id;
+            }
+            inicio_valido_dfs = red.obtenerNodo(self.estado_grafos.dfs_nodo_inicio) != nullptr;
+        }
+
+        if (ImGui::BeginCombo("##inicio_dfs", red.nombreNodo(self.estado_grafos.dfs_nodo_inicio).c_str())) {
         for (const auto& n : red.nodos) {
             bool sel = (n.id == self.estado_grafos.dfs_nodo_inicio);
             if (ImGui::Selectable(n.nombre.c_str(), sel)) self.estado_grafos.dfs_nodo_inicio = n.id;
@@ -580,45 +607,48 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
     }
     ImGui::Spacing();
 
-    if (ImGui::Button(ICON_FA_PLAY " Animacion DFS", ImVec2(-1, 32))) {
-        auto pasos = Algoritmos::DFS::generarPasos(red, self.estado_grafos.dfs_nodo_inicio);
-        AnimacionUI::iniciar(self, pasos);
-        self.registrarLog("[DFS] Iniciado desde " + red.nombreNodo(self.estado_grafos.dfs_nodo_inicio));
-        g_sonidos.reproducir(Sonidos::VISITAR_NODO);
-    }
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip("Explora el grafo en profundidad, retrocediendo solo al llegar a un callejon.");
-    if (ImGui::Button(ICON_FA_BOLT " Instantaneo", ImVec2(-1, 32))) {
-        self.estado_grafos.dfs_resultado = Algoritmos::DFS::dfs(red, self.estado_grafos.dfs_nodo_inicio);
-        AnimacionUI::reset(self);
-        self.registrarLog("[OK] DFS: " + std::to_string(self.estado_grafos.dfs_resultado.orden_visita.size()) +
-            " nodos, " + std::to_string(self.estado_grafos.dfs_resultado.back_edges.size()) + " back-edges");
-        g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
-    }
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip("Ejecuta la busqueda en profundidad y muestra el resultado.");
-
-    if (!self.estado_grafos.dfs_resultado.orden_visita.empty()) {
-        ImGui::Separator();
-        ImGui::Text("Orden de visita:");
-        std::string orden;
-        for (size_t i = 0; i < self.estado_grafos.dfs_resultado.orden_visita.size(); i++) {
-            if (i > 0) orden += " -> ";
-            orden += red.nombreNodo(self.estado_grafos.dfs_resultado.orden_visita[i]);
+        ImGui::BeginDisabled(!inicio_valido_dfs);
+        if (ImGui::Button(ICON_FA_PLAY " Animacion DFS", ImVec2(-1, 32))) {
+            auto pasos = Algoritmos::DFS::generarPasos(red, self.estado_grafos.dfs_nodo_inicio);
+            AnimacionUI::iniciar(self, pasos);
+            self.registrarLog("[DFS] Iniciado desde " + red.nombreNodo(self.estado_grafos.dfs_nodo_inicio));
+            g_sonidos.reproducir(Sonidos::VISITAR_NODO);
         }
-        ImGui::TextWrapped("%s", orden.c_str());
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            ImGui::SetTooltip("Explora el grafo en profundidad, retrocediendo solo al llegar a un callejon.");
+        if (ImGui::Button(ICON_FA_BOLT " Instantaneo##DFS", ImVec2(-1, 32))) {
+            self.estado_grafos.dfs_resultado = Algoritmos::DFS::dfs(red, self.estado_grafos.dfs_nodo_inicio);
+            AnimacionUI::reset(self);
+            self.registrarLog("[OK] DFS: " + std::to_string(self.estado_grafos.dfs_resultado.orden_visita.size()) +
+                " nodos, " + std::to_string(self.estado_grafos.dfs_resultado.back_edges.size()) + " back-edges");
+            g_sonidos.reproducir(Sonidos::ALGORITMO_FIN);
+        }
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            ImGui::SetTooltip("Ejecuta la busqueda en profundidad y muestra el resultado.");
+        ImGui::EndDisabled();
 
-        if (!self.estado_grafos.dfs_resultado.back_edges.empty()) {
-            ImGui::Spacing();
-            ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.2f, 1.0f),
-                ICON_FA_TRIANGLE_EXCLAMATION " Back-edges (ciclos):");
-            for (const auto& [u, v] : self.estado_grafos.dfs_resultado.back_edges) {
-                ImGui::BulletText("%s -> %s",
-                    red.nombreNodo(u).c_str(), red.nombreNodo(v).c_str());
+        if (!self.estado_grafos.dfs_resultado.orden_visita.empty()) {
+            ImGui::Separator();
+            ImGui::Text("Orden de visita:");
+            std::string orden;
+            for (size_t i = 0; i < self.estado_grafos.dfs_resultado.orden_visita.size(); i++) {
+                if (i > 0) orden += " -> ";
+                orden += red.nombreNodo(self.estado_grafos.dfs_resultado.orden_visita[i]);
             }
-        } else {
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
-                ICON_FA_CHECK " Sin back-edges — no hay ciclos");
+            ImGui::TextWrapped("%s", orden.c_str());
+    
+            if (!self.estado_grafos.dfs_resultado.back_edges.empty()) {
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.2f, 1.0f),
+                    ICON_FA_TRIANGLE_EXCLAMATION " Back-edges (ciclos):");
+                for (const auto& [u, v] : self.estado_grafos.dfs_resultado.back_edges) {
+                    ImGui::BulletText("%s -> %s",
+                        red.nombreNodo(u).c_str(), red.nombreNodo(v).c_str());
+                }
+            } else {
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
+                    ICON_FA_CHECK " Sin back-edges — no hay ciclos");
+            }
         }
     }
 }
@@ -1267,8 +1297,20 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
     else if (self.estado_ui.herramienta_activa == EstadoUI::CatEulerHamilton) current_item = 8;
     else if (self.estado_ui.herramienta_activa == EstadoUI::CatFA2)       current_item = 9;
 
+    int prev_item = current_item;
     ImGui::SetNextItemWidth(-1);
     if (ImGui::Combo("##algo_select", &current_item, items, 10)) {
+        if (current_item != prev_item) {
+            // Limpieza Automatica de Estado al cambiar de algoritmo
+            // No limpiamos si el destino es Coloreo (index 5) o FA2 (index 9) para mantener visuales
+            if (current_item != 5 && current_item != 9) {
+                self.estado_grafos.ruta_optima.clear();
+                self.estado_grafos.aristas_mst.clear();
+                self.estado_grafos.mostrar_mst = false;
+                AnimacionUI::reset(self);
+                self.estado_ui.zoom_velocity = 0.0f;
+            }
+        }
         if (current_item == 0)       self.estado_ui.herramienta_activa = EstadoUI::CatGeneral;
         else if (current_item == 1)  self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
         else if (current_item == 2)  self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
@@ -1305,11 +1347,12 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
         case EstadoUI::CatColoreo:  subpanelColoreo(self, red); break;
         case EstadoUI::CatIsomorfismo: PanelIsomorfismo::dibujar(self, red); break;
         case EstadoUI::CatFractales: {
-            ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_SHAPES " generadores fractales");
-            ImGui::TextWrapped("grafos matematicos con patrones recursivos sutiles.");
+            ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_SHAPES " GENERADORES FRACTALES");
+            ImGui::TextWrapped("Grafos matemáticos con patrones recursivos complejos.");
             ImGui::Spacing();
             static int iter = 3;
-            ImGui::SliderInt("iter", &iter, 1, 5); // limite de  5 para no colapsar fps
+            ImGui::SliderInt("Iteraciones", &iter, 1, 5);
+            ImGui::Checkbox("Ocultar Vértices", &self.estado_grafos.ocultar_vertices_fractal);
             ImGui::Spacing();
 
             auto reset_fractal = [&]() {
@@ -1317,39 +1360,54 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
                 self.estado_grafos.aristas_mst.clear();
                 self.estado_grafos.mostrar_mst = false;
                 self.estado_ui.zoom_velocity = 0.0f;
+                self.estado_ui.zoom_lienzo = 1.0f;
                 self.estado_ui.offset_lienzo = ImVec2(0, 0);
-                for (auto& n : red.nodos) n.radio = 20.0f;
+                self.estado_ui.fisicas_activas = false;
                 AnimacionUI::reset(self);
             };
 
-            if (ImGui::Button("triangulo de sierpinski", ImVec2(-1, 30))) {
-                self.registrarLog("generando sierpinski it: " + std::to_string(iter));
+            ImGui::SeparatorText(ICON_FA_CARET_DOWN " Sierpinski");
+            if (ImGui::Button("Generar Triángulo", ImVec2(-1, 30))) {
+                self.registrarLog("Generando Sierpinski it: " + std::to_string(iter));
+                self.historial.capturar(red);
                 red = Algoritmos::TopologiasFractales::generarSierpinski(iter);
                 reset_fractal();
             }
-            if (ImGui::Button("mandala", ImVec2(-1, 30))) {
-                self.registrarLog("generando mandala");
+
+            ImGui::SeparatorText(ICON_FA_CARET_DOWN " Mandala");
+            if (ImGui::Button("Generar Mandala", ImVec2(-1, 30))) {
+                self.registrarLog("Generando Mandala");
+                self.historial.capturar(red);
                 red = Algoritmos::TopologiasFractales::generarMandala(iter + 1, 10 + iter * 2);
                 reset_fractal();
             }
-            if (ImGui::Button("arbol fractal", ImVec2(-1, 30))) {
-                self.registrarLog("generando arbol");
+            
+            ImGui::SeparatorText(ICON_FA_CARET_DOWN " Árbol Fractal");
+            if (ImGui::Button("Generar Árbol", ImVec2(-1, 30))) {
+                self.registrarLog("Generando Árbol Fractal");
+                self.historial.capturar(red);
                 red = Algoritmos::TopologiasFractales::generarArbolFractal(iter);
                 reset_fractal();
             }
-            if (ImGui::Button("copo de koch", ImVec2(-1, 30))) {
-                self.registrarLog("generando koch");
+
+            ImGui::SeparatorText(ICON_FA_CARET_DOWN " Copo de Koch");
+            if (ImGui::Button("Generar Koch", ImVec2(-1, 30))) {
+                self.registrarLog("Generando Copo de Koch");
+                self.historial.capturar(red);
                 red = Algoritmos::TopologiasFractales::generarKoch(iter);
                 reset_fractal();
             }
-            if (ImGui::Button("malla hexagonal", ImVec2(-1, 30))) {
-                self.registrarLog("generando hexagonal");
+
+            ImGui::SeparatorText(ICON_FA_CARET_DOWN " Malla Hexagonal");
+            if (ImGui::Button("Generar Hexagonal", ImVec2(-1, 30))) {
+                self.registrarLog("Generando Malla Hexagonal");
+                self.historial.capturar(red);
                 red = Algoritmos::TopologiasFractales::generarMallaHexagonal(iter);
                 reset_fractal();
             }
 
             ImGui::Spacing();
-            ImGui::TextDisabled("ve a 'coloreo' para probar los colores dinamicos");
+            ImGui::TextDisabled("Ve a 'Coloreo' para probar los colores dinámicos");
             break;
         }
         case EstadoUI::CatEulerHamilton: {
@@ -1357,53 +1415,70 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
             ImGui::TextWrapped("Busca caminos y circuitos eulerianos y hamiltonianos en el grafo.");
             ImGui::Spacing();
             auto props = Algoritmos::AnalizadorGrafo::analizar(red);
+            
+            // Sección Euleriano
+            ImGui::SeparatorText("Circuito Euleriano");
             if (props.es_euleriano) {
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), ICON_FA_CHECK " Es un grafo Euleriano.");
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), ICON_FA_CHECK " Es un grafo Euleriano");
             } else {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ICON_FA_XMARK " NO es un grafo Euleriano.");
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), ICON_FA_TRIANGLE_EXCLAMATION " NO es Euleriano");
             }
             ImGui::Spacing();
-            if (ImGui::Button(ICON_FA_PLAY " Buscar Circuito Euleriano", ImVec2(-1, 32))) {
-                self.registrarLog("Ejecutando busqueda de circuito euleriano...");
+            
+            float btn_ancho = (ImGui::GetContentRegionAvail().x - 8) / 2.0f;
+            if (ImGui::Button(ICON_FA_PLAY " Animar##Euler", ImVec2(btn_ancho, 32))) {
                 auto camino = Algoritmos::EulerHamilton::buscarCaminoEuleriano(red);
                 if (!camino.empty()) {
-                    std::vector<PasoAnimacion> pasos;
-                    for (size_t i = 0; i < camino.size(); i++) {
-                        int actual = camino[i];
-                        int prev = (i > 0) ? camino[i-1] : actual;
-                        pasos.push_back({PasoAnimacion::VISITAR, actual, prev, actual, "Visitando " + red.nombreNodo(actual)});
-                        if (i > 0) {
-                            pasos.push_back({PasoAnimacion::CONFIRMAR, actual, prev, actual, "Arista cruzada"});
-                        }
-                    }
-                    pasos.push_back({PasoAnimacion::CONFIRMAR, camino.back(), -1, -1, "Circuito euleriano completado"});
+                    auto pasos = Algoritmos::EulerHamilton::generarPasosEuler(red);
                     AnimacionUI::iniciar(self, pasos);
                     self.estado_grafos.ruta_optima = camino;
+                    self.registrarLog("[OK] Animando Euleriano");
                 } else {
-                    self.registrarLog("El grafo no contiene circuito/camino euleriano.");
+                    self.registrarLog("[!] El grafo no tiene camino euleriano.");
                 }
                 self.estado_grafos.mostrar_mst = false;
             }
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_BOLT " Instantáneo##Euler", ImVec2(btn_ancho, 32))) {
+                auto camino = Algoritmos::EulerHamilton::buscarCaminoEuleriano(red);
+                self.estado_grafos.ruta_optima = camino;
+                AnimacionUI::reset(self);
+                if (!camino.empty()) self.registrarLog("[OK] Circuito Euleriano encontrado al instante.");
+                else self.registrarLog("[!] El grafo no tiene camino euleriano.");
+                self.estado_grafos.mostrar_mst = false;
+            }
+
             ImGui::Spacing();
-            if (ImGui::Button(ICON_FA_PLAY " Buscar Camino Hamiltoniano", ImVec2(-1, 32))) {
-                self.registrarLog("Ejecutando busqueda de camino hamiltoniano...");
+            // Sección Hamiltoniano
+            ImGui::SeparatorText("Camino Hamiltoniano");
+            ImGui::TextWrapped("Advertencia: NP-Completo. Usa heurística para grafos grandes (>20 nodos).");
+            ImGui::Spacing();
+            if (ImGui::Button(ICON_FA_PLAY " Animar##Ham", ImVec2(btn_ancho, 32))) {
                 auto camino = Algoritmos::EulerHamilton::buscarCaminoHamiltoniano(red);
                 if (!camino.empty()) {
                     std::vector<PasoAnimacion> pasos;
-                    for (size_t i = 0; i < camino.size(); i++) {
-                        int actual = camino[i];
-                        int prev = (i > 0) ? camino[i-1] : actual;
-                        pasos.push_back({PasoAnimacion::VISITAR, actual, prev, actual, "Visitando " + red.nombreNodo(actual)});
-                        if (i > 0) {
-                            pasos.push_back({PasoAnimacion::CONFIRMAR, actual, prev, actual, "Arista cruzada"});
+                    if (red.nodos.size() > 20) pasos = Algoritmos::EulerHamilton::generarPasosHamiltonHeuristico(red);
+                    else {
+                        for (size_t i = 1; i < camino.size(); i++) {
+                            PasoAnimacion paso; paso.accion = PasoAnimacion::CONFIRMAR; paso.arista_origen = camino[i-1]; paso.arista_destino = camino[i];
+                            paso.descripcion = "Visitando " + red.nombreNodo(camino[i]); pasos.push_back(paso);
                         }
                     }
-                    pasos.push_back({PasoAnimacion::CONFIRMAR, camino.back(), -1, -1, "Camino hamiltoniano completado"});
                     AnimacionUI::iniciar(self, pasos);
                     self.estado_grafos.ruta_optima = camino;
+                    self.registrarLog("[OK] Animando Hamiltoniano");
                 } else {
-                    self.registrarLog("El grafo no contiene camino hamiltoniano.");
+                    self.registrarLog("[!] El grafo no tiene camino hamiltoniano.");
                 }
+                self.estado_grafos.mostrar_mst = false;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_BOLT " Instantáneo##Ham", ImVec2(btn_ancho, 32))) {
+                auto camino = Algoritmos::EulerHamilton::buscarCaminoHamiltoniano(red);
+                self.estado_grafos.ruta_optima = camino;
+                AnimacionUI::reset(self);
+                if (!camino.empty()) self.registrarLog("[OK] Camino Hamiltoniano encontrado al instante.");
+                else self.registrarLog("[!] El grafo no tiene camino hamiltoniano.");
                 self.estado_grafos.mostrar_mst = false;
             }
             break;

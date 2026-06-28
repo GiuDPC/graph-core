@@ -62,6 +62,7 @@ struct EstadoGrafos {
     std::vector<uint32_t>              colores_fractales;
     bool                               mostrar_coloreo = false;
     bool                               modo_fractal    = false;
+    bool                               ocultar_vertices_fractal = false;
     float                              fractal_tiempo  = 0.0f;
 
     // Planaridad

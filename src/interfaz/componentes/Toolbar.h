@@ -54,9 +54,15 @@ struct Toolbar {
         }
 
         // -- boton de enciclopedia (wiki) --
-        ImGui::SameLine(avail - 300);
+        ImGui::SameLine(avail - 450);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.25f, 0.9f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.4f, 1.0f));
+        if (ImGui::Button(ICON_FA_GRADUATION_CAP " Tutorial Rapido", ImVec2(140, 28))) {
+            ui.mostrar_tutorial_rapido = true;
+        }
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Muestra los conceptos basicos del programa");
+
+        ImGui::SameLine();
         if (ImGui::Button(ICON_FA_BOOK_OPEN " Enciclopedia", ImVec2(130, 28))) {
             ui.mostrar_ventana_ayuda = true;
         }

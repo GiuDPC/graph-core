@@ -20,6 +20,7 @@
 #include "estado/EstadoRedes.h"
 #include "estado/EstadoAeroGrafos.h"
 #include "estado/EstadoUI.h"
+#include "nucleo/HistorialGrafos.h"
 
 extern Sonidos g_sonidos;
 
@@ -34,6 +35,7 @@ public:
     EstadoRedes       estado_redes;
     EstadoAeroGrafos  estado_aerografos;
     EstadoUI          estado_ui;
+    HistorialGrafos   historial;
 
     // -- workspace tracking --
     ModoApp ultimo_modo_workspace = ModoApp::Grafos;
@@ -57,6 +59,7 @@ public:
 #include "interfaz/componentes/Toolbar.h"
 #include "interfaz/paneles/PanelIsomorfismo.h"
 #include "interfaz/util/AnimacionUI.h"
+#include "interfaz/util/AtajosTeclado.h"
 #include "interfaz/paneles/PanelGrafos.h"
 #include "interfaz/paneles/PanelAeroGrafos.h"
 #include "interfaz/lienzo/LienzoRed.h"
@@ -182,6 +185,8 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
 
     static bool theme_set = false;
     if (!theme_set) { aplicarTemaCisco(); theme_set = true; }
+
+    AtajosTeclado::procesar(red, historial, estado_ui, estado_grafos);
 
     if (estado_grafos.anim_estado.activa && !estado_grafos.anim_estado.pausada) {
         float dt = ImGui::GetIO().DeltaTime;
@@ -343,6 +348,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     Dialogos::fallbackCargar(*this, red);
     Dialogos::fallbackGuardar(*this, red);
     VentanaAyuda::dibujar(estado_ui);
+    VentanaAyuda::dibujarTutorialRapido(estado_ui);
 
     StatusBar::dibujar(*this);
 }

@@ -76,7 +76,16 @@ inline void selectorAlgoritmo(EstadoAeroGrafos& estado) {
 
 // ── Selector de ciudad ────────────────────────────────────────────────────
 inline void selectorCiudad(const char* label, int& ciudad_id,
-                           const std::vector<Ciudad>& ciudades) {
+                           const std::vector<Ciudad>& ciudades, bool filtro_rusia = false) {
+    if (filtro_rusia && ciudad_id >= 0) {
+        for (const auto& c : ciudades) {
+            if (c.id == ciudad_id && std::string(c.pais) == "Rusia") {
+                ciudad_id = -1;
+                break;
+            }
+        }
+    }
+
     ImGui::Text("%s", label);
     ImGui::SetNextItemWidth(-1);
 
@@ -91,6 +100,8 @@ inline void selectorCiudad(const char* label, int& ciudad_id,
 
     if (ImGui::BeginCombo(("##" + std::string(label)).c_str(), preview)) {
         for (const auto& c : ciudades) {
+            if (filtro_rusia && std::string(c.pais) == "Rusia") continue;
+            
             char buf[128];
             snprintf(buf, sizeof(buf), "%s (%s) - %s", c.nombre, c.codigo_iata, c.pais);
             bool sel = (c.id == ciudad_id);
@@ -122,13 +133,13 @@ inline void dibujar(Interfaz& self, Grafo& red) {
 
     // ── Selectores de ciudad ──
     if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta) {
-        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Origen:", estado.ciudad_origen, ciudades);
-        selectorCiudad(ICON_FA_PLANE_ARRIVAL " Destino:", estado.ciudad_destino, ciudades);
+        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Origen:", estado.ciudad_origen, ciudades, estado.restricciones_geopoliticas);
+        selectorCiudad(ICON_FA_PLANE_ARRIVAL " Destino:", estado.ciudad_destino, ciudades, estado.restricciones_geopoliticas);
     } else if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles ||
                estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarTodo ||
                estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMantenimiento ||
                estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::VueltaAlMundo) {
-        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Punto de inicio:", estado.ciudad_origen, ciudades);
+        selectorCiudad(ICON_FA_PLANE_DEPARTURE " Punto de inicio:", estado.ciudad_origen, ciudades, estado.restricciones_geopoliticas);
     }
     
     // ── Panel Explicativo Académico ──

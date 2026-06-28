@@ -76,6 +76,41 @@ struct VentanaAyuda {
         ImGui::PopStyleVar();
     }
 
+    static void dibujarTutorialRapido(EstadoUI& ui) {
+        if (!ui.mostrar_tutorial_rapido) return;
+        
+        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Tutorial Rapido", &ui.mostrar_tutorial_rapido, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::TextColored(ImVec4(0.3f, 0.85f, 0.7f, 1.0f), ICON_FA_GRADUATION_CAP " Conceptos Básicos");
+            ImGui::Separator();
+            ImGui::Spacing();
+            
+            ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Nodos y Aristas:");
+            ImGui::BulletText("Clic derecho en el lienzo -> Crea un nodo");
+            ImGui::BulletText("Clic derecho en nodo y soltar en otro -> Crea una arista");
+            ImGui::BulletText("Clic derecho y soltar en el mismo nodo -> Crea un Bucle (Self-Loop)");
+            ImGui::BulletText("Crear multiples aristas entre los mismos nodos -> Aristas Paralelas");
+            ImGui::BulletText("Clic izquierdo en un nodo -> Selecciona y mueve");
+            
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Navegación y Atajos:");
+            ImGui::BulletText("Rueda del ratón / Teclado (+/-) -> Zoom");
+            ImGui::BulletText("Clic central / Clic izq. en vacio -> Paneos del lienzo (Mover cámara)");
+            ImGui::BulletText("Ctrl+Z -> Deshacer última acción");
+            ImGui::BulletText("Suprimir (Delete) / Backspace -> Borrar nodo seleccionado");
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            if (ImGui::Button("Entendido", ImVec2(120, 0))) {
+                ui.mostrar_tutorial_rapido = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        } else {
+            ImGui::OpenPopup("Tutorial Rapido");
+        }
+    }
+
 private:
     static void titulo(const char* t) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.85f, 0.7f, 1.0f));
@@ -165,6 +200,8 @@ private:
         
         subtitulo("Teclado (Shortcuts de Alta Productividad)");
         bullet_text_wrapped("Supr / Delete: Elimina instantaneamente el nodo actualmente seleccionado y arranca de raiz todas las conexiones atadas a el.");
+        bullet_text_wrapped("Ctrl + Z: Deshacer. Revierte la ultima accion topologica que realizaste (agregar/borrar nodos o aristas).");
+        bullet_text_wrapped("Ctrl + Y: Rehacer. Restaura una accion previamente deshecha.");
         bullet_text_wrapped("Ctrl + N: Boton del Panico / Reset. Borra absolutamente toda la memoria del grafo libre actual.");
         bullet_text_wrapped("Teclas [+] y [-]: Alternativas de hardware para hacer Zoom si no tienes rueda de mouse.");
         ImGui::Spacing();
@@ -187,6 +224,7 @@ private:
         subtitulo("Bloqueos Geopoliticos (La variable del caos)");
         ImGui::TextWrapped("Al abrir el Panel Izquierdo encontraras un Checkbox llamado 'Bloqueo Geopolitico (Rusia)'.");
         bullet_text_wrapped("Al activarlo, el programa inyecta un factor de multiplicacion extremo (peso penalizador) a TODAS las rutas de vuelo que crucen el poligono de conflicto (zona roja neon).");
+        bullet_text_wrapped("Los aeropuertos Rusos se pinchan de color rojo y bloquean fisicamente tu interaccion. Si intentas seleccionarlos como origen/destino escucharas un sonido de error, simulando una sancion aerea total.");
         bullet_text_wrapped("Dijkstra desviara a los aviones por el polo norte o por el sur de asia automaticamente para evitar la zona de exclusion.");
         ImGui::Spacing();
         
@@ -347,8 +385,9 @@ private:
         bullet_text_wrapped("1. Entorno: Modo Grafos Libres. Dibuja el Grafo 1 (G1) en el centro de la pantalla (ej. un Cuadrado).");
         bullet_text_wrapped("2. El Cambio de Fase: Ve al panel 'Isomorfismo' a la derecha. Enciende el interruptor 'Editar G2 (Grafo de Pruebas)'.");
         bullet_text_wrapped("3. Magia Visual: La interfaz y etiquetas cambiaran a Violeta. G1 esta a salvo en memoria. Ahora todo lo que dibujes es G2. Dibuja un cuadrado aplastado a un costado.");
-        bullet_text_wrapped("4. Veredicto: Presiona 'COMPROBAR ISOMORFISMO'.");
-        bullet_text_wrapped("5. Resultado: Recibiras un cartel verde confirmatorio si ambos son identicos, mostrandote el mapeo exacto de nodos (Ej. V0 = U2).");
+        bullet_text_wrapped("4. Formas Geometricas: En G2 tendras botones especiales para generar figuras aleatorias o Forzar Poligonos Regulares basados en la cantidad de nodos. Esto es ideal para demostrar como un grafo feo puede ser isomorfo a un hexagono perfecto.");
+        bullet_text_wrapped("5. Veredicto: Presiona 'COMPROBAR ISOMORFISMO'. Si hay una diferencia de nodos, el programa abortara y te indicara la discrepancia matematica.");
+        bullet_text_wrapped("6. Resultado: Recibiras un cartel verde confirmatorio si ambos son identicos, mostrandote el mapeo exacto de nodos (Ej. V0 = U2).");
     }
 
     static void secMatrices() {

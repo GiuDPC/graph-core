@@ -1,3 +1,4 @@
+cat << 'EOF' > /tmp/PanelIsomorfismo.h
 #pragma once
 
 #include "imgui.h"
@@ -53,6 +54,97 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Acomoda todos los nodos del grafo en un circulo perfecto.");
             
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("G2 (El Grafo a Comparar)")) {
+            self.estado_grafos.iso_editando_g2 = true;
+            ImGui::Text("Nodos: %d  |  Aristas: %d",
+                (int)self.estado_grafos.grafo_iso_g2.nodos.size(), (int)self.estado_grafos.grafo_iso_g2.aristas.size());
+            auto degs = Algoritmos::Isomorfismo::secuenciaGrados(self.estado_grafos.grafo_iso_g2);
+            std::string dstr;
+            for (int d : degs) dstr += std::to_string(d) + " ";
+            ImGui::TextWrapped("Secuencia de grados: %s", dstr.c_str());
+            ImGui::Spacing();
+
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
+                "Opciones para G2:");
+
+            if (ImGui::Button(ICON_FA_WAND_MAGIC_SPARKLES " Generar Isomorfo Aleatorio", ImVec2(-1, 32))) {
+                self.estado_grafos.grafo_iso_g2.limpiar();
+                if (!red.nodos.empty()) {
+                    std::vector<int> idx(red.nodos.size());
+                    for (size_t i = 0; i < idx.size(); ++i) idx[i] = i;
+                    for (size_t i = 0; i < idx.size(); ++i) {
+                        size_t j = i + std::uniform_int_distribution<size_t>(0, idx.size() - i - 1)(red.obtenerGeneradorAleatorio());
+                        std::swap(idx[i], idx[j]);
+                    }
+                    std::map<int, int> mapa;
+                    float cx = 800.0f; // desplazar a la derecha
+                    float cy = 300.0f;
+                    float radio = 150.0f;
+                    for (size_t i = 0; i < idx.size(); ++i) {
+                        const auto& n_orig = red.nodos[idx[i]];
+                        float ang = (2.0f * 3.14159f / idx.size()) * i;
+                        Nodo n(i, ImVec2(cx + cosf(ang) * radio, cy + sinf(ang) * radio), n_orig.tipo);
+                        n.nombre = "Iso_" + n_orig.nombre;
+                        self.estado_grafos.grafo_iso_g2.nodos.push_back(n);
+                        mapa[n_orig.id] = i;
+                    }
+                    for (const auto& a : red.aristas) {
+                        self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
+                    }
+                    self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
+                    self.estado_grafos.iso_analizado = false;
+                    self.registrarLog("[OK] G2 generado. Estructura identica pero posiciones aleatorias.");
+                    g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+                }
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Crea una copia isomorfa con los nodos mezclados caoticamente.");
+
+            if (ImGui::Button(ICON_FA_SHAPES " Generar Isomorfo en Forma Geometrica", ImVec2(-1, 32))) {
+                self.estado_grafos.grafo_iso_g2.limpiar();
+                if (!red.nodos.empty()) {
+                    std::map<int, int> mapa;
+                    float cx = 800.0f; // desplazar a la derecha
+                    float cy = 300.0f;
+                    float radio = 150.0f;
+                    
+                    for (size_t i = 0; i < red.nodos.size(); ++i) {
+                        const auto& n_orig = red.nodos[i];
+                        float ang = (2.0f * 3.14159f / red.nodos.size()) * i;
+                        Nodo n(i, ImVec2(cx + cosf(ang) * radio, cy + sinf(ang) * radio), n_orig.tipo);
+                        n.nombre = "IsoGeo_" + n_orig.nombre;
+                        self.estado_grafos.grafo_iso_g2.nodos.push_back(n);
+                        mapa[n_orig.id] = i;
+                    }
+                    for (const auto& a : red.aristas) {
+                        self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
+                    }
+                    self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
+                    self.estado_grafos.iso_analizado = false;
+                    self.registrarLog("[OK] G2 generado. Forma geometrica perfecta.");
+                    g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
+                }
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Crea una copia isomorfa y la dibuja como un poligono regular.");
+
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PENCIL " Click derecho en el lienzo dibuja en G2");
+            ImGui::Spacing();
+            
+            if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {
+                self.estado_grafos.grafo_iso_g2.limpiar();
+                self.estado_grafos.iso_analizado = false;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Elimina el segundo grafo y reinicia la verificacion de isomorfismo.");
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
+
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Ejecutar Verificacion");
     ImGui::TextWrapped("Compara matemáticamente la estructura y conexiones. Limitado a <= 12 nodos.");
@@ -154,97 +246,8 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             ImGui::TextWrapped("%s", self.estado_grafos.resultado_iso.descripcion.c_str());
         }
     }
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("G2 (El Grafo a Comparar)")) {
-            self.estado_grafos.iso_editando_g2 = true;
-            ImGui::Text("Nodos: %d  |  Aristas: %d",
-                (int)self.estado_grafos.grafo_iso_g2.nodos.size(), (int)self.estado_grafos.grafo_iso_g2.aristas.size());
-            auto degs = Algoritmos::Isomorfismo::secuenciaGrados(self.estado_grafos.grafo_iso_g2);
-            std::string dstr;
-            for (int d : degs) dstr += std::to_string(d) + " ";
-            ImGui::TextWrapped("Secuencia de grados: %s", dstr.c_str());
-            ImGui::Spacing();
-
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
-                "Opciones para G2:");
-
-            if (ImGui::Button(ICON_FA_WAND_MAGIC_SPARKLES " Generar Isomorfo Aleatorio", ImVec2(-1, 32))) {
-                self.estado_grafos.grafo_iso_g2.limpiar();
-                if (!red.nodos.empty()) {
-                    std::vector<int> idx(red.nodos.size());
-                    for (size_t i = 0; i < idx.size(); ++i) idx[i] = i;
-                    for (size_t i = 0; i < idx.size(); ++i) {
-                        size_t j = i + std::uniform_int_distribution<size_t>(0, idx.size() - i - 1)(red.obtenerGeneradorAleatorio());
-                        std::swap(idx[i], idx[j]);
-                    }
-                    std::map<int, int> mapa;
-                    float cx = 800.0f; // desplazar a la derecha
-                    float cy = 300.0f;
-                    float radio = 150.0f;
-                    for (size_t i = 0; i < idx.size(); ++i) {
-                        const auto& n_orig = red.nodos[idx[i]];
-                        float ang = (2.0f * 3.14159f / idx.size()) * i;
-                        Nodo n(i, ImVec2(cx + cosf(ang) * radio, cy + sinf(ang) * radio), n_orig.tipo);
-                        n.nombre = "Iso_" + n_orig.nombre;
-                        self.estado_grafos.grafo_iso_g2.nodos.push_back(n);
-                        mapa[n_orig.id] = i;
-                    }
-                    for (const auto& a : red.aristas) {
-                        self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
-                    }
-                    self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
-                    self.estado_grafos.iso_analizado = false;
-                    self.registrarLog("[OK] G2 generado. Estructura identica pero posiciones aleatorias.");
-                    g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
-                }
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Crea una copia isomorfa con los nodos mezclados caoticamente.");
-
-            if (ImGui::Button(ICON_FA_SHAPES " Generar Isomorfo en Forma Geometrica", ImVec2(-1, 32))) {
-                self.estado_grafos.grafo_iso_g2.limpiar();
-                if (!red.nodos.empty()) {
-                    std::map<int, int> mapa;
-                    float cx = 800.0f; // desplazar a la derecha
-                    float cy = 300.0f;
-                    float radio = 150.0f;
-                    
-                    for (size_t i = 0; i < red.nodos.size(); ++i) {
-                        const auto& n_orig = red.nodos[i];
-                        float ang = (2.0f * 3.14159f / red.nodos.size()) * i;
-                        Nodo n(i, ImVec2(cx + cosf(ang) * radio, cy + sinf(ang) * radio), n_orig.tipo);
-                        n.nombre = "IsoGeo_" + n_orig.nombre;
-                        self.estado_grafos.grafo_iso_g2.nodos.push_back(n);
-                        mapa[n_orig.id] = i;
-                    }
-                    for (const auto& a : red.aristas) {
-                        self.estado_grafos.grafo_iso_g2.aristas.push_back(Arista(mapa[a.origen_id], mapa[a.destino_id], a.peso, a.es_dirigida));
-                    }
-                    self.estado_grafos.grafo_iso_g2.contador_ids = (int)red.nodos.size();
-                    self.estado_grafos.iso_analizado = false;
-                    self.registrarLog("[OK] G2 generado. Forma geometrica perfecta.");
-                    g_sonidos.reproducir(Sonidos::CONFIRMAR_RUTA);
-                }
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Crea una copia isomorfa y la dibuja como un poligono regular.");
-
-            ImGui::Spacing();
-            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PENCIL " Click derecho en el lienzo dibuja en G2");
-            ImGui::Spacing();
-            
-            if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {
-                self.estado_grafos.grafo_iso_g2.limpiar();
-                self.estado_grafos.iso_analizado = false;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Elimina el segundo grafo y reinicia la verificacion de isomorfismo.");
-            ImGui::EndTabItem();
-        }
-        ImGui::EndTabBar();
-    }
-
 }
 
 }
+EOF
+mv /tmp/PanelIsomorfismo.h src/interfaz/paneles/PanelIsomorfismo.h

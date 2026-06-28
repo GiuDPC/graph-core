@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Nombre del proyecto, versión y lenguaje
 project(graph-core
-    VERSION 2.0.0
+    VERSION 3.0.0
     LANGUAGES CXX
 )
 
@@ -15,6 +15,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -ffast-math -ftree-vectorize")
+endif()
 
 
 # ============================================================================

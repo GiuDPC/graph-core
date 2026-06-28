@@ -57,6 +57,7 @@ struct EstadoUI {
     // enciclopedia / ayuda 
     bool mostrar_ventana_ayuda = false;
     int seccion_ayuda_actual = 0;
+    bool mostrar_tutorial_rapido = true; // Se muestra al iniciar por primera vez
 
     // --- forceatlas2 ---
     bool fisicas_activas          = false;

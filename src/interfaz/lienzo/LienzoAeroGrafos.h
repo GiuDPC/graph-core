@@ -348,6 +348,12 @@ inline int dibujarCiudades(ImDrawList* dl, EstadoAeroGrafos& estado,
             }
         }
 
+        if (estado.restricciones_geopoliticas && std::string(c.pais) == "Rusia") {
+            fill   = IM_COL32(255, 50, 50, 200);
+            glow_c = IM_COL32(255, 50, 50, 60);
+            circle = IM_COL32(255, 100, 100, 80);
+            selec = false;
+        }
         float radio_glow = radio * (2.8f + (selec ? pulso : 0.0f));
 
         // Glow
@@ -926,6 +932,10 @@ inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
         if (click_candidato && ciudad_pres >= 0 && !se_movio) {
             // Seleccionar ciudad
             const auto& ciudades = DatosMundo::obtenerCiudades();
+            if (estado.restricciones_geopoliticas && std::string(ciudades[ciudad_pres].pais) == "Rusia") {
+                estado.agregarMensaje(ICON_FA_BAN " Espacio aereo ruso bloqueado (Moscu/Rusia no seleccionable)", IM_COL32(255, 80, 80, 255));
+                g_sonidos.reproducir(Sonidos::DESCARTAR);
+            } else {
             if (estado.ciudad_origen < 0 || estado.ciudad_destino >= 0) {
                 estado.ciudad_origen = ciudad_pres;
                 estado.ciudad_destino = -1;
@@ -937,6 +947,7 @@ inline void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
                 estado.agregarMensaje(ICON_FA_PLANE_ARRIVAL " Destino: " +
                     std::string(ciudades[ciudad_pres].nombre),
                     IM_COL32(100, 200, 255, 255));
+            }
             }
         }
         paneando = false;

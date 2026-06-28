@@ -6,6 +6,10 @@
 #include "IconsFontAwesome6.h"
 #include <GLFW/glfw3.h>
 #include <cstdio>
+#include <filesystem>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "nucleo/Grafo.h"
 
 ImFont* g_fontMono = nullptr;
@@ -100,7 +104,19 @@ void configurarTemaIngenieria() {
     c[ImGuiCol_ModalWindowDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.60f);
 }
 
-int main(int, char**) {
+int main(int argc, char** argv) {
+    try {
+#ifdef _WIN32
+        char path[MAX_PATH];
+        GetModuleFileNameA(NULL, path, MAX_PATH);
+        std::filesystem::current_path(std::filesystem::path(path).parent_path());
+#elif defined(__linux__)
+        std::filesystem::current_path(std::filesystem::canonical("/proc/self/exe").parent_path());
+#else
+        std::filesystem::current_path(std::filesystem::absolute(std::filesystem::path(argv[0])).parent_path());
+#endif
+    } catch(...) {}
+
     glfwSetErrorCallback(callbackErrorGlfw);
     if (!glfwInit()) {
         fprintf(stderr, "Error: No se pudo inicializar GLFW\n");
@@ -112,7 +128,7 @@ int main(int, char**) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* ventana = glfwCreateWindow(
-        1500, 900, "graphCore", nullptr, nullptr
+        1500, 900, "graphCore v3.0", nullptr, nullptr
     );
     if (!ventana) {
         fprintf(stderr, "Error: No se pudo crear la ventana GLFW\n");

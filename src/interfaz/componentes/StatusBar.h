@@ -39,12 +39,16 @@ inline void dibujar(Interfaz& self) {
     }
 
     // FPS a la derecha, usando posicion relativa
-    float fps_w = ImGui::CalcTextSize("FPS: 60").x + 20;
+    float fps_w = ImGui::CalcTextSize("v3.0 | FPS: 60").x + 20;
     float audio_w = 180.0f;
     float right_x = bar_w - fps_w - audio_w - 20;
     
     if (right_x > ImGui::GetCursorPosX() + 20) {
         ImGui::SameLine(right_x);
+        ImGui::TextColored(ImVec4(0.0f, 0.85f, 0.65f, 1.0f), "v3.0");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.4f, 1.0f), "|");
+        ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.6f, 1.0f), "FPS: %.0f", ImGui::GetIO().Framerate);
 
         ImGui::SameLine();

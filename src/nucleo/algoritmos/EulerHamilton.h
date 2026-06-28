@@ -15,7 +15,7 @@ struct EulerHamilton {
         std::vector<int> camino;
         if (g.nodos.empty()) return camino;
 
-        std::vector<int> grados(g.nodos.size(), 0);
+        std::vector<int> grados(g.rangoIds(), 0);
         for (const auto& arista : g.aristas) {
             grados[arista.origen_id]++;
             grados[arista.destino_id]++;
@@ -79,12 +79,19 @@ struct EulerHamilton {
         if (camino.empty()) return pasos;
 
         for (size_t i = 1; i < camino.size(); i++) {
-            PasoAnimacion paso;
-            paso.accion = PasoAnimacion::CONFIRMAR;
-            paso.arista_origen = camino[i-1];
-            paso.arista_destino = camino[i];
-            paso.descripcion = "Recorriendo (" + std::to_string(i+1) + "/" + std::to_string(camino.size()) + "): " + g.nodos[camino[i-1]].nombre + " -> " + g.nodos[camino[i]].nombre;
-            pasos.push_back(paso);
+            PasoAnimacion paso1;
+            paso1.accion = PasoAnimacion::VISITAR;
+            paso1.arista_origen = camino[i-1];
+            paso1.arista_destino = camino[i];
+            paso1.descripcion = "Viajando (" + std::to_string(i) + "/" + std::to_string(camino.size()-1) + "): " + g.nombreNodo(camino[i-1]) + " -> " + g.nombreNodo(camino[i]);
+            pasos.push_back(paso1);
+
+            PasoAnimacion paso2;
+            paso2.accion = PasoAnimacion::CONFIRMAR;
+            paso2.arista_origen = camino[i-1];
+            paso2.arista_destino = camino[i];
+            paso2.descripcion = "Camino confirmado";
+            pasos.push_back(paso2);
         }
         return pasos;
     }
@@ -117,6 +124,11 @@ struct EulerHamilton {
         std::vector<int> camino;
         if (g.nodos.empty()) return camino;
 
+        if (g.nodos.size() > 20) {
+            // Guard contra O(N!). Usar heuristica
+            return buscarCaminoHamiltonianoHeuristico(g).ruta;
+        }
+
         std::unordered_map<int, std::vector<int>> adj;
         for (const auto& a : g.aristas) {
             adj[a.origen_id].push_back(a.destino_id);
@@ -124,10 +136,10 @@ struct EulerHamilton {
         }
 
         int num_nodos = g.nodos.size();
-        std::vector<bool> visitado(num_nodos, false);
+        std::vector<bool> visitado(g.rangoIds(), false);
 
-        for (int i = 0; i < num_nodos; i++) {
-            if (hamiltonianoRecursivo(i, num_nodos, adj, visitado, camino)) {
+        for (const auto& n : g.nodos) {
+            if (hamiltonianoRecursivo(n.id, num_nodos, adj, visitado, camino)) {
                 return camino;
             }
         }
@@ -145,9 +157,9 @@ struct EulerHamilton {
         res.distancia_total = 0;
         if (g.nodos.empty()) return res;
 
-        int actual = origen_sugerido >= 0 ? origen_sugerido : 0;
+        int actual = origen_sugerido >= 0 ? origen_sugerido : (g.nodos.empty() ? 0 : g.nodos[0].id);
         res.ruta.push_back(actual);
-        std::vector<bool> visitado(g.nodos.size(), false);
+        std::vector<bool> visitado(g.rangoIds(), false);
         visitado[actual] = true;
 
         for (size_t paso = 1; paso < g.nodos.size(); paso++) {
@@ -184,12 +196,19 @@ struct EulerHamilton {
         if (res.ruta.empty()) return pasos;
 
         for (size_t i = 1; i < res.ruta.size(); i++) {
-            PasoAnimacion paso;
-            paso.accion = PasoAnimacion::CONFIRMAR;
-            paso.arista_origen = res.ruta[i-1];
-            paso.arista_destino = res.ruta[i];
-            paso.descripcion = "Viajando (" + std::to_string(i+1) + "/" + std::to_string(res.ruta.size()) + "): " + g.nodos[res.ruta[i-1]].nombre + " -> " + g.nodos[res.ruta[i]].nombre;
-            pasos.push_back(paso);
+            PasoAnimacion paso1;
+            paso1.accion = PasoAnimacion::VISITAR;
+            paso1.arista_origen = res.ruta[i-1];
+            paso1.arista_destino = res.ruta[i];
+            paso1.descripcion = "Viajando (" + std::to_string(i) + "/" + std::to_string(res.ruta.size()-1) + "): " + g.nombreNodo(res.ruta[i-1]) + " -> " + g.nombreNodo(res.ruta[i]);
+            pasos.push_back(paso1);
+
+            PasoAnimacion paso2;
+            paso2.accion = PasoAnimacion::CONFIRMAR;
+            paso2.arista_origen = res.ruta[i-1];
+            paso2.arista_destino = res.ruta[i];
+            paso2.descripcion = "Camino confirmado";
+            pasos.push_back(paso2);
         }
         return pasos;
     }

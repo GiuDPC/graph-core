@@ -109,6 +109,7 @@ struct TopologiasFractales {
         // renombrar nodos secuencialmente para que quede limpio
         for (size_t i = 0; i < g.nodos.size(); i++) {
             g.nodos[i].nombre = "F" + std::to_string(i+1);
+            g.nodos[i].radio = std::max(4.0f, 20.0f - (iteraciones * 3.5f));
         }
 
         return g;
@@ -156,7 +157,10 @@ struct TopologiasFractales {
                 }
             }
         }
-        return g;
+        // escalar nodos
+        for (size_t i = 0; i < g.nodos.size(); i++) {
+            g.nodos[i].radio = std::max(4.0f, 20.0f - (capas * 3.0f));
+        }
         return g;
     }
 
@@ -186,6 +190,10 @@ struct TopologiasFractales {
             // dos nuevas ramas
             ramas.push_back({ nuevo_id, x_fin, y_fin, r.angulo - 0.5f, r.longitud * 0.7f, r.nivel + 1 });
             ramas.push_back({ nuevo_id, x_fin, y_fin, r.angulo + 0.5f, r.longitud * 0.7f, r.nivel + 1 });
+        }
+        // escalar nodos
+        for (size_t i = 0; i < g.nodos.size(); i++) {
+            g.nodos[i].radio = std::max(4.0f, 20.0f - (niveles * 3.0f));
         }
         return g;
     }
@@ -256,15 +264,21 @@ struct TopologiasFractales {
             return g.contador_ids - 1;
         };
 
+        auto en_limites = [&](int nq, int nr) {
+            return nq >= -capas && nq <= capas && 
+                   nr >= -capas && nr <= capas && 
+                   (nq + nr) >= -capas && (nq + nr) <= capas;
+        };
+
         for (int q = -capas; q <= capas; q++) {
             int r1 = std::max(-capas, -q - capas);
             int r2 = std::min(capas, -q + capas);
             for (int r = r1; r <= r2; r++) {
                 int id_actual = get_id(q, r);
-                // conectar con vecinos solo 3 direcciones para evitar duplicados en grafo no dirigido
-                if (r < r2) g.agregarArista(id_actual, get_id(q, r + 1), 1.0f);
-                if (q < capas && r > -q - capas) g.agregarArista(id_actual, get_id(q + 1, r - 1), 1.0f);
-                if (q < capas && r < -q + capas) g.agregarArista(id_actual, get_id(q + 1, r), 1.0f);
+                // conectar con vecinos solo 3 direcciones (hacia adelante) para evitar duplicados
+                if (en_limites(q, r + 1)) g.agregarArista(id_actual, get_id(q, r + 1), 1.0f);
+                if (en_limites(q + 1, r - 1)) g.agregarArista(id_actual, get_id(q + 1, r - 1), 1.0f);
+                if (en_limites(q + 1, r)) g.agregarArista(id_actual, get_id(q + 1, r), 1.0f);
             }
         }
         return g;
