@@ -1,20 +1,9 @@
-#pragma once
-
-#include <vector>
-#include <string>
-#include <functional>
-#include "../Grafo.hpp"
+#include "Ciclos.hpp"
 #include "../UnionFind.h"
+#include <functional>
 
 namespace Algoritmos {
 
-struct ResultadoCiclos {
-    bool                            tiene_ciclo = false;
-    std::vector<std::pair<int,int>> aristas_ciclo;  // aristas que forman parte del ciclo
-    std::string                     descripcion;
-};
-
-// detecta ciclos en grafos no dirigidos usando unionfind legacy
 ResultadoCiclos detectarCiclos(const Grafo& g) {
     ResultadoCiclos resultado;
     if (g.estaVacio()) return resultado;
@@ -33,7 +22,6 @@ ResultadoCiclos detectarCiclos(const Grafo& g) {
     return resultado;
 }
 
-// detecta ciclos con dfs 3 colores si toca gris hay ciclo
 ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     ResultadoCiclos resultado;
     if (g.estaVacio()) return resultado;
@@ -50,7 +38,6 @@ ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     std::function<bool(int)> dfs = [&](int u) -> bool {
         color[u] = GRAY;
         for (const auto& a : g.aristas) {
-            // sigue direccion correcta origen destino o ambas
             int v = -1;
             if (a.origen_id == u) v = a.destino_id;
             else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
@@ -88,4 +75,4 @@ ResultadoCiclos detectarCiclosDirigidos(const Grafo& g) {
     return resultado;
 }
 
-} 
+}

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nucleo/algoritmos/BFS.h"
+#include "nucleo/algoritmos/BFS.hpp"
 
 // ── BFS: aristas dirigidas ────────────────────────────────────────────────
 

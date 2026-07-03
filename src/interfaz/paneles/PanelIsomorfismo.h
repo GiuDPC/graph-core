@@ -4,7 +4,7 @@
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
-#include "nucleo/algoritmos/Isomorfismo.h"
+#include "nucleo/algoritmos/Isomorfismo.hpp"
 #include "audio/Sonidos.h"
 
 class Interfaz;

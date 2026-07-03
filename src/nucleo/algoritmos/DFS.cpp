@@ -1,18 +1,7 @@
-#pragma once
-
-#include <vector>
-#include <string>
-
-#include "../Grafo.hpp"
-#include "../tipos/PasoAnimacion.h"
+#include "DFS.hpp"
 
 namespace Algoritmos {
 namespace DFS {
-
-struct ResultadoDFS {
-    std::vector<int>                       orden_visita;
-    std::vector<std::pair<int,int>>        back_edges;   
-};
 
 void dfsHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis, ResultadoDFS& resultado) {
     vis[u] = true;
@@ -22,12 +11,12 @@ void dfsHelper(const Grafo& g, int u, int padre, std::vector<bool>& vis, Resulta
         int v = -1;
         if (a.origen_id == u) v = a.destino_id;
         else if (!a.es_dirigida && a.destino_id == u) v = a.origen_id;
-        if (v == -1 || v >= g.rangoIds() || v == padre) continue; // no marcar vuelta al padre como backedge
+        if (v == -1 || v >= g.rangoIds() || v == padre) continue;
 
         if (!vis[v]) {
             dfsHelper(g, v, u, vis, resultado);
         } else {
-            resultado.back_edges.push_back({u, v}); // arista de vuelta ciclo genuino
+            resultado.back_edges.push_back({u, v});
         }
     }
 }
@@ -76,4 +65,4 @@ std::vector<PasoAnimacion> generarPasos(const Grafo& g, int inicio_id) {
 }
 
 }
-} 
+}

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nucleo/algoritmos/Dijkstra.h"
+#include "nucleo/algoritmos/Dijkstra.hpp"
 
 // ── Dijkstra: ruta simple ──────────────────────────────────────────────────
 

@@ -93,6 +93,21 @@ find_package(Threads REQUIRED)
 
 add_library(graph-core-lib STATIC
     src/nucleo/Grafo.cpp
+    src/nucleo/algoritmos/BFS.cpp
+    src/nucleo/algoritmos/DFS.cpp
+    src/nucleo/algoritmos/Kruskal.cpp
+    src/nucleo/algoritmos/Ciclos.cpp
+    src/nucleo/algoritmos/Coloreo.cpp
+    src/nucleo/algoritmos/Dijkstra.cpp
+    src/nucleo/algoritmos/Planaridad.cpp
+    src/nucleo/algoritmos/ColorFractal.cpp
+    src/nucleo/algoritmos/QuadTree.cpp
+    src/nucleo/algoritmos/EulerHamilton.cpp
+    src/nucleo/algoritmos/Arbol.cpp
+    src/nucleo/algoritmos/ForceAtlas2.cpp
+    src/nucleo/algoritmos/TopologiasFractales.cpp
+    src/nucleo/algoritmos/AnalizadorGrafo.cpp
+    src/nucleo/algoritmos/Isomorfismo.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC

@@ -8,7 +8,7 @@
 #include <chrono>
 #include "Grafo.hpp"
 #include "tipos/EstadoRed.h"
-#include "algoritmos/Dijkstra.h"
+#include "algoritmos/Dijkstra.hpp"
 #include "audio/Sonidos.h"
 
 extern Sonidos g_sonidos;

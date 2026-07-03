@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nucleo/algoritmos/Ciclos.h"
+#include "nucleo/algoritmos/Ciclos.hpp"
 
 // ── Ciclos: deteccion de ciclos ───────────────────────────────────────────
 

@@ -1,17 +1,17 @@
 #pragma once
 
 #include "nucleo/Grafo.hpp"
-#include "nucleo/algoritmos/Dijkstra.h"
-#include "nucleo/algoritmos/Kruskal.h"
-#include "nucleo/algoritmos/BFS.h"
-#include "nucleo/algoritmos/DFS.h"
-#include "nucleo/algoritmos/Ciclos.h"
-#include "nucleo/algoritmos/Coloreo.h"
-#include "nucleo/algoritmos/Isomorfismo.h"
-#include "nucleo/algoritmos/Arbol.h"
-#include "nucleo/algoritmos/Planaridad.h"
-#include "nucleo/algoritmos/Planaridad.h"
-#include "nucleo/algoritmos/ColorFractal.h"
+#include "nucleo/algoritmos/Dijkstra.hpp"
+#include "nucleo/algoritmos/Kruskal.hpp"
+#include "nucleo/algoritmos/BFS.hpp"
+#include "nucleo/algoritmos/DFS.hpp"
+#include "nucleo/algoritmos/Ciclos.hpp"
+#include "nucleo/algoritmos/Coloreo.hpp"
+#include "nucleo/algoritmos/Isomorfismo.hpp"
+#include "nucleo/algoritmos/Arbol.hpp"
+#include "nucleo/algoritmos/Planaridad.hpp"
+#include "nucleo/algoritmos/Planaridad.hpp"
+#include "nucleo/algoritmos/ColorFractal.hpp"
 #include "interfaz/util/Animacion.h"
 
 struct EstadoGrafos {

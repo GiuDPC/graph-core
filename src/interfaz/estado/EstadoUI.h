@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "nucleo/algoritmos/ForceAtlas2.h"
+#include "nucleo/algoritmos/ForceAtlas2.hpp"
 
 struct EstadoUI {
     enum class ModoApp { Grafos, AeroGrafos };

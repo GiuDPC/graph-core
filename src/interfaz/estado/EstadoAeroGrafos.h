@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "nucleo/datos/DatosMundo.h"
 #include "nucleo/tipos/PasoAnimacion.h"
-#include "nucleo/algoritmos/AnalizadorGrafo.h"
+#include "nucleo/algoritmos/AnalizadorGrafo.hpp"
 #include "interfaz/util/Animacion.h"
 #include <vector>
 #include <string>
