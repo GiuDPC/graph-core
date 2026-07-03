@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Grafo.hpp"
-#include "../tipos/PasoAnimacion.h"
+#include "../tipos/PasoAnimacion.hpp"
 #include <vector>
 
 namespace Algoritmos {

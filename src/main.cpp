@@ -1,5 +1,5 @@
 #include "interfaz/Interfaz.hpp"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -14,7 +14,7 @@
 
 ImFont* g_fontMono = nullptr;
 Sonidos g_sonidos; 
-#include "interfaz/util/TextureLoader.h"
+#include "interfaz/util/TextureLoader.hpp"
 
 static void callbackErrorGlfw(int error, const char* descripcion) {
     fprintf(stderr, "[GLFW ERROR %d] %s\n", error, descripcion);

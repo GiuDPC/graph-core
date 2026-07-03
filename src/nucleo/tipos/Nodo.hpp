@@ -2,7 +2,7 @@
 #include <string>
 #include "imgui.h"          // ImVec2 (miembro de datos: necesita definición completa, no solo forward decl)
                              // TODO(refactor): extraer Posicion2D propia del dominio para eliminar dependencia de ImGui
-#include "TipoHardware.h"
+#include "TipoHardware.hpp"
 
 // Nodo del grafo
 struct Nodo {

@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
-#include "nucleo/tipos/TipoHardware.h"
+#include "nucleo/tipos/TipoHardware.hpp"
 
 class Interfaz;
 class Grafo;

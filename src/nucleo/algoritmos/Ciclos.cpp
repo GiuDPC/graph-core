@@ -1,5 +1,5 @@
 #include "Ciclos.hpp"
-#include "../UnionFind.h"
+#include "../UnionFind.hpp"
 #include <functional>
 
 namespace Algoritmos {

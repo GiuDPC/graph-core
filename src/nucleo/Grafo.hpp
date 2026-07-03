@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <random>
 
-#include "tipos/Nodo.h"
-#include "tipos/Arista.h"
+#include "tipos/Nodo.hpp"
+#include "tipos/Arista.hpp"
 
 // Grafo: vector-of-vertices, vector-of-edges (no adjacency lists)
 // Nodo.h pulls in ImVec2 via imgui.h — TODO: extract Posicion2D

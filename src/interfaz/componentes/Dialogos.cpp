@@ -1,6 +1,6 @@
 #include "interfaz/componentes/Dialogos.hpp"
 #include "Interfaz.hpp"
-#include "persistencia/SerializadorJSON.h"
+#include "persistencia/SerializadorJSON.hpp"
 #include "interfaz/util/Animacion.hpp"
 
 namespace Dialogos {

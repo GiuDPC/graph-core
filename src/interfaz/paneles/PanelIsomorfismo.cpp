@@ -5,7 +5,7 @@
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
 #include "nucleo/algoritmos/Isomorfismo.hpp"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 
 extern Sonidos g_sonidos;
 

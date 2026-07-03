@@ -4,7 +4,7 @@
 #include <map>
 
 #include "../Grafo.hpp"
-#include "../tipos/PasoAnimacion.h"
+#include "../tipos/PasoAnimacion.hpp"
 
 namespace Algoritmos {
 namespace BFS {

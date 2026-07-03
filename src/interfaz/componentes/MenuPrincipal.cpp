@@ -1,9 +1,9 @@
 #include "interfaz/componentes/MenuPrincipal.hpp"
 #include "Interfaz.hpp"
-#include "persistencia/SerializadorJSON.h"
-#include "persistencia/SerializadorGEXF.h"
+#include "persistencia/SerializadorJSON.hpp"
+#include "persistencia/SerializadorGEXF.hpp"
 #include "portable-file-dialogs.h"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 
 namespace MenuPrincipal {
 

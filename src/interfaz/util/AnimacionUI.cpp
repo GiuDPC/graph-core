@@ -1,6 +1,6 @@
 #include "interfaz/util/AnimacionUI.hpp"
 #include "Interfaz.hpp"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 
 namespace AnimacionUI {
 

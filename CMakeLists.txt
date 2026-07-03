@@ -109,6 +109,9 @@ add_library(graph-core-lib STATIC
     src/nucleo/algoritmos/AnalizadorGrafo.cpp
     src/nucleo/algoritmos/Isomorfismo.cpp
     src/nucleo/datos/DatosMundo.cpp
+    src/nucleo/SimuladorRed.cpp
+    src/nucleo/Topologias.cpp
+    src/audio/Sonidos.cpp
     src/interfaz/estado/EstadoAeroGrafos.cpp
     src/interfaz/Interfaz.cpp
     src/interfaz/paneles/PanelGrafos.cpp

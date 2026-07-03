@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nucleo/UnionFind.h"
+#include "nucleo/UnionFind.hpp"
 
 // ── UnionFind: operaciones basicas ─────────────────────────────────────────
 

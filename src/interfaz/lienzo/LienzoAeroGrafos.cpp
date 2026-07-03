@@ -4,9 +4,9 @@
 #include "IconsFontAwesome6.h"
 #include "nucleo/datos/DatosMundo.hpp"
 #include "interfaz/estado/EstadoAeroGrafos.hpp"
-#include "interfaz/util/TextureLoader.h"
+#include "interfaz/util/TextureLoader.hpp"
 #include "interfaz/util/Easing.hpp"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 #include <cmath>
 #include <algorithm>
 #include <string>

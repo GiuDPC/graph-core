@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imgui.h"
-#include "nucleo/tipos/PasoAnimacion.h"
+#include "nucleo/tipos/PasoAnimacion.hpp"
 #include <set>
 #include <map>
 #include <vector>

@@ -1,5 +1,5 @@
 #include "Dijkstra.hpp"
-#include "../tipos/TipoHardware.h"
+#include "../tipos/TipoHardware.hpp"
 #include <queue>
 #include <limits>
 #include <algorithm>

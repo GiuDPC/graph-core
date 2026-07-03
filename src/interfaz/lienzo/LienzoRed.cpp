@@ -1,6 +1,6 @@
 #include "LienzoRed.hpp"
 #include "Interfaz.hpp"
-#include "nucleo/SimuladorRed.h"
+#include "nucleo/SimuladorRed.hpp"
 #include "interfaz/util/Easing.hpp"
 #include "interfaz/util/Animacion.hpp"
 #include "interfaz/util/AnimacionUI.hpp"

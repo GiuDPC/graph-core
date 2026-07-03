@@ -1,5 +1,5 @@
 #include "Kruskal.hpp"
-#include "../UnionFind.h"
+#include "../UnionFind.hpp"
 #include <algorithm>
 
 namespace Algoritmos {

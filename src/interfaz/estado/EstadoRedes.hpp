@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nucleo/SimuladorRed.h"
+#include "nucleo/SimuladorRed.hpp"
 #include <string>
 
 // Estado completo de simulacion de redes

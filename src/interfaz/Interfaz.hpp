@@ -3,13 +3,13 @@
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
-#include "nucleo/tipos/PasoAnimacion.h"
+#include "nucleo/tipos/PasoAnimacion.hpp"
 #include "estado/EstadoGrafos.hpp"
 #include "estado/EstadoRedes.hpp"
 #include "estado/EstadoAeroGrafos.hpp"
 #include "estado/EstadoUI.hpp"
 #include "nucleo/HistorialGrafos.hpp"
-#include "audio/Sonidos.h"
+#include "audio/Sonidos.hpp"
 #include "interfaz/util/Animacion.hpp"
 #include <GLFW/glfw3.h>
 
