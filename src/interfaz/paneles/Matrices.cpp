@@ -1,16 +1,15 @@
-#pragma once
-
+#include "interfaz/paneles/Matrices.hpp"
+#include "Interfaz.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
 
-class Interfaz;
+// Internal helpers
+namespace {
 
-// Panel de matrices de adyacencia e incidencia
-namespace Matrices {
-
-inline void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMono) {
+void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMono) {
+    (void)fontMono;
     if (red.nodos.empty()) { ImGui::TextDisabled("Grafo vacio."); return; }
 
     ImVec2 region = ImGui::GetContentRegionAvail();
@@ -130,7 +129,8 @@ inline void dibujarAdyacencia(Grafo& red, bool aristas_dirigidas, ImFont* fontMo
     ImGui::EndChild();
 }
 
-inline void dibujarIncidencia(Grafo& red, ImFont* fontMono) {
+void dibujarIncidencia(Grafo& red, ImFont* fontMono) {
+    (void)fontMono;
     if (red.nodos.empty() || red.aristas.empty()) {
         ImGui::TextDisabled("Sin datos.");
         return;
@@ -183,7 +183,11 @@ inline void dibujarIncidencia(Grafo& red, ImFont* fontMono) {
     ImGui::EndChild();
 }
 
-inline void dibujar(Grafo& red, Interfaz& self) {
+} // anonymous namespace
+
+namespace Matrices {
+
+void dibujar(Grafo& red, Interfaz& self) {
     (void)self;
     ImGui::Begin("Matrices");
     if (self.estado_ui.fontMono) ImGui::PushFont(self.estado_ui.fontMono);
@@ -204,4 +208,4 @@ inline void dibujar(Grafo& red, Interfaz& self) {
     ImGui::End();
 }
 
-} 
+}

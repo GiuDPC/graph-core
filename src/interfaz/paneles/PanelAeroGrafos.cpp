@@ -1,5 +1,5 @@
-#pragma once
-
+#include "interfaz/paneles/PanelAeroGrafos.hpp"
+#include "Interfaz.hpp"
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
@@ -11,15 +11,13 @@
 #include "nucleo/algoritmos/Coloreo.hpp"
 #include "nucleo/algoritmos/EulerHamilton.hpp"
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
+#include "interfaz/util/Animacion.h"
 #include <cmath>
-#include "interfaz/estado/EstadoAeroGrafos.hpp"
 
-class Interfaz;
+// ── Helper functions in anonymous namespace ──
+namespace {
 
-namespace PanelAeroGrafos {
-
-// ── Selector de algoritmo ──────────────────────────────────────────────────
-inline void selectorAlgoritmo(EstadoAeroGrafos& estado) {
+void selectorAlgoritmo(EstadoAeroGrafos& estado) {
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
         ICON_FA_ROUTE " ALGORITMO");
     ImGui::Spacing();
@@ -75,9 +73,8 @@ inline void selectorAlgoritmo(EstadoAeroGrafos& estado) {
     }
 }
 
-// ── Selector de ciudad ────────────────────────────────────────────────────
-inline void selectorCiudad(const char* label, int& ciudad_id,
-                           const std::vector<Ciudad>& ciudades, bool filtro_rusia = false) {
+void selectorCiudad(const char* label, int& ciudad_id,
+                    const std::vector<Ciudad>& ciudades, bool filtro_rusia = false) {
     if (filtro_rusia && ciudad_id >= 0) {
         for (const auto& c : ciudades) {
             if (c.id == ciudad_id && std::string(c.pais) == "Rusia") {
@@ -115,8 +112,13 @@ inline void selectorCiudad(const char* label, int& ciudad_id,
     }
 }
 
-// ── Panel principal ───────────────────────────────────────────────────────
-inline void dibujar(Interfaz& self, Grafo& red) {
+} // anonymous namespace
+
+// ── Panel principal en namespace PanelAeroGrafos ──
+namespace PanelAeroGrafos {
+
+void dibujar(Interfaz& self, Grafo& red) {
+    (void)red;
     ImGui::Begin("Opciones AeroGrafos");
 
     const auto& ciudades = DatosMundo::obtenerCiudades();
@@ -967,7 +969,6 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
-        
         if (ImGui::Button(ICON_FA_CHECK " Cerrar y Volver", ImVec2(220, 38))) {
             estado.mostrar_popup_analisis = false;
             estado.animacion.completa = false;

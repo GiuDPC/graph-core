@@ -1,5 +1,5 @@
-#pragma once
-
+#include "interfaz/paneles/PanelIsomorfismo.hpp"
+#include "Interfaz.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
@@ -7,12 +7,11 @@
 #include "nucleo/algoritmos/Isomorfismo.hpp"
 #include "audio/Sonidos.h"
 
-class Interfaz;
 extern Sonidos g_sonidos;
 
 namespace PanelIsomorfismo {
 
-inline void dibujar(Interfaz& self, Grafo& red) {
+void dibujar(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.1f, 0.7f, 0.8f, 1.0f),
         ICON_FA_OBJECT_GROUP " ISOMORFISMO");
 

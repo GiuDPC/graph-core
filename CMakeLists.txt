@@ -111,6 +111,10 @@ add_library(graph-core-lib STATIC
     src/nucleo/datos/DatosMundo.cpp
     src/interfaz/estado/EstadoAeroGrafos.cpp
     src/interfaz/Interfaz.cpp
+    src/interfaz/paneles/PanelGrafos.cpp
+    src/interfaz/paneles/PanelAeroGrafos.cpp
+    src/interfaz/paneles/PanelIsomorfismo.cpp
+    src/interfaz/paneles/Matrices.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC

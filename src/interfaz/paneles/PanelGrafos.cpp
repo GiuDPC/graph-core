@@ -1,5 +1,5 @@
-#pragma once
-
+#include "interfaz/paneles/PanelGrafos.hpp"
+#include "Interfaz.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
@@ -12,25 +12,19 @@
 #include "nucleo/algoritmos/Ciclos.hpp"
 #include "nucleo/algoritmos/Coloreo.hpp"
 #include "nucleo/algoritmos/Arbol.hpp"
-#include "../../nucleo/algoritmos/Isomorfismo.hpp"
-#include "../../nucleo/algoritmos/Planaridad.hpp"
-#include "../../nucleo/algoritmos/AnalizadorGrafo.hpp"
-#include "../../nucleo/algoritmos/TopologiasFractales.hpp"
-#include "../../nucleo/algoritmos/EulerHamilton.hpp"
-#include "interfaz/util/Animacion.h"
-
-class Interfaz;
-namespace PanelIsomorfismo {
-    inline void dibujar(Interfaz& self, Grafo& red);
-}
-namespace Matrices {
-    inline void dibujar(Grafo& red, class Interfaz& self);
-}
+#include "nucleo/algoritmos/Isomorfismo.hpp"
+#include "nucleo/algoritmos/Planaridad.hpp"
+#include "nucleo/algoritmos/AnalizadorGrafo.hpp"
+#include "nucleo/algoritmos/TopologiasFractales.hpp"
+#include "nucleo/algoritmos/EulerHamilton.hpp"
+#include "interfaz/paneles/PanelIsomorfismo.hpp"
+#include "interfaz/paneles/Matrices.hpp"
 
 namespace PanelGrafos {
 
 // Selector de modo Grafos / AeroGrafos
-inline void selectorModo(Interfaz& self, Grafo& red) {
+void selectorModo(Interfaz& self, Grafo& red) {
+    (void)red;
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "MODO DE OPERACION");
     float ancho = ImGui::GetContentRegionAvail().x;
     ImVec2 btnSize(ancho * 0.48f, 32);
@@ -55,7 +49,7 @@ inline void selectorModo(Interfaz& self, Grafo& red) {
 }
 
 // Controles de animacion
-inline void controlesAnimacion(Interfaz& self) {
+void controlesAnimacion(Interfaz& self) {
     float ancho = ImGui::GetContentRegionAvail().x;
 
     ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.0f, 1.0f),
@@ -135,7 +129,7 @@ inline void controlesAnimacion(Interfaz& self) {
 }
 
 // Propiedades del nodo seleccionado + tabla de aristas editables
-inline void propiedadesNodo(Interfaz& self, Grafo& red) {
+void propiedadesNodo(Interfaz& self, Grafo& red) {
     if (self.estado_ui.nodo_seleccionado >= 0) {
         Nodo* n = red.obtenerNodo(self.estado_ui.nodo_seleccionado);
         if (n) {
@@ -198,7 +192,7 @@ inline void propiedadesNodo(Interfaz& self, Grafo& red) {
 }
 
 // Menu general
-inline void menuGeneral(Interfaz& self, Grafo& red) {
+void menuGeneral(Interfaz& self, Grafo& red) {
     float ancho = ImGui::GetContentRegionAvail().x;
 
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
@@ -313,7 +307,7 @@ inline void menuGeneral(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: Dijkstra
-inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
+void subpanelDijkstra(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
         ICON_FA_DIAMOND " DIJKSTRA — RUTA OPTIMA");
     ImGui::TextWrapped(
@@ -427,7 +421,7 @@ inline void subpanelDijkstra(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: Kruskal (MST)
-inline void subpanelKruskal(Interfaz& self, Grafo& red) {
+void subpanelKruskal(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.8f, 1.0f),
         ICON_FA_TREE " KRUSKAL — ARBOL DE EXPANSION MINIMA");
     ImGui::TextWrapped(
@@ -491,7 +485,7 @@ inline void subpanelKruskal(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: BFS 
-inline void subpanelBFS(Interfaz& self, Grafo& red) {
+void subpanelBFS(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.2f, 0.6f, 1.0f, 1.0f),
         ICON_FA_LAYER_GROUP " BFS — Busqueda en Anchura");
     ImGui::TextWrapped(
@@ -575,7 +569,7 @@ inline void subpanelBFS(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: DFS 
-inline void subpanelDFS(Interfaz& self, Grafo& red) {
+void subpanelDFS(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.3f, 0.7f, 1.0f, 1.0f),
         ICON_FA_CODE_BRANCH " DFS — Busqueda en Profundidad");
     ImGui::TextWrapped(
@@ -655,7 +649,7 @@ inline void subpanelDFS(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: Ciclos
-inline void subpanelCiclos(Interfaz& self, Grafo& red) {
+void subpanelCiclos(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.1f, 1.0f),
         ICON_FA_ROTATE " DETECCION DE CICLOS");
     ImGui::TextWrapped(
@@ -700,7 +694,7 @@ inline void subpanelCiclos(Interfaz& self, Grafo& red) {
 }
 
 // Subpanel: Coloreo 
-inline void subpanelColoreo(Interfaz& self, Grafo& red) {
+void subpanelColoreo(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.7f, 0.1f, 0.7f, 1.0f), ICON_FA_PAINTBRUSH " coloreo de grafos");
 
     ImGui::TextDisabled("asigna colores minimos sin adyacencias");
@@ -886,7 +880,8 @@ inline void subpanelColoreo(Interfaz& self, Grafo& red) {
 }
 
 // subpanel: forceatlas2 — control de fisicas
-inline void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
+void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
+    (void)red;
     ImGui::TextColored(ImVec4(0.8f, 0.3f, 0.9f, 1.0f), ICON_FA_MAGNET " FORCE ATLAS 2");
     ImGui::TextWrapped("Layout de fuerzas (Física de Grafos). Agrupa clusters y separa nodos muy conectados.");
     ImGui::Spacing();
@@ -949,7 +944,7 @@ inline void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
 
 
 // layout arbol jerarquico
-inline void aplicarLayoutArbol(Grafo& red, const Algoritmos::Arbol::PropiedadesArbol& props,
+void aplicarLayoutArbol(Grafo& red, const Algoritmos::Arbol::PropiedadesArbol& props,
                              ImVec2 origen_canvas) {
     if (!props.es_arbol) return;
 
@@ -978,7 +973,7 @@ inline void aplicarLayoutArbol(Grafo& red, const Algoritmos::Arbol::PropiedadesA
 }
 
 // panel de los subpaneles de herramientas
-inline void subpanelArbol(Interfaz& self, Grafo& red) {
+void subpanelArbol(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.3f, 0.8f, 0.3f, 1.0f),
         ICON_FA_SITEMAP " ANALISIS DE ARBOL");
     ImGui::TextWrapped(
@@ -1189,7 +1184,7 @@ inline void subpanelArbol(Interfaz& self, Grafo& red) {
 }
 
 // barra de info rapida del lado izquierdo
-inline void sidebarInfo(Interfaz& self, Grafo& red) {
+void sidebarInfo(Interfaz& self, Grafo& red) {
     ImGui::Begin("Info del Grafo");
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "MODO");
     const char* modo_txt = (self.estado_ui.modo_actual == Interfaz::ModoApp::Grafos)
@@ -1265,7 +1260,7 @@ inline void sidebarInfo(Interfaz& self, Grafo& red) {
     ImGui::End();
 }
 // panel donde estan las herramientas   que se estan usando es ese momento
-inline void panelContextual(Interfaz& self, Grafo& red) {
+void panelContextual(Interfaz& self, Grafo& red) {
     // en modo, maneja su propio panl aparte
     if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
         return; // AeroGrafos tiene su propio panel
@@ -1494,4 +1489,4 @@ inline void panelContextual(Interfaz& self, Grafo& red) {
     ImGui::End();
 }
 
-} 
+}
