@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
-#include "nucleo/datos/DatosMundo.h"
+#include "nucleo/datos/DatosMundo.hpp"
 #include "nucleo/algoritmos/Dijkstra.hpp"
 #include "nucleo/algoritmos/Kruskal.hpp"
 #include "nucleo/algoritmos/BFS.hpp"
@@ -12,7 +12,7 @@
 #include "nucleo/algoritmos/EulerHamilton.hpp"
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
 #include <cmath>
-#include "interfaz/estado/EstadoAeroGrafos.h"
+#include "interfaz/estado/EstadoAeroGrafos.hpp"
 
 class Interfaz;
 

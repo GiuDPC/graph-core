@@ -8,6 +8,7 @@
 #include "interfaz/util/Easing.h"
 #include <cmath>
 #include <algorithm>
+#include <unordered_set>
 #include <cstdio>
 
 class Interfaz;

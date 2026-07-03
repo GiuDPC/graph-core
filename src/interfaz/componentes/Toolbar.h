@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
-#include "interfaz/estado/EstadoUI.h"
+#include "interfaz/estado/EstadoUI.hpp"
 
 // -- toolbar compacta con botones horizontales (icono + texto en una linea) --
 // cada categoria es un boton en la barra superior.

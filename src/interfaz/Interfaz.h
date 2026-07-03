@@ -16,11 +16,11 @@
 #include "audio/Sonidos.h"
 #include "interfaz/util/Animacion.h"
 #include <GLFW/glfw3.h>
-#include "estado/EstadoGrafos.h"
-#include "estado/EstadoRedes.h"
-#include "estado/EstadoAeroGrafos.h"
-#include "estado/EstadoUI.h"
-#include "nucleo/HistorialGrafos.h"
+#include "estado/EstadoGrafos.hpp"
+#include "estado/EstadoRedes.hpp"
+#include "estado/EstadoAeroGrafos.hpp"
+#include "estado/EstadoUI.hpp"
+#include "nucleo/HistorialGrafos.hpp"
 
 extern Sonidos g_sonidos;
 

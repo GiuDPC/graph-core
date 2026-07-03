@@ -1,8 +1,8 @@
 #pragma once
 #include "../../nucleo/Grafo.hpp"
-#include "../../nucleo/HistorialGrafos.h"
-#include "../estado/EstadoUI.h"
-#include "../estado/EstadoGrafos.h"
+#include "../../nucleo/HistorialGrafos.hpp"
+#include "../estado/EstadoUI.hpp"
+#include "../estado/EstadoGrafos.hpp"
 #include <imgui.h>
 #include <vector>
 

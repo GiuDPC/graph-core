@@ -108,6 +108,8 @@ add_library(graph-core-lib STATIC
     src/nucleo/algoritmos/TopologiasFractales.cpp
     src/nucleo/algoritmos/AnalizadorGrafo.cpp
     src/nucleo/algoritmos/Isomorfismo.cpp
+    src/nucleo/datos/DatosMundo.cpp
+    src/interfaz/estado/EstadoAeroGrafos.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC

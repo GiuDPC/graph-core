@@ -1,45 +1,14 @@
-#pragma once
-
-#include "imgui.h"
-#include "../Grafo.hpp"
-#include <vector>
-#include <string>
-#include <cmath>
+#include "DatosMundo.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <unordered_set>
 #include <queue>
 #include <cstdlib>
 
-// ============================================================================
-// DatosMundo — Base de datos geográfica mundial para AeroGrafos
-//
-// 63 ciudades reales con coordenadas verificadas
-// 200+ rutas aéreas con distancias calculadas via Haversine
-// Grafo conexo garantizado
-// Incluye Venezuela (Caracas, Maracaibo, Valencia, Barquisimeto, Mérida, Pto. Ordaz)
-// ============================================================================
-
-struct Ciudad {
-    int id;
-    const char* nombre;
-    const char* pais;
-    float latitud;      // -90..90
-    float longitud;     // -180..180
-    const char* codigo_iata;  // 3 letras
-    int poblacion_millones;   // para escalar nodos
-};
-
-struct RutaAerea {
-    int origen_id;
-    int destino_id;
-    float distancia_km;  // calculada con Haversine
-};
-
 namespace DatosMundo {
 
 // ── Haversine ──────────────────────────────────────────────────────────────
-inline float calcularDistancia(float lat1, float lon1, float lat2, float lon2) {
+float calcularDistancia(float lat1, float lon1, float lat2, float lon2) {
     const float R = 6371.0f;  // radio terrestre en km
     float dlat = (lat2 - lat1) * 3.14159265f / 180.0f;
     float dlon = (lon2 - lon1) * 3.14159265f / 180.0f;
@@ -52,10 +21,7 @@ inline float calcularDistancia(float lat1, float lon1, float lat2, float lon2) {
 }
 
 // ── Ciudades ───────────────────────────────────────────────────────────────
-// 63 ciudades en orden SECUENCIAL (ID = índice en el vector)
-// Esto es crítico: las rutas acceden via ciudades[id], ID debe coincidir con índice
-// Índice: {id, nombre, pais, lat, lon, iata, poblacion_M}
-inline const std::vector<Ciudad>& obtenerCiudades() {
+const std::vector<Ciudad>& obtenerCiudades() {
     static const std::vector<Ciudad> ciudades = {
         //  0-4: Norteamérica
         {0,  "Nueva York",     "EE.UU.",        40.7128f,  -74.0060f,  "JFK", 8},
@@ -139,221 +105,58 @@ inline const std::vector<Ciudad>& obtenerCiudades() {
 }
 
 // ── Rutas Aéreas ───────────────────────────────────────────────────────────
-// Definidas como pares (origen, destino) — la distancia se calcula con Haversine
-// Grafo conexo garantizado — todas las rutas son bidireccionales
-inline const std::vector<RutaAerea>& obtenerRutas() {
+const std::vector<RutaAerea>& obtenerRutas() {
     static std::vector<RutaAerea> rutas;
     if (rutas.empty()) {
         rutas.reserve(300);
 
-        // Pares (origen, destino) con origen < destino para evitar duplicados
         struct Par { int o; int d; };
         static const Par pares[] = {
-            // ── Norteamérica ──
-            {0,1},   // NY-LA
-            {0,2},   // NY-Miami
-            {0,3},   // NY-Toronto
-            {0,11},  // NY-Londres
-            {0,12},  // NY-París
-            {0,40},  // NY-Chicago
-            {0,41},  // NY-Atlanta
-            {0,44},  // NY-Ámsterdam
-            {1,2},   // LA-Miami
-            {1,4},   // LA-CDMX
-            {1,21},  // LA-Tokio
-            {1,28},  // LA-Sídney
-            {1,40},  // LA-Chicago
-            {1,42},  // LA-Vancouver
-            {2,4},   // Miami-CDMX
-            {2,5},   // Miami-Bogotá
-            {2,6},   // Miami-São Paulo
-            {2,11},  // Miami-Londres
-            {2,30},  // Miami-Caracas
-            {2,31},  // Miami-Maracaibo
-            {2,36},  // Miami-Río
-            {2,38},  // Miami-Medellín
-            {2,39},  // Miami-Panamá
-            {2,40},  // Miami-Chicago
-            {2,41},  // Miami-Atlanta
-            {2,43},  // Miami-Lisboa
-            {2,60},  // Miami-La Habana
-            {2,61},  // Miami-San Juan
-            {2,62},  // Miami-Santo Domingo
-            {3,11},  // Toronto-Londres
-            {3,12},  // Toronto-París
-            {3,40},  // Toronto-Chicago
-            {3,42},  // Toronto-Vancouver
-            {4,5},   // CDMX-Bogotá
-            {4,39},  // CDMX-Panamá
-            {4,60},  // CDMX-La Habana
-            {40,41}, // Chicago-Atlanta
-            {40,11}, // Chicago-Londres
-            {40,42}, // Chicago-Vancouver
-
-            // ── Venezuela y Sudamérica ──
-            {5,6},   // Bogotá-São Paulo
-            {5,8},   // Bogotá-Lima
-            {5,9},   // Bogotá-Santiago
-            {5,10},  // Bogotá-Madrid
-            {5,30},  // Bogotá-Caracas
-            {5,31},  // Bogotá-Maracaibo
-            {5,37},  // Bogotá-Quito
-            {5,38},  // Bogotá-Medellín
-            {5,39},  // Bogotá-Panamá
-            {6,7},   // São Paulo-Buenos Aires
-            {6,10},  // São Paulo-Madrid
-            {6,11},  // São Paulo-Londres
-            {6,19},  // São Paulo-Singapur
-            {6,26},  // São Paulo-Johannesburgo
-            {6,36},  // São Paulo-Río
-            {7,9},   // Buenos Aires-Santiago
-            {7,10},  // Buenos Aires-Madrid
-            {7,36},  // Buenos Aires-Río
-            {7,57},  // Buenos Aires-Ciudad del Cabo
-            {8,4},   // Lima-CDMX
-            {8,6},   // Lima-São Paulo
-            {8,37},  // Lima-Quito
-            {8,39},  // Lima-Panamá
-            {30,31}, // Caracas-Maracaibo
-            {30,32}, // Caracas-Valencia
-            {30,33}, // Caracas-Barquisimeto
-            {30,34}, // Caracas-Mérida
-            {30,35}, // Caracas-Puerto Ordaz
-            {30,39}, // Caracas-Panamá
-            {30,10}, // Caracas-Madrid
-            {30,61}, // Caracas-San Juan
-            {30,62}, // Caracas-Santo Domingo
-            {31,39}, // Maracaibo-Panamá
-            {35,5},  // Puerto Ordaz-Bogotá
-            {36,10}, // Río-Madrid
-            {37,39}, // Quito-Panamá
-            {38,39}, // Medellín-Panamá
-            {39,10}, // Panamá-Madrid
-
-            // ── Europa ──
-            {10,11}, // Madrid-Londres
-            {10,12}, // Madrid-París
-            {10,13}, // Madrid-Roma
-            {10,14}, // Madrid-Berlín
-            {10,25}, // Madrid-El Cairo
-            {10,27}, // Madrid-Casablanca
-            {10,43}, // Madrid-Lisboa
-            {10,55}, // Madrid-Lagos
-            {10,58}, // Madrid-Marrakech
-            {10,60}, // Madrid-La Habana
-            {11,12}, // Londres-París
-            {11,13}, // Londres-Roma
-            {11,14}, // Londres-Berlín
-            {11,16}, // Londres-Estambul
-            {11,17}, // Londres-Dubái
-            {11,43}, // Londres-Lisboa
-            {11,44}, // Londres-Ámsterdam
-            {11,46}, // Londres-Estocolmo
-            {11,48}, // Londres-Tel Aviv
-            {11,55}, // Londres-Lagos
-            {12,13}, // París-Roma
-            {12,14}, // París-Berlín
-            {12,44}, // París-Ámsterdam
-            {13,16}, // Roma-Estambul
-            {13,25}, // Roma-El Cairo
-            {13,45}, // Roma-Atenas
-            {14,15}, // Berlín-Moscú
-            {14,16}, // Berlín-Estambul
-            {14,44}, // Berlín-Ámsterdam
-            {14,46}, // Berlín-Estocolmo
-            {15,16}, // Moscú-Estambul
-            {15,17}, // Moscú-Dubái
-            {15,21}, // Moscú-Tokio
-            {15,46}, // Moscú-Estocolmo
-            {16,17}, // Estambul-Dubái
-            {16,25}, // Estambul-El Cairo
-            {16,45}, // Estambul-Atenas
-            {16,47}, // Estambul-Doha
-            {16,48}, // Estambul-Tel Aviv
-            {43,58}, // Lisboa-Marrakech
-            {45,48}, // Atenas-Tel Aviv
-
-            // ── Asia ──
-            {17,18}, // Dubái-Mumbai
-            {17,19}, // Dubái-Singapur
-            {17,20}, // Dubái-Bangkok
-            {17,25}, // Dubái-El Cairo
-            {17,47}, // Dubái-Doha
-            {17,50}, // Dubái-Delhi
-            {18,19}, // Mumbai-Singapur
-            {18,20}, // Mumbai-Bangkok
-            {18,50}, // Mumbai-Delhi
-            {19,20}, // Singapur-Bangkok
-            {19,21}, // Singapur-Tokio
-            {19,22}, // Singapur-Seúl
-            {19,24}, // Singapur-Shanghái
-            {19,49}, // Singapur-Hong Kong
-            {19,51}, // Singapur-Yakarta
-            {19,52}, // Singapur-Manila
-            {19,53}, // Singapur-Kuala Lumpur
-            {19,28}, // Singapur-Sídney
-            {19,59}, // Singapur-Melbourne
-            {20,21}, // Bangkok-Tokio
-            {20,53}, // Bangkok-Kuala Lumpur
-            {21,22}, // Tokio-Seúl
-            {21,23}, // Tokio-Pekín
-            {21,24}, // Tokio-Shanghái
-            {21,49}, // Tokio-Hong Kong
-            {21,52}, // Tokio-Manila
-            {21,54}, // Tokio-Taipéi
-            {22,23}, // Seúl-Pekín
-            {22,24}, // Seúl-Shanghái
-            {22,49}, // Seúl-Hong Kong
-            {22,54}, // Seúl-Taipéi
-            {23,15}, // Pekín-Moscú
-            {23,24}, // Pekín-Shanghái
-            {23,49}, // Pekín-Hong Kong
-            {24,49}, // Shanghái-Hong Kong
-            {24,54}, // Shanghái-Taipéi
-            {49,50}, // Hong Kong-Delhi
-            {49,51}, // Hong Kong-Yakarta
-            {49,52}, // Hong Kong-Manila
-            {49,53}, // Hong Kong-Kuala Lumpur
-            {49,54}, // Hong Kong-Taipéi
-            {49,28}, // Hong Kong-Sídney
-            {51,53}, // Yakarta-Kuala Lumpur
-            {52,54}, // Manila-Taipéi
-
-            // ── África ──
-            {25,26}, // El Cairo-Johannesburgo
-            {25,47}, // El Cairo-Doha
-            {25,48}, // El Cairo-Tel Aviv
-            {25,55}, // El Cairo-Lagos
-            {25,56}, // El Cairo-Nairobi
-            {26,56}, // Johannesburgo-Nairobi
-            {26,57}, // Johannesburgo-Ciudad del Cabo
-            {26,28}, // Johannesburgo-Sídney
-            {27,2},  // Casablanca-Miami
-            {27,11}, // Casablanca-Londres
-            {27,58}, // Casablanca-Marrakech
-            {55,56}, // Lagos-Nairobi
-            {56,17}, // Nairobi-Dubái
-
-            // ── Oceanía ──
-            {28,29}, // Sídney-Auckland
-            {28,59}, // Sídney-Melbourne
-            {29,59}, // Auckland-Melbourne
-            {29,21}, // Auckland-Tokio
-
-            // ── Caribe ──
-            {60,61}, // La Habana-San Juan
-            {60,62}, // La Habana-Santo Domingo
-            {61,62}, // San Juan-Santo Domingo
-
-            // ── Conexiones Directas y Hubs Faltantes ──
-            {10, 16}, // Madrid-Estambul (Turkish Airlines)
-            {10, 17}, // Madrid-Dubái (Emirates)
-            {10, 47}, // Madrid-Doha (Qatar Airways)
-            {16, 21}, // Estambul-Tokio (Turkish)
-            {17, 21}, // Dubái-Tokio (Emirates)
-            {47, 21}, // Doha-Tokio (Qatar Airways)
-            {11, 19}, // Londres-Singapur (Qantas/BA)
-            {6, 17},  // São Paulo-Dubái (Emirates)
+            {0,1},   {0,2},   {0,3},   {0,11},  {0,12},
+            {0,40},  {0,41},  {0,44},  {1,2},   {1,4},
+            {1,21},  {1,28},  {1,40},  {1,42},  {2,4},
+            {2,5},   {2,6},   {2,11},  {2,30},  {2,31},
+            {2,36},  {2,38},  {2,39},  {2,40},  {2,41},
+            {2,43},  {2,60},  {2,61},  {2,62},  {3,11},
+            {3,12},  {3,40},  {3,42},  {4,5},   {4,39},
+            {4,60},  {40,41}, {40,11}, {40,42},
+            {5,6},   {5,8},   {5,9},   {5,10},  {5,30},
+            {5,31},  {5,37},  {5,38},  {5,39},  {6,7},
+            {6,10},  {6,11},  {6,19},  {6,26},  {6,36},
+            {7,9},   {7,10},  {7,36},  {7,57},  {8,4},
+            {8,6},   {8,37},  {8,39},  {30,31}, {30,32},
+            {30,33}, {30,34}, {30,35}, {30,39}, {30,10},
+            {30,61}, {30,62}, {31,39}, {35,5},  {36,10},
+            {37,39}, {38,39}, {39,10},
+            {10,11}, {10,12}, {10,13}, {10,14}, {10,25},
+            {10,27}, {10,43}, {10,55}, {10,58}, {10,60},
+            {11,12}, {11,13}, {11,14}, {11,16}, {11,17},
+            {11,43}, {11,44}, {11,46}, {11,48}, {11,55},
+            {12,13}, {12,14}, {12,44}, {13,16}, {13,25},
+            {13,45}, {14,15}, {14,16}, {14,44}, {14,46},
+            {15,16}, {15,17}, {15,21}, {15,46}, {16,17},
+            {16,25}, {16,45}, {16,47}, {16,48}, {43,58},
+            {45,48},
+            {17,18}, {17,19}, {17,20}, {17,25}, {17,47},
+            {17,50}, {18,19}, {18,20}, {18,50},
+            {19,20}, {19,21}, {19,22}, {19,24}, {19,49},
+            {19,51}, {19,52}, {19,53}, {19,28}, {19,59},
+            {20,21}, {20,53},
+            {21,22}, {21,23}, {21,24}, {21,49}, {21,52}, {21,54},
+            {22,23}, {22,24}, {22,49}, {22,54},
+            {23,15}, {23,24}, {23,49},
+            {24,49}, {24,54},
+            {49,50}, {49,51}, {49,52}, {49,53}, {49,54}, {49,28},
+            {51,53}, {52,54},
+            {25,26}, {25,47}, {25,48}, {25,55}, {25,56},
+            {26,56}, {26,57}, {26,28},
+            {27,2},  {27,11}, {27,58},
+            {55,56}, {56,17},
+            {28,29}, {28,59}, {29,59}, {29,21},
+            {60,61}, {60,62}, {61,62},
+            {10,16}, {10,17}, {10,47},
+            {16,21}, {17,21}, {47,21},
+            {11,19}, {6,17},
         };
 
         const auto& ciudades = obtenerCiudades();
@@ -370,18 +173,16 @@ inline const std::vector<RutaAerea>& obtenerRutas() {
 }
 
 // ── Restricciones Geopolíticas ─────────────────────────────────────────────
-inline void aplicarRestriccionesGeopoliticas(Grafo& g) {
+void aplicarRestriccionesGeopoliticas(Grafo& g) {
     for (auto& a : g.aristas) {
         bool toca_rusia = (a.origen_id == 15 || a.destino_id == 15);
-        
-        bool sobrevuelo = 
+        bool sobrevuelo =
             (a.origen_id == 16 && a.destino_id == 21) ||
             (a.origen_id == 21 && a.destino_id == 16) ||
             (a.origen_id == 11 && a.destino_id == 21) ||
             (a.origen_id == 21 && a.destino_id == 11) ||
             (a.origen_id == 14 && a.destino_id == 21) ||
             (a.origen_id == 21 && a.destino_id == 14);
-
         if (toca_rusia || sobrevuelo) {
             a.peso *= 100000.0f;
             a.peso_actual *= 100000.0f;
@@ -390,17 +191,15 @@ inline void aplicarRestriccionesGeopoliticas(Grafo& g) {
 }
 
 // ── Validación ─────────────────────────────────────────────────────────────
-inline bool validarDatos() {
+bool validarDatos() {
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
 
-    // 1. Al menos 25 ciudades
     if (ciudades.size() < 25) {
         printf("[ERROR] DatosMundo: solo %zu ciudades\n", ciudades.size());
         return false;
     }
 
-    // 2. Coordenadas válidas
     for (const auto& c : ciudades) {
         if (c.latitud < -90.0f || c.latitud > 90.0f) {
             printf("[ERROR] Ciudad %s: latitud invalida %.2f\n", c.nombre, c.latitud);
@@ -410,7 +209,6 @@ inline bool validarDatos() {
             printf("[ERROR] Ciudad %s: longitud invalida %.2f\n", c.nombre, c.longitud);
             return false;
         }
-        // IATA de 3 letras
         std::string iata(c.codigo_iata);
         if (iata.length() != 3) {
             printf("[ERROR] Ciudad %s: IATA '%s' no tiene 3 letras\n", c.nombre, c.codigo_iata);
@@ -418,7 +216,6 @@ inline bool validarDatos() {
         }
     }
 
-    // 3. IDs únicos
     std::unordered_set<int> ids;
     for (const auto& c : ciudades) {
         if (ids.count(c.id)) {
@@ -428,7 +225,6 @@ inline bool validarDatos() {
         ids.insert(c.id);
     }
 
-    // 4. Rutas válidas
     for (const auto& r : rutas) {
         if (r.origen_id == r.destino_id) {
             printf("[ERROR] Ruta self-loop: %d -> %d\n", r.origen_id, r.destino_id);
@@ -444,7 +240,6 @@ inline bool validarDatos() {
         }
     }
 
-    // 5. Grafo conexo (BFS desde ciudad 0)
     std::unordered_set<int> visitados;
     std::queue<int> cola;
     cola.push(0);
@@ -472,32 +267,32 @@ inline bool validarDatos() {
     return true;
 }
 
-// ── Métricas Analíticas ───────────────────────────────────────────────────
-
-inline std::vector<std::pair<int, int>> obtenerTop3Hubs() {
+// ── Métricas Analíticas ────────────────────────────────────────────────────
+std::vector<std::pair<int, int>> obtenerTop3Hubs() {
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
     std::vector<int> grados(ciudades.size(), 0);
-    
+
     for (const auto& r : rutas) {
         grados[r.origen_id]++;
         grados[r.destino_id]++;
     }
-    
+
     std::vector<std::pair<int, int>> nodos_grados;
     for (int i = 0; i < (int)ciudades.size(); i++) {
         nodos_grados.push_back({i, grados[i]});
     }
-    
-    std::sort(nodos_grados.begin(), nodos_grados.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-        return a.second > b.second;
-    });
-    
+
+    std::sort(nodos_grados.begin(), nodos_grados.end(),
+              [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+                  return a.second > b.second;
+              });
+
     if (nodos_grados.size() > 3) nodos_grados.resize(3);
     return nodos_grados;
 }
 
-inline float calcularDensidadRed() {
+float calcularDensidadRed() {
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
     float V = (float)ciudades.size();
@@ -506,31 +301,12 @@ inline float calcularDensidadRed() {
     return (2.0f * E) / (V * (V - 1.0f));
 }
 
-// ── Proyección ─────────────────────────────────────────────────────────────
-// Proyección equirectangular: lat/lon → coordenadas virtuales (0..W, 0..H)
-inline constexpr float ANCHO_VIRTUAL = 2048.0f;
-inline constexpr float ALTO_VIRTUAL  = 1024.0f;
-
-inline ImVec2 latLonAVirtual(float lat, float lon) {
-    float vx = (lon + 180.0f) / 360.0f * ANCHO_VIRTUAL;
-    float vy = (90.0f - lat) / 180.0f * ALTO_VIRTUAL;
-    return ImVec2(vx, vy);
-}
-
-// Virtual → lat/lon (para hit testing)
-inline void virtualALatLon(ImVec2 v, float& lat, float& lon) {
-    lon = v.x / ANCHO_VIRTUAL * 360.0f - 180.0f;
-    lat = 90.0f - v.y / ALTO_VIRTUAL * 180.0f;
-}
-
-// ── Construir Grafo desde datos AeroGrafos ───────────────────────────────
-// Crea un Grafo (no dirigido, ponderado) para usar con los algoritmos existentes
-inline Grafo construirGrafoAerografos() {
+// ── Construir Grafo desde datos AeroGrafos ────────────────────────────────
+Grafo construirGrafoAerografos() {
     Grafo g;
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
 
-    // Agregar nodos (ciudades)
     for (const auto& c : ciudades) {
         ImVec2 pos = latLonAVirtual(c.latitud, c.longitud);
         g.nodos.push_back(Nodo(c.id, pos, TipoHardware::Servidor));
@@ -538,18 +314,14 @@ inline Grafo construirGrafoAerografos() {
     }
     g.contador_ids = (int)ciudades.size();
 
-    // Inyectar aristas dirigidas asimétricas (Jet Stream)
     for (const auto& r : rutas) {
         float lon_origen = ciudades[r.origen_id].longitud;
         float lon_destino = ciudades[r.destino_id].longitud;
         float distancia_base = r.distancia_km;
 
-        // AeroGrafos de Origen a Destino
         float peso_ida = (lon_destino > lon_origen) ? (distancia_base * 0.90f) : (distancia_base * 1.10f);
-        // AeroGrafos de Destino a Origen
         float peso_vuelta = (lon_origen > lon_destino) ? (distancia_base * 0.90f) : (distancia_base * 1.10f);
 
-        // Se usa dirigida = true para insertar ambas direcciones con pesos distintos
         g.agregarArista(r.origen_id, r.destino_id, peso_ida, true);
         g.agregarArista(r.destino_id, r.origen_id, peso_vuelta, true);
     }

@@ -4,8 +4,8 @@
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
 #include "nucleo/Grafo.hpp"
-#include "nucleo/datos/DatosMundo.h"
-#include "interfaz/estado/EstadoAeroGrafos.h"
+#include "nucleo/datos/DatosMundo.hpp"
+#include "interfaz/estado/EstadoAeroGrafos.hpp"
 #include "interfaz/util/TextureLoader.h"
 #include <cmath>
 #include <algorithm>

@@ -14,7 +14,7 @@
 | 2.1 Viewport culling + LOD | ⬜ PENDIENTE | |
 | 2.2 Radio dinamico vertices | ✅ COMPLETADO | LienzoRed.h, PanelGrafos.h, EstadoGrafos.h |
 | 2.3 Euler/Hamilton instant button | ⬜ PENDIENTE | |
-| 3.1 HistorialGrafos.h (nuevo) | ⬜ PENDIENTE | |
+| 3.1 HistorialGrafos.hpp (nuevo) | ⬜ PENDIENTE | |
 | 4.1 AtajosTeclado.h (nuevo) | ⬜ PENDIENTE | |
 | 4.2 Tooltips en botones | ⬜ PENDIENTE | |
 | 5.1 Isomorfismo Geometrico | ✅ COMPLETADO | Isomorfismo.h, PanelIsomorfismo.h |

@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
-#include "interfaz/estado/EstadoUI.h"
+#include "interfaz/estado/EstadoUI.hpp"
 
 struct VentanaAyuda {
     static void dibujar(EstadoUI& ui) {

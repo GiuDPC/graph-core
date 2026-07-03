@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imgui.h"
-#include "nucleo/datos/DatosMundo.h"
+#include "nucleo/datos/DatosMundo.hpp"
 #include "nucleo/tipos/PasoAnimacion.h"
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
 #include "interfaz/util/Animacion.h"
@@ -53,7 +53,7 @@ struct EstadoAeroGrafos {
     ImVec2 centro_mapa = ImVec2(DatosMundo::ANCHO_VIRTUAL / 2.0f,
                                 DatosMundo::ALTO_VIRTUAL / 2.0f); // centro virtual
     float zoom_mapa = 1.0f;
-    
+
     // Cámara cinemática (Lerp)
     ImVec2 target_centro = centro_mapa;
     float target_zoom = 1.0f;
@@ -75,16 +75,7 @@ struct EstadoAeroGrafos {
         mensajes.push_back({texto, duracion, color});
     }
 
-    void actualizarMensajes(float dt) {
-        for (auto it = mensajes.begin(); it != mensajes.end(); ) {
-            it->tiempo_restante -= dt;
-            if (it->tiempo_restante <= 0.0f) {
-                it = mensajes.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
+    void actualizarMensajes(float dt);  // implementado en .cpp
 
     // ── Tiempo global para animaciones ──
     float tiempo_reloj = 0.0f;

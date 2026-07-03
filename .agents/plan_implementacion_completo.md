@@ -226,7 +226,7 @@ Mismo patrón para Hamiltoniano.
 
 ### 3.1 🆕 Crear HistorialGrafos
 
-**Archivo nuevo**: [src/nucleo/HistorialGrafos.h](file:///home/giuseppe/Escritorio/GraphCore/src/nucleo/)
+**Archivo nuevo**: [src/nucleo/HistorialGrafos.hpp](file:///home/giuseppe/Escritorio/GraphCore/src/nucleo/)
 
 **Diseño** (Memento + RAII, sin memory leaks):
 
@@ -291,7 +291,7 @@ struct HistorialGrafos {
 ```cpp
 #pragma once
 #include "../Interfaz.h"
-#include "../../nucleo/HistorialGrafos.h"
+#include "../../nucleo/HistorialGrafos.hpp"
 
 namespace AtajosTeclado {
 
@@ -513,7 +513,7 @@ return g;  // ← BORRAR esta línea
 | [LienzoRed.h](file:///home/giuseppe/Escritorio/GraphCore/src/interfaz/lienzo/LienzoRed.h) | 2.1, 4.1 | Culling, LOD, atajos centralizados |
 | [Isomorfismo.h](file:///home/giuseppe/Escritorio/GraphCore/src/nucleo/algoritmos/Isomorfismo.h) | 5.1, 5.3 | Geométrico nuevo, cortafuegos |
 | [PanelIsomorfismo.h](file:///home/giuseppe/Escritorio/GraphCore/src/interfaz/paneles/PanelIsomorfismo.h) | 5.2 | 2 botones separados |
-| **NUEVO** [HistorialGrafos.h](file:///home/giuseppe/Escritorio/GraphCore/src/nucleo/) | 3.1 | Undo/Redo completo |
+| **NUEVO** [HistorialGrafos.hpp](file:///home/giuseppe/Escritorio/GraphCore/src/nucleo/) | 3.1 | Undo/Redo completo |
 | **NUEVO** [AtajosTeclado.h](file:///home/giuseppe/Escritorio/GraphCore/src/interfaz/util/) | 4.1 | Ctrl+Z/Y/L/A, Delete |
 | [EstadoUI.h](file:///home/giuseppe/Escritorio/GraphCore/src/interfaz/estado/EstadoUI.h) | 3.1 | Agregar historial como miembro |
 | [Interfaz.h](file:///home/giuseppe/Escritorio/GraphCore/src/interfaz/Interfaz.h) | 3.1 | Incluir HistorialGrafos |
