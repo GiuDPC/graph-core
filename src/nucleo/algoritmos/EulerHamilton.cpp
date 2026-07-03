@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
+// euler: todos los vertices con grado par, hierholzer O(V+E)
+// hamilton: backtrack exponencial O(V!), heuristica vecino mas cercano O(V^2)
 
 namespace Algoritmos {
 

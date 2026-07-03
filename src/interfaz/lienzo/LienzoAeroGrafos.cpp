@@ -14,7 +14,7 @@
 
 extern Sonidos g_sonidos;
 
-// ── Static helper functions ─────────────────────────────────────────────────
+// Static helper functions
 
 static ImVec2 virtualAPantalla(ImVec2 v, ImVec2 centro, float zoom, ImVec2 tam) {
     return ImVec2(
@@ -970,7 +970,7 @@ static void dibujarInfoZoom(ImDrawList* dl, EstadoAeroGrafos& estado,
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// FUNCIÓN PRINCIPAL DE DIBUJO
+// FUNCION PRINCIPAL DE DIBUJO
 // ══════════════════════════════════════════════════════════════════════════
 
 namespace LienzoAeroGrafos {
@@ -980,7 +980,7 @@ void dibujar(Grafo& red, Interfaz& self) {
     float dt = ImGui::GetIO().DeltaTime;
     estado.tiempo_reloj += dt;
 
-    // ── Cámara Cinemática (Lerp) ──
+    // Camara Cinematica (Lerp)
     if (estado.interpolando_camara) {
         float t = std::min(dt * 5.0f, 1.0f);
         estado.centro_mapa.x = estado.centro_mapa.x + (estado.target_centro.x - estado.centro_mapa.x) * t;
@@ -996,7 +996,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         }
     }
 
-    // Avanzar animación automáticamente y reproducir sonidos
+    // Avanzar animacion automaticamente y reproducir sonidos
     if (estado.animacion.activa) {
         int paso_ant = estado.animacion.paso_actual;
         bool completa_ant = estado.animacion.completa;
@@ -1033,7 +1033,7 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     dl->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true);
 
-    // 1. Océano
+    // 1. Oceano
     dibujarOcean(dl, canvas_pos, canvas_size, estado.modo_noche);
 
     // 2. Textura del mundo
@@ -1048,12 +1048,12 @@ void dibujar(Grafo& red, Interfaz& self) {
     // 5. Ciudades + hover
     int hover_ciudad = dibujarCiudades(dl, estado, canvas_pos, canvas_size);
 
-    // 6. Resultados de algoritmos (solo si no hay animación activa)
+    // 6. Resultados de algoritmos (solo si no hay animacion activa)
     if (!estado.animacion.activa) {
         dibujarResultadoAlgoritmo(dl, estado, canvas_pos, canvas_size);
     }
 
-    // 7. Animación paso a paso
+    // 7. Animacion paso a paso
     if (estado.animacion.activa)
         dibujarAnimacion(dl, estado, canvas_pos, canvas_size);
 
@@ -1065,20 +1065,20 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     dl->PopClipRect();
 
-    // ── Controles de zoom (como widgets ImGui, encima del canvas) ──
+    // Controles de zoom (como widgets ImGui, encima del canvas)
     dibujarControlesZoom(estado);
 
-    // ── Área clickeable ──
+    // Area clickeable
     ImGui::SetCursorScreenPos(canvas_pos);
     ImGui::InvisibleButton("lienzo_aerografos", canvas_size,
         ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle);
 
     bool hovered = ImGui::IsItemHovered();
 
-    // ── Interacción ──
+    // Interaccion
     manejarInteraccion(estado, hovered, canvas_pos, canvas_size, hover_ciudad);
 
-    // ── Tooltip ──
+    // Tooltip
     dibujarTooltipCiudad(hover_ciudad);
 
     ImGui::End();

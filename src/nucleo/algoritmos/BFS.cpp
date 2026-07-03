@@ -1,5 +1,7 @@
 #include "BFS.hpp"
 #include <queue>
+// bfs: recorrido por niveles, cola O(V+E)
+// camino mas corto en grafos no ponderados explorando vecinos nivel por nivel
 
 namespace Algoritmos {
 namespace BFS {

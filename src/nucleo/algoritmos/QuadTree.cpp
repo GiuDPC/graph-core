@@ -1,4 +1,6 @@
 #include "QuadTree.hpp"
+// quadtree: subdivision recursiva en 4 cuadrantes O(V log V)
+// barnes-hut: si s/d < theta, tratar celda como unico centro de masa
 
 namespace Algoritmos {
 
@@ -44,7 +46,6 @@ void QuadTree::insert_rec(int node_idx, float x, float y, float m, int id, int d
                 old_x += ((rand() % 100) - 50) * 0.01f;
                 old_y += ((rand() % 100) - 50) * 0.01f;
             }
-            // ponytail: solo recursar en el cuadrante correcto, no en los 4
             float omx = (pool[node_idx].x_min + pool[node_idx].x_max) * 0.5f;
             float omy = (pool[node_idx].y_min + pool[node_idx].y_max) * 0.5f;
             int o_child = (old_x < omx) ? ((old_y < omy) ? pool[node_idx].NW : pool[node_idx].SW)
@@ -54,7 +55,7 @@ void QuadTree::insert_rec(int node_idx, float x, float y, float m, int id, int d
         }
     }
 
-    { // ponytail: solo recursar en el cuadrante correcto
+    {
         float mx2 = (pool[node_idx].x_min + pool[node_idx].x_max) * 0.5f;
         float my2 = (pool[node_idx].y_min + pool[node_idx].y_max) * 0.5f;
         int child = (x < mx2) ? ((y < my2) ? pool[node_idx].NW : pool[node_idx].SW)

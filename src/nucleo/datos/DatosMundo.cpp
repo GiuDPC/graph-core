@@ -7,7 +7,7 @@
 
 namespace DatosMundo {
 
-// ── Haversine ──────────────────────────────────────────────────────────────
+// Haversine
 float calcularDistancia(float lat1, float lon1, float lat2, float lon2) {
     const float R = 6371.0f;  // radio terrestre en km
     float dlat = (lat2 - lat1) * 3.14159265f / 180.0f;
@@ -20,16 +20,16 @@ float calcularDistancia(float lat1, float lon1, float lat2, float lon2) {
     return R * c;
 }
 
-// ── Ciudades ───────────────────────────────────────────────────────────────
+// Ciudades
 const std::vector<Ciudad>& obtenerCiudades() {
     static const std::vector<Ciudad> ciudades = {
-        //  0-4: Norteamérica
+        // 0-4: Norteamerica
         {0,  "Nueva York",     "EE.UU.",        40.7128f,  -74.0060f,  "JFK", 8},
         {1,  "Los Ángeles",   "EE.UU.",        34.0522f, -118.2437f,  "LAX", 4},
         {2,  "Miami",         "EE.UU.",        25.7617f,  -80.1918f,  "MIA", 0},
         {3,  "Toronto",       "Canadá",        43.6532f,  -79.3832f,  "YYZ", 3},
         {4,  "Ciudad de México", "México",     19.4326f,  -99.1332f,  "MEX", 9},
-        //  5-9: Sudamérica
+        // 5-9: Sudamerica
         {5,  "Bogotá",        "Colombia",       4.7110f,  -74.0721f,  "BOG", 7},
         {6,  "São Paulo",     "Brasil",       -23.5505f,  -46.6333f,  "GRU", 12},
         {7,  "Buenos Aires",  "Argentina",    -34.6037f,  -58.3816f,  "EZE", 3},
@@ -52,7 +52,7 @@ const std::vector<Ciudad>& obtenerCiudades() {
         {22, "Seúl",          "Corea del Sur", 37.5665f,  126.9780f,  "ICN", 10},
         {23, "Pekín",         "China",         39.9042f,  116.4074f,  "PEK", 22},
         {24, "Shanghái",      "China",         31.2304f,  121.4737f,  "PVG", 25},
-        // 25-29: África y Oceanía
+        // 25-29: Africa y Oceania
         {25, "El Cairo",      "Egipto",        30.0444f,   31.2357f,  "CAI", 10},
         {26, "Johannesburgo", "Sudáfrica",    -26.2041f,   28.0473f,  "JNB", 6},
         {27, "Casablanca",    "Marruecos",     33.5731f,   -7.5898f,  "CMN", 3},
@@ -65,12 +65,12 @@ const std::vector<Ciudad>& obtenerCiudades() {
         {33, "Barquisimeto",  "Venezuela",     10.0734f,  -69.3228f,  "BRM", 1},
         {34, "Mérida",        "Venezuela",      8.5981f,  -71.1440f,  "MRD", 0},
         {35, "Puerto Ordaz",  "Venezuela",      8.2932f,  -62.7170f,  "PZO", 1},
-        // 36-39: Resto Sudamérica
+        // 36-39: Resto Sudamerica
         {36, "Río de Janeiro","Brasil",       -22.9068f,  -43.1729f,  "GIG", 7},
         {37, "Quito",         "Ecuador",       -0.1807f,  -78.4678f,  "UIO", 2},
         {38, "Medellín",      "Colombia",       6.2476f,  -75.5658f,  "MDE", 3},
         {39, "Panamá",        "Panamá",         9.0000f,  -79.5000f,  "PTY", 2},
-        // 40-42: Norteamérica extendida
+        // 40-42: Norteamerica extendida
         {40, "Chicago",       "EE.UU.",        41.8781f,  -87.6298f,  "ORD", 10},
         {41, "Atlanta",       "EE.UU.",        33.7490f,  -84.3880f,  "ATL", 6},
         {42, "Vancouver",     "Canadá",        49.2827f, -123.1207f,  "YVR", 3},
@@ -89,12 +89,12 @@ const std::vector<Ciudad>& obtenerCiudades() {
         {52, "Manila",        "Filipinas",     14.5995f,  120.9842f,  "MNL", 13},
         {53, "Kuala Lumpur",  "Malasia",        3.1390f,  101.6869f,  "KUL", 2},
         {54, "Taipéi",        "Taiwán",        25.0330f,  121.5654f,  "TPE", 7},
-        // 55-58: África extendida
+        // 55-58: Africa extendida
         {55, "Lagos",         "Nigeria",        6.5244f,    3.3792f,  "LOS", 15},
         {56, "Nairobi",       "Kenia",         -1.2921f,   36.8219f,  "NBO", 4},
         {57, "Ciudad del Cabo","Sudáfrica",   -33.9249f,   18.4241f,  "CPT", 5},
         {58, "Marrakech",     "Marruecos",     31.6295f,   -7.9811f,  "RAK", 1},
-        // 59: Oceanía extendida
+        // 59: Oceania extendida
         {59, "Melbourne",     "Australia",    -37.8136f,  144.9631f,  "MEL", 5},
         // 60-62: Caribe
         {60, "La Habana",     "Cuba",          23.1136f,  -82.3666f,  "HAV", 2},
@@ -104,7 +104,7 @@ const std::vector<Ciudad>& obtenerCiudades() {
     return ciudades;
 }
 
-// ── Rutas Aéreas ───────────────────────────────────────────────────────────
+// Rutas Aereas
 const std::vector<RutaAerea>& obtenerRutas() {
     static std::vector<RutaAerea> rutas;
     if (rutas.empty()) {
@@ -172,7 +172,7 @@ const std::vector<RutaAerea>& obtenerRutas() {
     return rutas;
 }
 
-// ── Restricciones Geopolíticas ─────────────────────────────────────────────
+// Restricciones Geopoliticas
 void aplicarRestriccionesGeopoliticas(Grafo& g) {
     for (auto& a : g.aristas) {
         bool toca_rusia = (a.origen_id == 15 || a.destino_id == 15);
@@ -190,7 +190,7 @@ void aplicarRestriccionesGeopoliticas(Grafo& g) {
     }
 }
 
-// ── Validación ─────────────────────────────────────────────────────────────
+// Validacion
 bool validarDatos() {
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
@@ -267,7 +267,7 @@ bool validarDatos() {
     return true;
 }
 
-// ── Métricas Analíticas ────────────────────────────────────────────────────
+// Metricas Analiticas
 std::vector<std::pair<int, int>> obtenerTop3Hubs() {
     const auto& ciudades = obtenerCiudades();
     const auto& rutas = obtenerRutas();
@@ -301,7 +301,7 @@ float calcularDensidadRed() {
     return (2.0f * E) / (V * (V - 1.0f));
 }
 
-// ── Construir Grafo desde datos AeroGrafos ────────────────────────────────
+// Construir Grafo desde datos AeroGrafos
 Grafo construirGrafoAerografos() {
     Grafo g;
     const auto& ciudades = obtenerCiudades();

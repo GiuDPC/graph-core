@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <unordered_set>
+// fa2: repulsion Fr = kr * deg * deg / d, atraccion Fa = d^2 / k
+// gravedad Fg = kg * deg, barnes-hut theta < 1.2 para O(V log V)
 
 namespace Algoritmos {
 
@@ -91,7 +93,7 @@ void ForceAtlas2::step(Grafo& g, const ParametrosFA2& p) {
         }
     }
 
-    // Pre-build reverse edge lookup: O(1) per edge, elimina el O(m²) de la busqueda de dobles
+    // Pre-construir busqueda inversa de aristas: O(1) por arista, elimina el O(m2) de la busqueda de dobles
     std::unordered_set<uint64_t> edge_dir;
     edge_dir.reserve(g.aristas.size());
     for (const auto& ae : g.aristas)

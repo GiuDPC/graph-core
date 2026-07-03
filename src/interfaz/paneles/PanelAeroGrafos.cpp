@@ -14,7 +14,7 @@
 #include "interfaz/util/Animacion.hpp"
 #include <cmath>
 
-// ── Helper functions in anonymous namespace ──
+// Helper functions in anonymous namespace
 namespace {
 
 void selectorAlgoritmo(EstadoAeroGrafos& estado) {
@@ -114,7 +114,7 @@ void selectorCiudad(const char* label, int& ciudad_id,
 
 } // anonymous namespace
 
-// ── Panel principal en namespace PanelAeroGrafos ──
+// Panel principal en namespace PanelAeroGrafos
 namespace PanelAeroGrafos {
 
 void dibujar(Interfaz& self, Grafo& red) {
@@ -129,12 +129,12 @@ void dibujar(Interfaz& self, Grafo& red) {
     ImGui::TextDisabled("Red de rutas aereas mundiales");
     ImGui::Separator();
 
-    // ── Selector de algoritmo ──
+    // Selector de algoritmo
     selectorAlgoritmo(estado);
 
     ImGui::Separator();
 
-    // ── Selectores de ciudad ──
+    // Selectores de ciudad
     if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta) {
         selectorCiudad(ICON_FA_PLANE_DEPARTURE " Origen:", estado.ciudad_origen, ciudades, estado.restricciones_geopoliticas);
         selectorCiudad(ICON_FA_PLANE_ARRIVAL " Destino:", estado.ciudad_destino, ciudades, estado.restricciones_geopoliticas);
@@ -145,7 +145,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         selectorCiudad(ICON_FA_PLANE_DEPARTURE " Punto de inicio:", estado.ciudad_origen, ciudades, estado.restricciones_geopoliticas);
     }
     
-    // ── Panel Explicativo Académico ──
+    // Panel Explicativo Academico
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.15f, 0.2f, 0.6f));
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 4.0f);
@@ -189,7 +189,7 @@ void dibujar(Interfaz& self, Grafo& red) {
 
     ImGui::Spacing();
 
-    // ── Modo animación ──
+    // Modo animacion
     bool puede_animar = (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta ||
                          estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ConectarTodo ||
                          estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::ExplorarNiveles ||
@@ -201,7 +201,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         ImGui::Checkbox(ICON_FA_PLAY " Modo animacion paso a paso", &estado.modo_animacion);
     ImGui::Spacing();
 
-    // ── Botón de acción ──
+    // Boton de accion
     bool puede_calcular = (estado.ciudad_origen >= 0);
     if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::RutaMasCorta)
         puede_calcular = (estado.ciudad_origen >= 0 && estado.ciudad_destino >= 0);
@@ -249,7 +249,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         Animacion::reset(estado.animacion);
         Grafo g = DatosMundo::construirGrafoAerografos();
 
-        // Aplicar restricciones geopolíticas
+        // Aplicar restricciones geopoliticas
         if (estado.restricciones_geopoliticas) {
             DatosMundo::aplicarRestriccionesGeopoliticas(g);
             estado.agregarMensaje(ICON_FA_TRIANGLE_EXCLAMATION
@@ -277,7 +277,7 @@ void dibujar(Interfaz& self, Grafo& red) {
                         res.costo_total, res.saltos);
                     estado.agregarMensaje(msg, IM_COL32(0,255,150,255), 5.0f);
                     
-                    // ── Análisis Comparativo BFS ──
+                    // Analisis Comparativo BFS
                     auto res_bfs = Algoritmos::BFS::bfs(g, estado.ciudad_origen);
                     if (res_bfs.padre.count(estado.ciudad_destino) && res_bfs.padre[estado.ciudad_destino] != -1) {
                         estado.mostrar_comparativa = true;
@@ -303,13 +303,13 @@ void dibujar(Interfaz& self, Grafo& red) {
                         estado.saltos_bfs = saltos_bfs;
                     }
 
-                    // ── Auto-Encuadre Cinemático ──
+                    // Auto-Encuadre Cinematico
                     const auto& ciudades = DatosMundo::obtenerCiudades();
                     ImVec2 p_o = DatosMundo::latLonAVirtual(ciudades[estado.ciudad_origen].latitud, ciudades[estado.ciudad_origen].longitud);
                     ImVec2 p_d = DatosMundo::latLonAVirtual(ciudades[estado.ciudad_destino].latitud, ciudades[estado.ciudad_destino].longitud);
                     estado.target_centro.x = (p_o.x + p_d.x) * 0.5f;
                     estado.target_centro.y = (p_o.y + p_d.y) * 0.5f;
-                    // Zoom heurístico según distancia en pixeles virtuales
+                    // Zoom heuristico segun distancia en pixeles virtuales
                     float dist_v = sqrtf((p_o.x - p_d.x) * (p_o.x - p_d.x) + (p_o.y - p_d.y) * (p_o.y - p_d.y));
                     if (dist_v < 10.0f) dist_v = 10.0f;
                     estado.target_zoom = std::max(0.5f, std::min(15.0f, 600.0f / dist_v));
@@ -558,7 +558,7 @@ void dibujar(Interfaz& self, Grafo& red) {
     ImGui::PopStyleColor();
     ImGui::EndDisabled();
 
-    // Animación y Controles
+    // Animacion y Controles
     if (estado.animacion.activa) {
         ImGui::Spacing();
         ImGui::Separator();
@@ -658,7 +658,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         }
     }
 
-    // ── Resultado del algoritmo ──
+    // Resultado del algoritmo
     if (estado.algoritmo_ejecutado && !estado.descripcion_resultado.empty()) {
         ImGui::Spacing();
         ImGui::Separator();
@@ -666,7 +666,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         ImGui::BeginChild("panel_resultado", ImVec2(0, 0), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Borders);
         ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.6f, 1.0f), "%s", "RESULTADO");
 
-        // Mostrar análisis en formato dashboard si es AnalizarRed
+        // Mostrar analisis en formato dashboard si es AnalizarRed
         if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed) {
             const auto& a = estado.analisis_cache_detallado;
             const auto& ciudades = DatosMundo::obtenerCiudades();
@@ -719,7 +719,7 @@ void dibujar(Interfaz& self, Grafo& red) {
             ImGui::PopTextWrapPos();
         }
 
-        // Mostrar información adicional según el algoritmo
+        // Mostrar informacion adicional segun el algoritmo
         if (!estado.ruta_resultado.empty()) {
             const auto& c = DatosMundo::obtenerCiudades();
             ImGui::TextDisabled("Ruta:");
@@ -776,7 +776,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         ImGui::PopStyleColor();
     }
 
-    // ── Info del mapa ──
+    // Info del mapa
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "NAVEGACION");
@@ -792,7 +792,7 @@ void dibujar(Interfaz& self, Grafo& red) {
     ImGui::Spacing();
     ImGui::Separator();
 
-    // ── Estadísticas ──
+    // Estadisticas
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.1f, 0.15f, 0.4f));
     ImGui::BeginChild("panel_dashboard", ImVec2(0, 0), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Borders);
@@ -829,7 +829,7 @@ void dibujar(Interfaz& self, Grafo& red) {
     ImGui::EndChild();
     ImGui::PopStyleColor();
 
-    // ── Opciones de visualización ──
+    // Opciones de visualizacion
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "VISUALIZACION");
@@ -838,7 +838,7 @@ void dibujar(Interfaz& self, Grafo& red) {
     ImGui::Checkbox(ICON_FA_ROUTE " Todas las rutas", &estado.mostrar_todas_rutas);
     ImGui::Checkbox(ICON_FA_MOON " Modo noche", &estado.modo_noche);
 
-    // ── Simulación geopolítica ──
+    // Simulacion geopolitica
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), "SIMULACION");
@@ -882,7 +882,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         ImGui::Separator();
         ImGui::Spacing();
 
-        // ── Métricas principales en tabla ──
+        // Metricas principales en tabla
         if (ImGui::BeginTable("tabla_analisis", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
             ImGui::TableSetupColumn("Metrica", ImGuiTableColumnFlags_WidthFixed, 200.0f);
             ImGui::TableSetupColumn("Valor", ImGuiTableColumnFlags_WidthStretch);
@@ -923,7 +923,7 @@ void dibujar(Interfaz& self, Grafo& red) {
 
         ImGui::Spacing();
         
-        // ── Clasificación del grafo ──
+        // Clasificacion del grafo
         ImGui::Separator();
         ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "%s CLASIFICACION DEL GRAFO:", ICON_FA_TAGS);
         ImGui::Spacing();
@@ -946,7 +946,7 @@ void dibujar(Interfaz& self, Grafo& red) {
         ImGui::Separator();
         ImGui::Spacing();
 
-        // ── Interpretación ──
+        // Interpretacion
         ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "%s INTERPRETACION:", ICON_FA_LIGHTBULB);
         ImGui::PushTextWrapPos(0.0f);
         if (a.densidad < 0.05f) {

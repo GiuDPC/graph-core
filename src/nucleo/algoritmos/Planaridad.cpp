@@ -2,6 +2,8 @@
 #include <set>
 #include <algorithm>
 #include <cmath>
+// planaridad: formula de euler |E| <= 3|V| - 6 para grafos planares
+// kuratowski: menores K5 y K3,3, deteccion de cruces O(V)
 
 namespace Algoritmos {
 

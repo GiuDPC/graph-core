@@ -13,7 +13,7 @@
 
 extern Sonidos g_sonidos;
 
-// ── Colores de protocolo (uint32_t ARGB) ────────────────────────────────────
+// Colores de protocolo (uint32_t ARGB)
 namespace ColoresProtocolo {
     inline uint32_t paraTipo(const std::string& tipo) {
         if (tipo == "HTTP")    return 0xFF4CAF50;
@@ -58,7 +58,7 @@ public:
     void inicializar(const Grafo& g);
     void tick(Grafo& g, float dt);
 
-    // ── API publica ──
+    // API publica
     std::vector<std::pair<int, std::string>> tablaRuteo(const Grafo& g, int nodo_id);
 
     struct Paquete {
@@ -86,7 +86,7 @@ public:
     float usoArista(int origen, int destino) const;
     float perdidaEnArista(int origen, int destino) const;
 
-    // ── Fallos / Restauraciones ──
+    // Fallos / Restauraciones
     static float tiempoReal();
     void notificar(const std::string& msg, uint32_t color, float duracion = 3.0f);
     void simularFalloNodo(int nodo_id, Grafo& g);

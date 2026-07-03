@@ -46,6 +46,7 @@ openspec/
 .atl/
 .opencode/
 agents/
+.agents/
 
 # Configuración en tiempo de ejecución
 imgui.ini

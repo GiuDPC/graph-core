@@ -25,18 +25,18 @@ struct EstadoUI {
     };
     Categoria herramienta_activa = CatGeneral;
 
-    //  seleccion 
+    // seleccion
     int  nodo_seleccionado = -1;
     int  nodo_hover        = -1;
     bool arrastrando       = false;
 
-    //  panning y zoom 
+    // desplazamientoning y zoom
     ImVec2 offset_lienzo = ImVec2(0, 0);
     ImVec2 pan_velocity  = ImVec2(0, 0);
     float  zoom_velocity = 0.0f;
     float  zoom_lienzo   = 1.0f;
 
-    //  creacion pendiente 
+    // creacion pendiente
     bool   creando_arista_drag        = false;
     int    drag_arista_origen         = -1;
     ImVec2 pos_click_derecho          = ImVec2(0, 0);
@@ -46,7 +46,7 @@ struct EstadoUI {
     bool   pendiente_arista_dirigida  = false;
     char   buffer_nombre[64]          = {};
 
-    //  logs 
+    // logs
     std::vector<std::string> system_logs;
 
     void registrarLog(const std::string& msg) {
@@ -54,7 +54,7 @@ struct EstadoUI {
         if (system_logs.size() > 100) system_logs.erase(system_logs.begin());
     }
 
-    // enciclopedia / ayuda 
+    // enciclopedia / ayuda
     bool mostrar_ventana_ayuda = false;
     int seccion_ayuda_actual = 0;
     bool mostrar_tutorial_rapido = true; // Se muestra al iniciar por primera vez
@@ -84,11 +84,11 @@ struct EstadoUI {
     // fuentes
     ImFont* fontMono = nullptr;
     
-    // logo 
+    // logo
     unsigned int id_logo = 0;
     int width_logo = 0;
     int height_logo = 0;
     
-    // flags de dialogo 
+    // flags de dialogo
     bool mostrar_acerca_de = false;
 };

@@ -3,6 +3,8 @@
 #include <set>
 #include <algorithm>
 #include <limits>
+// arbol: |E| = |V| - 1, conexo, sin ciclos, bfs O(V+E)
+// altura = camino mas largo de raiz a hoja, grado = max hijos
 
 namespace Algoritmos {
 namespace Arbol {

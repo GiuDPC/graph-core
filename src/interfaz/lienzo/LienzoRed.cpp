@@ -13,7 +13,7 @@
 #include <cfloat>
 #include <climits>
 
-// ── Static helper functions ─────────────────────────────────────────────────
+// Static helper functions
 
 static void dibujarGrid(ImDrawList* dl, const EstadoUI& ui,
                          ImVec2 origin, ImVec2 tamano)
@@ -73,7 +73,7 @@ static ImU32 imColorProtocolo(const std::string& tipo) {
     return IM_COL32((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF, (c >> 24) & 0xFF);
 }
 
-// ── Helpers para aristas dirigidas y curvas ──────────────────────────────
+// Helpers para aristas dirigidas y curvas
 
 static void calcularPuntaFlecha(ImVec2 origen, ImVec2 destino, float radio_nodo,
                                  ImVec2& p1, ImVec2& p2, ImVec2& p3) {
@@ -138,7 +138,7 @@ static void lineaArista(ImDrawList* dl, ImVec2 o, ImVec2 d, float r_o, float r_d
     }
 }
 
-// ── Dibujar aristas de un grafo ───────────────────────────────────────────
+// Dibujar aristas de un grafo
 static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     EstadoUI& ui, EstadoRedes& redes, EstadoGrafos& grafos,
     const std::unordered_set<uint64_t>& edge_lookup,
@@ -194,7 +194,7 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
         }
         if (!o || !d) continue;
 
-        // ── Self-loop: lazo Bezier simetrico arriba del nodo ─────────
+        // Self-loop: lazo Bezier simetrico arriba del nodo
         if (o == d) {
             float r = o->radio;
             float h = r * 2.8f;
@@ -269,7 +269,7 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
         auto par = std::make_pair(a.origen_id, a.destino_id);
         auto parR = std::make_pair(a.destino_id, a.origen_id);
 
-        // ── Detectar curva (par bidireccional) ───────────────────────
+        // Detectar curva (par bidireccional)
         bool es_curva = false;
         ImVec2 punto_control(0, 0);
         if (!es_g2 && o != d) {
@@ -473,7 +473,7 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     }
 }
 
-// ── Dibujar paquetes ───────────────────────────────────────────────────────
+// Dibujar paquetes
 static void dibujarPaquetesEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     const EstadoRedes& redes, float tiempo, ImVec2 mouse,
     bool& tooltip_mostrado, bool modo_red, bool es_g2)
@@ -559,7 +559,7 @@ static void dibujarPaquetesEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     }
 }
 
-// ── Dibujar nodos de un grafo ─────────────────────────────────────────────
+// Dibujar nodos de un grafo
 static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     EstadoUI& ui, EstadoRedes& redes, EstadoGrafos& grafos,
     bool usar_ranking, float rank_size_min, float rank_size_max,
@@ -818,7 +818,7 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
     }
 }
 
-// ── Partícula de animación ──────────────────────────────────────────────────
+// Particula de animacion
 static void dibujarParticulaAnimacion(ImDrawList* dl, EstadoGrafos& grafos,
     EstadoUI& ui, const Grafo& g_dib, bool es_g2)
 {
@@ -859,7 +859,7 @@ static void dibujarParticulaAnimacion(ImDrawList* dl, EstadoGrafos& grafos,
     dl->AddCircleFilled(pos, grafos.anim_estado.particula.radio * 0.4f, IM_COL32(255, 255, 255, 200), 16);
 }
 
-// ── Notificaciones emergentes ───────────────────────────────────────────────
+// Notificaciones emergentes
 static void dibujarNotificaciones(ImDrawList* dl, EstadoRedes& redes,
                                    ImVec2 origin, ImVec2 tamano)
 {
@@ -893,7 +893,7 @@ static void dibujarNotificaciones(ImDrawList* dl, EstadoRedes& redes,
     }
 }
 
-// ── Overlay de resultados de algoritmos ────────────────────────────────────
+// Overlay de resultados de algoritmos
 static void dibujarOverlayAlgoritmos(ImDrawList* dl, EstadoUI& ui,
                                       EstadoGrafos& grafos, const Grafo& red,
                                       ImVec2 origin)
@@ -991,7 +991,7 @@ static void dibujarOverlayAlgoritmos(ImDrawList* dl, EstadoUI& ui,
     }
 }
 
-// ── Barra de zoom flotante ─────────────────────────────────────────────────
+// Barra de zoom flotante
 static void dibujarZoomBar(Grafo& red, EstadoUI& ui, EstadoGrafos& grafos)
 {
     ImVec2 pos_ventana = ImGui::GetWindowPos();
@@ -1029,7 +1029,7 @@ static void dibujarZoomBar(Grafo& red, EstadoUI& ui, EstadoGrafos& grafos)
     ImGui::EndChild();
 }
 
-// ── Main entry ──────────────────────────────────────────────────────────────
+// entrada principal
 namespace LienzoRed {
 
 void dibujar(Grafo& red, Interfaz& self) {
@@ -1050,10 +1050,10 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     bool tooltip_mostrado = false;
 
-    // ── Grid ──
+    // Grid
     dibujarGrid(dl, ui, origin, tamano);
 
-    // ── Mouse ──
+    // raton
     ImVec2 mouse = ImGui::GetMousePos();
     bool en_canvas = ImGui::IsWindowHovered();
 
@@ -1069,7 +1069,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         if (sqrtf(dx * dx + dy * dy) <= screen_r) ui.nodo_hover = n.id;
     }
 
-    // ── Click izquierdo ──
+    // Click izquierdo
     bool paquete_clickeado = false;
     if (en_canvas && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         ui.nodo_seleccionado = ui.nodo_hover;
@@ -1106,7 +1106,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         }
     }
 
-    // ── Arrastre ──
+    // Arrastre
     if (!paquete_clickeado) {
         if (ui.arrastrando && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
             Nodo* n = grafo_actual.obtenerNodo(ui.nodo_seleccionado);
@@ -1127,7 +1127,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) ui.arrastrando = false;
     }
 
-    // ── Paneo ──
+    // Paneo
     bool panning_activo = ImGui::IsMouseDragging(ImGuiMouseButton_Middle) ||
         (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ui.nodo_seleccionado == -1 && ui.nodo_hover == -1);
 
@@ -1144,7 +1144,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         ui.pan_velocity.y *= 0.85f;
     }
 
-    // ── Zoom ──
+    // Zoom
     float wheel = ImGui::GetIO().MouseWheel;
     if (en_canvas && wheel != 0.0f) {
         ui.zoom_velocity += wheel * 0.1f;
@@ -1164,7 +1164,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         ui.zoom_velocity *= 0.7f;
     }
 
-    // ── Físicas ──
+    // Fisicas
     if (ui.fisicas_estado_cambiado) {
         ui.fisicas_estado_cambiado = false;
         if (ui.fisicas_activas) {
@@ -1196,7 +1196,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         }
     }
 
-    // ── Creación de arista (drag con botón derecho) ──
+    // Creacion de arista (drag con boton derecho)
     if (en_canvas && ImGui::IsMouseDragging(ImGuiMouseButton_Right) && ui.nodo_hover != -1 && !ui.creando_arista_drag) {
         ui.creando_arista_drag = true;
         ui.drag_arista_origen = ui.nodo_hover;
@@ -1259,7 +1259,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         }
     }
 
-    // ── Delete ──
+    // borrar
     if (en_canvas && ImGui::IsKeyPressed(ImGuiKey_N) && ImGui::GetIO().KeyCtrl && !ImGui::GetIO().WantTextInput) {
         grafo_actual.limpiar();
         grafos.ruta_optima.clear(); grafos.aristas_mst.clear(); grafos.mostrar_mst = false;
@@ -1277,7 +1277,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         ui.nodo_seleccionado = -1; ui.arrastrando = false;
     }
 
-    // ── Popups ──
+    // Popups
     if (ImGui::BeginPopup("CrearEquipo")) {
         ImGui::Text(ICON_FA_PLUS " Nuevo Equipamiento"); ImGui::Separator();
         static int tipo_sel = 0;
@@ -1351,7 +1351,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         ImGui::EndPopup();
     }
 
-    // ── Transformación visual para dibujo ──
+    // Transformacion visual para dibujo
     Grafo red_dibujo = red;
     Grafo iso_dibujo = grafos.grafo_iso_g2;
     for(auto& n : red_dibujo.nodos) {
@@ -1380,7 +1380,7 @@ void dibujar(Grafo& red, Interfaz& self) {
         dl->AddText(ImVec2(origin.x + tamano.x/2 - ts.x/2, origin.y + 27), IM_COL32(0, 0, 0, 255), cartel);
     }
 
-    // ── Recorrer grafos ──
+    // Recorrer grafos
     for (Grafo* ptr_g : grafos_a_dibujar) {
         Grafo& g_dib = *ptr_g;
         bool es_g2 = (&g_dib == &iso_dibujo);
@@ -1440,17 +1440,17 @@ void dibujar(Grafo& red, Interfaz& self) {
             modo_red, es_g2, editando_g2,
             origin, tamano, tiempo, mouse, tooltip_mostrado);
 
-        // Partícula de animación
+        // Particula de animacion
         dibujarParticulaAnimacion(dl, grafos, ui, g_dib, es_g2);
     }
 
-    // ── Notificaciones ──
+    // Notificaciones
     dibujarNotificaciones(dl, redes, origin, tamano);
 
-    // ── Overlay de algoritmos ──
+    // Overlay de algoritmos
     dibujarOverlayAlgoritmos(dl, ui, grafos, red, origin);
 
-    // ── Barra de zoom ──
+    // Barra de zoom
     dibujarZoomBar(red, ui, grafos);
 
     ImGui::End();

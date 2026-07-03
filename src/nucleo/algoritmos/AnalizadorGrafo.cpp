@@ -5,6 +5,8 @@
 #include <sstream>
 #include <unordered_set>
 #include <unordered_map>
+// analizador: coeficiente de clustering = 3*triangulos / tripletes
+// diametro via bfs O(V*(V+E)), densidad = 2|E| / (V*(V-1))
 
 namespace Algoritmos {
 

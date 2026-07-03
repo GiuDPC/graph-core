@@ -16,7 +16,7 @@ public:
     std::vector<Arista> aristas;
     int contador_ids = 0;
 
-    // ── Inline helpers (trivial getters, keeps .cpp lean) ───────────────
+    // Inline helpers (trivial getters, keeps .cpp lean)
 
     std::string nombreNodo(int id) const {
         const Nodo* n = obtenerNodo(id);
@@ -50,7 +50,7 @@ public:
         return gen;
     }
 
-    // ── .cpp (non-trivial implementations) ──────────────────────────────
+    // .cpp (non-trivial implementations)
 
     int rangoIds() const;
 

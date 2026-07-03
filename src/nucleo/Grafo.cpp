@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-// ── Rango de IDs (max_id + 1) ──────────────────────────────────────────────
+// Rango de IDs
 
 int Grafo::rangoIds() const {
     int max_id = 0;
@@ -12,7 +12,7 @@ int Grafo::rangoIds() const {
     return nodos.empty() ? 0 : max_id + 1;
 }
 
-// ── CRUD nodos ─────────────────────────────────────────────────────────────
+// CRUD nodos
 
 void Grafo::agregarNodo(ImVec2 posicion, TipoHardware tipo) {
     nodos.push_back(Nodo(contador_ids, posicion, tipo));
@@ -31,7 +31,7 @@ void Grafo::eliminarNodo(int id) {
     if (nodos.empty()) contador_ids = 0;
 }
 
-// ── CRUD aristas ───────────────────────────────────────────────────────────
+// CRUD aristas
 
 void Grafo::agregarArista(int id1, int id2, float peso, bool dirigida) {
     if (!dirigida && id1 == id2) return;
@@ -45,7 +45,7 @@ void Grafo::agregarArista(int id1, int id2, float peso) {
     agregarArista(id1, id2, peso, false);
 }
 
-// ── Simulación ─────────────────────────────────────────────────────────────
+// Simulacion
 
 void Grafo::aplicarJitter(float porcentaje) {
     static std::mt19937& gen = obtenerGeneradorAleatorio();
@@ -56,7 +56,7 @@ void Grafo::aplicarJitter(float porcentaje) {
     }
 }
 
-// ── Queries estructurales ──────────────────────────────────────────────────
+// Queries estructurales
 
 int Grafo::gradoNodo(int id) const {
     int grado = 0;

@@ -3,6 +3,8 @@
 #include <sstream>
 #include <set>
 #include <cmath>
+// isomorfismo: secuencia de grados O(V log V), refinamiento de firma O(V^3)
+// backtrack exacto O(V!) solo para V <= 18, heuristico para grafos grandes
 
 namespace Algoritmos {
 namespace Isomorfismo {

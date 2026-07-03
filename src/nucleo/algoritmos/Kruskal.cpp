@@ -1,6 +1,8 @@
 #include "Kruskal.hpp"
 #include "../UnionFind.hpp"
 #include <algorithm>
+// kruskal: ordenar E por peso O(E log E), union-find O(E a(V))
+// mst: V-1 aristas de peso total minimo, avaro O(E log V)
 
 namespace Algoritmos {
 namespace Kruskal {

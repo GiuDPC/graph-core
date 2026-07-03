@@ -1,4 +1,6 @@
 #include "DFS.hpp"
+// dfs: backtrack recursivo O(V+E), basado en pila, encuentra aristas de retroceso
+// usado para conectividad, ordenacion topologica, y deteccion de ciclos
 
 namespace Algoritmos {
 namespace DFS {

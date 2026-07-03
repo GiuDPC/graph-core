@@ -49,7 +49,7 @@ inline TextureInfo cargarTextura(const std::string& ruta) {
 #endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ti.width, ti.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     
-    // Generar mipmaps dinámicamente para que al hacer zoom out (alejar) no se pixele feo
+    // Generar mipmaps dinamicamente para que al hacer zoom out (alejar) no se pixele feo
     typedef void (*PFNGLGENERATEMIPMAPPROC) (GLenum target);
     PFNGLGENERATEMIPMAPPROC my_glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)glfwGetProcAddress("glGenerateMipmap");
     if (my_glGenerateMipmap) {

@@ -7,12 +7,12 @@
 #include <cmath>
 
 // ============================================================================
-// DatosMundo — Base de datos geográfica mundial para AeroGrafos
+// DatosMundo — Base de datos geografica mundial para AeroGrafos
 //
 // 63 ciudades reales con coordenadas verificadas
-// 200+ rutas aéreas con distancias calculadas via Haversine
+// 200+ rutas aereas con distancias calculadas via Haversine
 // Grafo conexo garantizado
-// Incluye Venezuela (Caracas, Maracaibo, Valencia, Barquisimeto, Mérida, Pto. Ordaz)
+// Incluye Venezuela (Caracas, Maracaibo, Valencia, Barquisimeto, Merida, Pto. Ordaz)
 // ============================================================================
 
 struct Ciudad {
@@ -33,11 +33,11 @@ struct RutaAerea {
 
 namespace DatosMundo {
 
-// ── Constantes ──────────────────────────────────────────────────────────────
+// Constantes
 constexpr float ANCHO_VIRTUAL = 2048.0f;
 constexpr float ALTO_VIRTUAL  = 1024.0f;
 
-// ── Inline: proyección (< 3 líneas) ────────────────────────────────────────
+// Inline: proyeccion (< 3 lineas)
 inline ImVec2 latLonAVirtual(float lat, float lon) {
     float vx = (lon + 180.0f) / 360.0f * ANCHO_VIRTUAL;
     float vy = (90.0f - lat) / 180.0f * ALTO_VIRTUAL;
@@ -49,7 +49,7 @@ inline void virtualALatLon(ImVec2 v, float& lat, float& lon) {
     lat = 90.0f - v.y / ALTO_VIRTUAL * 180.0f;
 }
 
-// ── Declaraciones (implementaciones en DatosMundo.cpp) ─────────────────────
+// Declaraciones (implementaciones en DatosMundo.cpp)
 float calcularDistancia(float lat1, float lon1, float lat2, float lon2);
 const std::vector<Ciudad>& obtenerCiudades();
 const std::vector<RutaAerea>& obtenerRutas();

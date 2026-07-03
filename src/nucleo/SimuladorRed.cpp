@@ -1,7 +1,6 @@
 #include "SimuladorRed.hpp"
 #include <chrono>
 
-// ponytail: Method implementations extracted from former SimuladorRed.h
 
 void SimuladorRed::inicializar(const Grafo& g) {
     estado = {};
@@ -274,7 +273,7 @@ void SimuladorRed::simularTormenta(Grafo& g, float porcentaje, float duracion) {
         EventoRed::ERROR_RED);
 }
 
-// ── Private helpers ──
+// funciones auxiliares privadas
 
 float SimuladorRed::uniformeF(float lo, float hi) {
     return std::uniform_real_distribution<float>(lo, hi)(gen);

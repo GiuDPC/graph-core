@@ -69,7 +69,7 @@ private:
     void backend_info();
     void limpiarTerminados();
 
-    // Sound generation helpers
+    // funciones auxiliares de generacion de sonido
     inline double adsr(double t, double duracion,
                        double attack = 0.005, double decay = 0.010,
                        double sustain_lvl = 0.7, double release = 0.015) {

@@ -1,6 +1,6 @@
 #include "Interfaz.hpp"
 
-// UI module includes — moved here to break compile coupling
+// includes del modulo UI movidos aqui para evitar acoplamiento
 #include "interfaz/componentes/MenuPrincipal.hpp"
 #include "interfaz/componentes/StatusBar.hpp"
 #include "interfaz/componentes/Dialogos.hpp"
@@ -16,13 +16,13 @@
 #include "interfaz/util/AtajosTeclado.hpp"
 #include "interfaz/ventanas/VentanaAyuda.hpp"
 
-// Algorithm headers needed in dibujar()
+// cabeceras de algoritmos necesarias en dibujar
 #include "nucleo/algoritmos/Dijkstra.hpp"
 #include "nucleo/algoritmos/Kruskal.hpp"
 #include "nucleo/algoritmos/BFS.hpp"
 #include "nucleo/algoritmos/DFS.hpp"
 
-// imgui_internal.h needed for DockBuilder APIs and ImHashStr
+// imgui_internal.h necesario para APIs de DockBuilder
 #include "imgui_internal.h"
 
 // ---------------------------------------------------------------------------
@@ -131,7 +131,7 @@ void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     // Asegurar que Lienzo sea la pestana activa por defecto
     ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
 
-    // Layout para AeroGrafos: mapa mundial ocupa el centro, panel de control a la derecha
+    // Layout para AeroGrafos: mapa mundial ocupa el centro, desplazamientoel de control a la derecha
     if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
         ImGui::DockBuilderDockWindow("Info del Grafo", izq);
         ImGui::DockBuilderDockWindow("Opciones AeroGrafos", der);
@@ -142,7 +142,7 @@ void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
 }
 
 // ---------------------------------------------------------------------------
-// dibujar: toolbar, workspace, paneles acoplables, status bar
+// dibujar: toolbar, workspace, desplazamientoeles acoplables, status bar
 // ---------------------------------------------------------------------------
 void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
 

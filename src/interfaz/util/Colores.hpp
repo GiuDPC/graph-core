@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
 
-// Constantes de color semánticas para la UI de graph-core
+// Constantes de color semanticas para la UI de graph-core
 namespace Colores {
 
 // nodos
@@ -18,13 +18,13 @@ inline constexpr ImU32 ARISTA_EXPLORADA   = IM_COL32(0, 188, 212, 220);
 inline constexpr ImU32 ARISTA_DESCARTADA  = IM_COL32(255, 68, 68, 255);
 inline constexpr ImU32 ARISTA_DEFAULT     = IM_COL32(120, 130, 140, 120);
 
-// partículas de animación
+// particulas de animacion
 inline constexpr ImU32 PARTICULA_EXPLORAR  = IM_COL32(0, 200, 255, 255);
 inline constexpr ImU32 PARTICULA_CONFIRMAR = IM_COL32(255, 180, 0, 255);
 inline constexpr ImU32 PARTICULA_DESCARTAR = IM_COL32(255, 60, 60, 200);
 inline constexpr ImU32 PARTICULA_DEFAULT   = IM_COL32(0, 255, 180, 255);
 
-// paquetes de simulación de red
+// paquetes de simulacion de red
 inline constexpr ImU32 PAQUETE_PING  = IM_COL32(0, 255, 100, 220);
 inline constexpr ImU32 PAQUETE_HTTP  = IM_COL32(80, 180, 255, 220);
 inline constexpr ImU32 PAQUETE_VIDEO = IM_COL32(255, 150, 50, 220);

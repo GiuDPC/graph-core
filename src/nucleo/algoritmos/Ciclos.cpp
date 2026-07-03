@@ -1,6 +1,8 @@
 #include "Ciclos.hpp"
 #include "../UnionFind.hpp"
 #include <functional>
+// ciclo: no dirigido -> union-find detecta ciclos O(E a(V))
+// dirigido -> dfs 3-color O(V+E)
 
 namespace Algoritmos {
 

@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstdint>
 
-// ── Historial de uso en anillo (para sparklines) ───────────────────────────
+// Historial de uso en anillo (para sparklines)
 struct HistorialUso {
     static const int MAX_MUESTRAS = 60;  // 60 frames ~ 1 segundo a 60fps
     float muestras[MAX_MUESTRAS];
@@ -82,7 +82,7 @@ struct EventoRed {
     enum Severidad { INFO, ADVERTENCIA, ERROR_RED } severidad;
 };
 
-// ── Estadisticas acumuladas de la red ──────────────────────────────────────
+// Estadisticas acumuladas de la red
 struct EstadisticasRed {
     float throughput_total_mbps     = 0.0f;
     float paquetes_perdidos_total   = 0.0f;
@@ -99,7 +99,7 @@ struct EstadisticasRed {
     }
 };
 
-// ── Evento para timeline grafico ───────────────────────────────────────────
+// Evento para timeline grafico
 struct TimelineEvent {
     float tiempo;
     float duracion = 0.0f;          // 0 = instante

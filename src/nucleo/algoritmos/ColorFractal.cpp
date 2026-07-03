@@ -1,6 +1,8 @@
 #include "ColorFractal.hpp"
 #include <cmath>
 #include <algorithm>
+// color fractal: mandelbrot z = z^2 + c, max 64 iteraciones
+// color de nodo = color base * modulacion fractal + metamorfosis temporal
 
 namespace Algoritmos {
 

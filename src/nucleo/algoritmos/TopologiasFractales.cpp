@@ -1,5 +1,7 @@
 #include "TopologiasFractales.hpp"
 #include <algorithm>
+// topologia fractal: subdivision recursiva de triangulo de sierpinski O(3^n)
+// anillos concentricos mandala, copo de nieve koch, cuadricula hexagonal
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

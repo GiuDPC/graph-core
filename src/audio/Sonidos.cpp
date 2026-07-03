@@ -126,7 +126,7 @@ void Sonidos::limpiarTerminados() {
     }
 }
 
-// ── Sound generation ────────────────────────────────────────────────────
+// generacion de sonido
 
 AudioBuffer Sonidos::generarPing(double freq, double dur) {
     AudioBuffer buf;

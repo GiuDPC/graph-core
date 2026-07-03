@@ -1,6 +1,8 @@
 #include "Coloreo.hpp"
 #include <algorithm>
 #include <vector>
+// coloreo: avaro O(V+E), welsh-powell ordena por grado O(V log V)
+// dos nodos conectados nunca comparten el mismo color, min colores >= X
 
 namespace Algoritmos {
 

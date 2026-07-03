@@ -3,6 +3,8 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+// dijkstra: d[v] = min(d[u] + w(u,v)), cola de prioridad O((V+E) log V)
+// camino mas corto desde origen a todos los nodos, relajacion avara
 
 namespace Algoritmos {
 

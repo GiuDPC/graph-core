@@ -36,6 +36,9 @@ FetchContent_Declare(
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+# Forzar X11 (evita error 'Failed to find wayland-scanner' en Arch/manjaro)
+set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glfw)
 
 # --- Dear ImGui (la librería de interfaz gráfica) ---

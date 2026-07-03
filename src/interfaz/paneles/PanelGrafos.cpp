@@ -306,7 +306,7 @@ void menuGeneral(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: Dijkstra
+// Subdesplazamientoel: Dijkstra
 void subpanelDijkstra(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.0f, 0.83f, 0.67f, 1.0f),
         ICON_FA_DIAMOND " DIJKSTRA — RUTA OPTIMA");
@@ -420,7 +420,7 @@ void subpanelDijkstra(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: Kruskal (MST)
+// Subdesplazamientoel: Kruskal (MST)
 void subpanelKruskal(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.8f, 1.0f),
         ICON_FA_TREE " KRUSKAL — ARBOL DE EXPANSION MINIMA");
@@ -484,7 +484,7 @@ void subpanelKruskal(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: BFS 
+// Subdesplazamientoel: BFS
 void subpanelBFS(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.2f, 0.6f, 1.0f, 1.0f),
         ICON_FA_LAYER_GROUP " BFS — Busqueda en Anchura");
@@ -568,7 +568,7 @@ void subpanelBFS(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: DFS 
+// Subdesplazamientoel: DFS
 void subpanelDFS(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.3f, 0.7f, 1.0f, 1.0f),
         ICON_FA_CODE_BRANCH " DFS — Busqueda en Profundidad");
@@ -648,7 +648,7 @@ void subpanelDFS(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: Ciclos
+// Subdesplazamientoel: Ciclos
 void subpanelCiclos(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.1f, 1.0f),
         ICON_FA_ROTATE " DETECCION DE CICLOS");
@@ -693,7 +693,7 @@ void subpanelCiclos(Interfaz& self, Grafo& red) {
     }
 }
 
-// Subpanel: Coloreo 
+// Subdesplazamientoel: Coloreo
 void subpanelColoreo(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.7f, 0.1f, 0.7f, 1.0f), ICON_FA_PAINTBRUSH " coloreo de grafos");
 
@@ -879,7 +879,7 @@ void subpanelColoreo(Interfaz& self, Grafo& red) {
     }
 }
 
-// subpanel: forceatlas2 — control de fisicas
+// subdesplazamientoel: forceatlas2 — control de fisicas
 void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
     (void)red;
     ImGui::TextColored(ImVec4(0.8f, 0.3f, 0.9f, 1.0f), ICON_FA_MAGNET " FORCE ATLAS 2");
@@ -934,9 +934,9 @@ void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
     ImGui::Spacing();
     if (ImGui::Button(ICON_FA_ROTATE_LEFT " Resetear Motor", ImVec2(-1, 28))) {
         self.estado_ui.fa2.reset();
-        // Resetear también los parámetros a valores por defecto
+        // Resetear tambien los parametros a valores por defecto
         p = Algoritmos::ParametrosFA2();
-        // Leve temblor para que el usuario perciba visualmente que se reseteó la física
+        // Leve temblor para que el usuario perciba visualmente que se reseteo la fisica
         for (auto& n : red.nodos) {
             n.posicion.x += ((rand() % 100) - 50) * 0.1f;
             n.posicion.y += ((rand() % 100) - 50) * 0.1f;
@@ -974,7 +974,7 @@ void aplicarLayoutArbol(Grafo& red, const Algoritmos::Arbol::PropiedadesArbol& p
     }
 }
 
-// panel de los subpaneles de herramientas
+// desplazamientoel de los subdesplazamientoeles de herramientas
 void subpanelArbol(Interfaz& self, Grafo& red) {
     ImGui::TextColored(ImVec4(0.3f, 0.8f, 0.3f, 1.0f),
         ICON_FA_SITEMAP " ANALISIS DE ARBOL");
@@ -1261,16 +1261,16 @@ void sidebarInfo(Interfaz& self, Grafo& red) {
 
     ImGui::End();
 }
-// panel donde estan las herramientas   que se estan usando es ese momento
+// desplazamientoel donde estan las herramientas   que se estan usando es ese momento
 void panelContextual(Interfaz& self, Grafo& red) {
-    // en modo, maneja su propio panl aparte
+    // en modo, maneja su propio desplazamientol aparte
     if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos) {
-        return; // AeroGrafos tiene su propio panel
+        return; // AeroGrafos tiene su propio desplazamientoel
     }
 
     ImGui::Begin("Algoritmos");
     
-    // menu desplegable de las herramienetas 
+    // menu desplegable de las herramienetas
     const char* items[] = {
         ICON_FA_WRENCH " General",
         ICON_FA_ROUTE " Rutas",
@@ -1414,7 +1414,7 @@ void panelContextual(Interfaz& self, Grafo& red) {
             ImGui::Spacing();
             auto props = Algoritmos::AnalizadorGrafo::analizar(red);
             
-            // Sección Euleriano
+            // Seccion Euleriano
             ImGui::SeparatorText("Circuito Euleriano");
             if (props.es_euleriano) {
                 ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), ICON_FA_CHECK " Es un grafo Euleriano");
@@ -1447,7 +1447,7 @@ void panelContextual(Interfaz& self, Grafo& red) {
             }
 
             ImGui::Spacing();
-            // Sección Hamiltoniano
+            // Seccion Hamiltoniano
             ImGui::SeparatorText("Camino Hamiltoniano");
             ImGui::TextWrapped("Advertencia: NP-Completo. Usa heurística para grafos grandes (>20 nodos).");
             ImGui::Spacing();
