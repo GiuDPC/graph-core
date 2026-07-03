@@ -1,51 +1,9 @@
-#pragma once
-
+#include "interfaz/util/Animacion.hpp"
 #include "imgui.h"
-#include "Easing.h"
-#include "nucleo/tipos/PasoAnimacion.h"
-#include <set>
-#include <map>
-#include <vector>
-#include <cmath>
-#include <algorithm>
-
-// Particula animada que viaja entre nodos
-struct ParticulaAnimacion {
-    bool   activa     = false;
-    ImVec2 pos_inicio;
-    ImVec2 pos_fin;
-    float  progreso   = 0.0f;
-    float  duracion   = 0.3f;
-    ImU32  color      = IM_COL32(0, 255, 200, 255);
-    float  radio      = 6.0f;
-};
 
 namespace Animacion {
 
-// Estado completo de animación
-struct EstadoAnimacion {
-    std::vector<PasoAnimacion> pasos;
-    int         paso_actual       = -1;
-    float       timer_paso        = 0.0f;
-    float       tiempo_entre_pasos = 0.8f; // segundos entre pasos automáticos (AeroGrafos)
-    float       velocidad         = 1.0f;  // multiplicador de velocidad (AeroGrafos)
-    float       velocidad_paso    = 0.5f;  // legacy: usado por modo Grafos original
-    bool        activa            = false;
-    bool        pausada           = false;
-    bool        completa          = false; // true cuando todos los pasos se ejecutaron
-
-    std::set<int> visitados;
-    std::set<int> procesando;
-    std::set<std::pair<int,int>> exploradas;
-    std::set<std::pair<int,int>> confirmadas;
-    std::set<std::pair<int,int>> descartadas;
-
-    ParticulaAnimacion particula;
-    std::map<int, float> tiempo_visita_nodo;
-};
-
-// Resetear animación por completo
-inline void reset(EstadoAnimacion& est) {
+void reset(EstadoAnimacion& est) {
     est.pasos.clear();
     est.paso_actual = -1;
     est.timer_paso = 0.0f;
@@ -63,8 +21,7 @@ inline void reset(EstadoAnimacion& est) {
     est.tiempo_visita_nodo.clear();
 }
 
-// Iniciar una nueva animación
-inline void iniciar(EstadoAnimacion& est, std::vector<PasoAnimacion> pasos) {
+void iniciar(EstadoAnimacion& est, std::vector<PasoAnimacion> pasos) {
     reset(est);
     est.pasos = std::move(pasos);
     est.activa = true;
@@ -74,8 +31,7 @@ inline void iniciar(EstadoAnimacion& est, std::vector<PasoAnimacion> pasos) {
     est.timer_paso = 0.0f;
 }
 
-// Aplicar un paso individual (adelante)
-inline void aplicarPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
+void aplicarPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     switch (p.accion) {
         case PasoAnimacion::VISITAR:
             if (p.nodo_id >= 0) {
@@ -111,8 +67,7 @@ inline void aplicarPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     }
 }
 
-// Retroceder un paso (deshacer el último)
-inline void deshacerPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
+void deshacerPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     switch (p.accion) {
         case PasoAnimacion::VISITAR:
             if (p.nodo_id >= 0) {
@@ -147,8 +102,7 @@ inline void deshacerPaso(EstadoAnimacion& est, const PasoAnimacion& p) {
     }
 }
 
-// Avanzar un paso
-inline void pasoAdelante(EstadoAnimacion& est) {
+void pasoAdelante(EstadoAnimacion& est) {
     if (!est.activa || est.completa) return;
     int siguiente = est.paso_actual + 1;
     if (siguiente >= (int)est.pasos.size()) {
@@ -161,8 +115,7 @@ inline void pasoAdelante(EstadoAnimacion& est) {
     est.timer_paso = 0.0f;
 }
 
-// Retroceder un paso
-inline void pasoAtras(EstadoAnimacion& est) {
+void pasoAtras(EstadoAnimacion& est) {
     if (!est.activa || est.paso_actual < 0) return;
     deshacerPaso(est, est.pasos[est.paso_actual]);
     est.paso_actual--;
@@ -170,8 +123,7 @@ inline void pasoAtras(EstadoAnimacion& est) {
     est.completa = false;
 }
 
-// Avanzar automáticamente según el tiempo transcurrido
-inline void avanzarAuto(EstadoAnimacion& est, float dt) {
+void avanzarAuto(EstadoAnimacion& est, float dt) {
     if (!est.activa || est.pausada || est.completa) return;
     est.timer_paso += dt * est.velocidad;
     float intervalo = est.tiempo_entre_pasos;
@@ -181,27 +133,23 @@ inline void avanzarAuto(EstadoAnimacion& est, float dt) {
     }
 }
 
-// Obtener descripción del paso actual
-inline std::string obtenerDescripcion(EstadoAnimacion& est) {
+std::string obtenerDescripcion(EstadoAnimacion& est) {
     if (est.paso_actual < 0 || est.paso_actual >= (int)est.pasos.size())
         return "";
     return est.pasos[est.paso_actual].descripcion;
 }
 
-// Obtener progreso 0..1
-inline float obtenerProgreso(EstadoAnimacion& est) {
+float obtenerProgreso(EstadoAnimacion& est) {
     if (est.pasos.empty()) return 0.0f;
     return (float)(est.paso_actual + 1) / (float)est.pasos.size();
 }
 
-// Pausar/reanudar animación
-inline void pausar(EstadoAnimacion& est) {
+void pausar(EstadoAnimacion& est) {
     if (!est.activa || est.completa) return;
     est.pausada = !est.pausada;
 }
 
-// Saltar al final
-inline void completar(EstadoAnimacion& est) {
+void completar(EstadoAnimacion& est) {
     while (!est.completa) pasoAdelante(est);
 }
 

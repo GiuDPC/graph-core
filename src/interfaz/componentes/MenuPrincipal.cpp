@@ -1,16 +1,13 @@
-#pragma once
-
-#include <fstream>
-#include "interfaz/Interfaz.hpp"
+#include "interfaz/componentes/MenuPrincipal.hpp"
+#include "Interfaz.hpp"
 #include "persistencia/SerializadorJSON.h"
 #include "persistencia/SerializadorGEXF.h"
 #include "portable-file-dialogs.h"
 #include "audio/Sonidos.h"
 
-// menu principal: archivo, opciones, acerca de
 namespace MenuPrincipal {
 
-inline void contenido(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
+void contenido(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
     if (ImGui::MenuItem(ICON_FA_FILE_CIRCLE_PLUS " Nuevo Proyecto")) {
         red.limpiar();
         Animacion::reset(self.estado_grafos.anim_estado);
@@ -96,8 +93,7 @@ inline void contenido(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
     }
 }
 
-// mantiene compatibilidad con codigo que use BeginMainMenuBar
-inline void dibujar(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
+void dibujar(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
     if (ImGui::BeginMainMenuBar()) {
         contenido(self, red, ventana);
         ImGui::EndMainMenuBar();

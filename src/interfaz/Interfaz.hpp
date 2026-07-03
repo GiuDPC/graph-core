@@ -10,7 +10,7 @@
 #include "estado/EstadoUI.hpp"
 #include "nucleo/HistorialGrafos.hpp"
 #include "audio/Sonidos.h"
-#include "interfaz/util/Animacion.h"
+#include "interfaz/util/Animacion.hpp"
 #include <GLFW/glfw3.h>
 
 extern Sonidos g_sonidos;

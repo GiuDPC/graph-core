@@ -10,7 +10,7 @@ using json = nlohmann::json;
 // Serializacion json — separado del grafo
 namespace Persistencia {
 
-bool guardar(const Grafo& g, const std::string& ruta) {
+inline bool guardar(const Grafo& g, const std::string& ruta) {
     json j;
     j["version"] = "3.0";
     j["contador_ids"] = g.contador_ids;
@@ -38,7 +38,7 @@ bool guardar(const Grafo& g, const std::string& ruta) {
     return true;
 }
 
-bool cargar(Grafo& g, const std::string& ruta) {
+inline bool cargar(Grafo& g, const std::string& ruta) {
     std::ifstream archivo(ruta);
     if (!archivo.is_open()) return false;
 

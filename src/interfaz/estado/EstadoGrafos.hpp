@@ -12,7 +12,7 @@
 #include "nucleo/algoritmos/Planaridad.hpp"
 #include "nucleo/algoritmos/Planaridad.hpp"
 #include "nucleo/algoritmos/ColorFractal.hpp"
-#include "interfaz/util/Animacion.h"
+#include "interfaz/util/Animacion.hpp"
 
 struct EstadoGrafos {
     enum class ModoPanel {

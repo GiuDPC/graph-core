@@ -1,12 +1,10 @@
-#pragma once
-
-#include "interfaz/Interfaz.hpp"
+#include "interfaz/componentes/Dialogos.hpp"
+#include "Interfaz.hpp"
 #include "persistencia/SerializadorJSON.h"
+#include "interfaz/util/Animacion.hpp"
 
-// Diálogos modales: Acerca de, fallback de carga/guardado
 namespace Dialogos {
 
-// ── Modal "Acerca de" ─────────────────────────────────────────────────────
 void acercaDe() {
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -15,7 +13,6 @@ void acercaDe() {
     if (ImGui::BeginPopupModal("Acerca de", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
         ImGui::Spacing();
         
-        // Titulo
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.9f, 0.7f, 1.0f));
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graphCore").x) * 0.5f);
         ImGui::Text("graphCore");
@@ -28,7 +25,6 @@ void acercaDe() {
         ImGui::Separator();
         ImGui::Spacing();
         
-        // Descripcion
         ImGui::TextWrapped(
             "Motor avanzado de visualizacion y analisis de grafos y redes. "
             "Incluye algoritmos de caminos minimos, arboles de expansion, "
@@ -39,7 +35,6 @@ void acercaDe() {
         ImGui::Separator();
         ImGui::Spacing();
         
-        // Tecnologias
         ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.65f, 1.0f), ICON_FA_MICROCHIP " Stack tecnologico:");
         ImGui::BulletText("C++17 con ImGui (Docking)");
         ImGui::BulletText("OpenGL 3.3 + GLFW");
@@ -50,7 +45,6 @@ void acercaDe() {
         ImGui::Separator();
         ImGui::Spacing();
         
-        // Algoritmos
         ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.65f, 1.0f), ICON_FA_GEARS " Algoritmos implementados:");
         ImGui::BulletText("Dijkstra, BFS, DFS");
         ImGui::BulletText("Kruskal, Prim (MST)");
@@ -62,7 +56,6 @@ void acercaDe() {
         ImGui::Separator();
         ImGui::Spacing();
         
-        // Boton cerrar centrado
         float btn_w = 120.0f;
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - btn_w) * 0.5f);
         if (ImGui::Button(ICON_FA_CHECK " Cerrar", ImVec2(btn_w, 32))) {
@@ -74,8 +67,7 @@ void acercaDe() {
     }
 }
 
-// ── Fallback de carga (cuando pfd falla) ──────────────────────────────────
-inline void fallbackCargar(Interfaz& self, Grafo& red) {
+void fallbackCargar(Interfaz& self, Grafo& red) {
     if (ImGui::BeginPopupModal("FallbackCargar", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("No se pudo abrir el dialogo del sistema.");
         ImGui::Text("Escribi la ruta del archivo .json manualmente:");
@@ -99,8 +91,7 @@ inline void fallbackCargar(Interfaz& self, Grafo& red) {
     }
 }
 
-// ── Fallback de guardado (cuando pfd falla) ───────────────────────────────
-inline void fallbackGuardar(Interfaz& self, Grafo& red) {
+void fallbackGuardar(Interfaz& self, Grafo& red) {
     if (ImGui::BeginPopupModal("FallbackGuardar", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("No se pudo abrir el dialogo del sistema.");
         ImGui::Text("Asegurate de que la ruta sea valida o relativa al binario:");

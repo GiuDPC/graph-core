@@ -1,9 +1,9 @@
 #include "LienzoRed.hpp"
 #include "Interfaz.hpp"
 #include "nucleo/SimuladorRed.h"
-#include "interfaz/util/Easing.h"
-#include "interfaz/util/Animacion.h"
-#include "interfaz/util/AnimacionUI.h"
+#include "interfaz/util/Easing.hpp"
+#include "interfaz/util/Animacion.hpp"
+#include "interfaz/util/AnimacionUI.hpp"
 #include "IconsFontAwesome6.h"
 #include <cmath>
 #include <unordered_set>

@@ -1,12 +1,10 @@
-#pragma once
-
-#include "interfaz/Interfaz.hpp"
+#include "interfaz/componentes/StatusBar.hpp"
+#include "Interfaz.hpp"
 #include "audio/Sonidos.h"
 
-// Barra de estado inferior — modo actual, FPS, simulacion, audio
 namespace StatusBar {
 
-inline void dibujar(Interfaz& self) {
+void dibujar(Interfaz& self) {
     ImGuiViewport* vp = ImGui::GetMainViewport();
     float bar_h = 26.0f;
     float bar_w = vp->WorkSize.x;

@@ -4,7 +4,7 @@
 #include "nucleo/datos/DatosMundo.hpp"
 #include "nucleo/tipos/PasoAnimacion.h"
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
-#include "interfaz/util/Animacion.h"
+#include "interfaz/util/Animacion.hpp"
 #include <vector>
 #include <string>
 

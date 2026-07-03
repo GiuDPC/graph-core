@@ -117,6 +117,14 @@ add_library(graph-core-lib STATIC
     src/interfaz/paneles/Matrices.cpp
     src/interfaz/lienzo/LienzoRed.cpp
     src/interfaz/lienzo/LienzoAeroGrafos.cpp
+    src/interfaz/componentes/Dialogos.cpp
+    src/interfaz/componentes/MenuPrincipal.cpp
+    src/interfaz/componentes/StatusBar.cpp
+    src/interfaz/componentes/Toolbar.cpp
+    src/interfaz/util/Animacion.cpp
+    src/interfaz/util/AnimacionUI.cpp
+    src/interfaz/util/AtajosTeclado.cpp
+    src/interfaz/ventanas/VentanaAyuda.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC

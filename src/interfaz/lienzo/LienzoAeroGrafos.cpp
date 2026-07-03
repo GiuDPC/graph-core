@@ -5,7 +5,7 @@
 #include "nucleo/datos/DatosMundo.hpp"
 #include "interfaz/estado/EstadoAeroGrafos.hpp"
 #include "interfaz/util/TextureLoader.h"
-#include "interfaz/util/Easing.h"
+#include "interfaz/util/Easing.hpp"
 #include "audio/Sonidos.h"
 #include <cmath>
 #include <algorithm>

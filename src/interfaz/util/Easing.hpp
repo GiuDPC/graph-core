@@ -38,4 +38,4 @@ inline float easeOutElastic(float t) {
     return powf(2.0f, -10.0f * t) * sinf((t * 10.0f - 0.75f) * c4) + 1.0f;
 }
 
-} 
+}

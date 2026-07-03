@@ -1,16 +1,10 @@
-#pragma once
-
+#include "interfaz/util/AnimacionUI.hpp"
+#include "Interfaz.hpp"
 #include "audio/Sonidos.h"
-#include "interfaz/util/Animacion.h"
-#include "nucleo/tipos/PasoAnimacion.h"
-#include <vector>
 
-class Interfaz;
-
-// Wrappers de animación que agregan sonido y log y efectos visuales
 namespace AnimacionUI {
 
-inline void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
+void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
     Animacion::iniciar(self.estado_grafos.anim_estado, std::move(pasos));
     if (!self.estado_grafos.anim_estado.pasos.empty()) {
         self.registrarLog("🎬 Animación iniciada: " +
@@ -19,7 +13,7 @@ inline void iniciar(Interfaz& self, std::vector<PasoAnimacion> pasos) {
     }
 }
 
-inline void finalizar(Interfaz& self) {
+void finalizar(Interfaz& self) {
     if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)
         g_sonidos.reproducir(Sonidos::TRIUNFO_DIJKSTRA);
     else
@@ -28,7 +22,7 @@ inline void finalizar(Interfaz& self) {
         std::to_string(self.estado_grafos.anim_estado.pasos.size()) + " pasos)");
 }
 
-inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
+void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
     Animacion::aplicarPaso(self.estado_grafos.anim_estado, p);
 
     if (self.estado_grafos.anim_estado.velocidad_paso < 0.15f) {
@@ -46,7 +40,7 @@ inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
                 break;
             case PasoAnimacion::EXPLORAR:
                 if (self.estado_ui.modo_actual == Interfaz::ModoApp::AeroGrafos)
-                    g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO); // Placeholder, se reemplazara
+                    g_sonidos.reproducir(Sonidos::PAQUETE_ENVIADO);
                 else
                     g_sonidos.reproducir(Sonidos::VISITAR_NODO);
                 break;
@@ -67,7 +61,7 @@ inline void aplicarPaso(Interfaz& self, const PasoAnimacion& p) {
     if (!p.descripcion.empty()) self.registrarLog(p.descripcion);
 }
 
-inline void reset(Interfaz& self) {
+void reset(Interfaz& self) {
     Animacion::reset(self.estado_grafos.anim_estado);
     self.registrarLog("⏹ Animación reiniciada");
 }

@@ -1,20 +1,20 @@
 #include "Interfaz.hpp"
 
 // UI module includes — moved here to break compile coupling
-#include "interfaz/componentes/MenuPrincipal.h"
-#include "interfaz/componentes/StatusBar.h"
-#include "interfaz/componentes/Dialogos.h"
-#include "interfaz/componentes/Toolbar.h"
-#include "interfaz/componentes/LogPanel.h"
+#include "interfaz/componentes/MenuPrincipal.hpp"
+#include "interfaz/componentes/StatusBar.hpp"
+#include "interfaz/componentes/Dialogos.hpp"
+#include "interfaz/componentes/Toolbar.hpp"
+#include "interfaz/componentes/LogPanel.hpp"
 #include "interfaz/paneles/PanelGrafos.hpp"
 #include "interfaz/paneles/PanelAeroGrafos.hpp"
 #include "interfaz/paneles/PanelIsomorfismo.hpp"
 #include "interfaz/paneles/Matrices.hpp"
 #include "interfaz/lienzo/LienzoRed.hpp"
 #include "interfaz/lienzo/LienzoAeroGrafos.hpp"
-#include "interfaz/util/AnimacionUI.h"
-#include "interfaz/util/AtajosTeclado.h"
-#include "interfaz/ventanas/VentanaAyuda.h"
+#include "interfaz/util/AnimacionUI.hpp"
+#include "interfaz/util/AtajosTeclado.hpp"
+#include "interfaz/ventanas/VentanaAyuda.hpp"
 
 // Algorithm headers needed in dibujar()
 #include "nucleo/algoritmos/Dijkstra.hpp"

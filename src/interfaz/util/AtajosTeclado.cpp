@@ -1,17 +1,16 @@
-#pragma once
+#include "interfaz/util/AtajosTeclado.hpp"
 #include "../../nucleo/Grafo.hpp"
 #include "../../nucleo/HistorialGrafos.hpp"
 #include "../estado/EstadoUI.hpp"
 #include "../estado/EstadoGrafos.hpp"
 #include <imgui.h>
-#include <vector>
 
 namespace AtajosTeclado {
 
-inline void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos& estado_grafos) {
+void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos& estado_grafos) {
     ImGuiIO& io = ImGui::GetIO();
     
-    if (io.WantTextInput) return; // Si estamos escribiendo en un input, ignorar atajos
+    if (io.WantTextInput) return;
 
     bool ctrl  = io.KeyCtrl;
     bool shift = io.KeyShift;
@@ -19,8 +18,6 @@ inline void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, Estad
     // [Ctrl+Z] → Deshacer
     if (ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_Z)) {
         if (historial.deshacer(red)) {
-            // Se asume que el logger o sonidos están disponibles en otro lado si se necesitan,
-            // pero podemos limpiar estados si deshacemos
             ui.nodo_seleccionado = -1;
             ui.nodo_hover = -1;
         }
@@ -58,8 +55,7 @@ inline void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, Estad
     
     // [Ctrl+A] → Seleccionar todos los nodos
     if (ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_A)) {
-        // En este grafo, la selección suele ser de un solo nodo (nodo_seleccionado).
-        // Si hay una selección múltiple implementada, iría aquí.
+        // placeholder
     }
 }
 

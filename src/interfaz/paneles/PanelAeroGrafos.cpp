@@ -11,7 +11,7 @@
 #include "nucleo/algoritmos/Coloreo.hpp"
 #include "nucleo/algoritmos/EulerHamilton.hpp"
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
-#include "interfaz/util/Animacion.h"
+#include "interfaz/util/Animacion.hpp"
 #include <cmath>
 
 // ── Helper functions in anonymous namespace ──
