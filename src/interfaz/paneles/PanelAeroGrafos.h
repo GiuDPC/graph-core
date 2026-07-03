@@ -10,6 +10,7 @@
 #include "nucleo/algoritmos/DFS.h"
 #include "nucleo/algoritmos/Coloreo.h"
 #include "nucleo/algoritmos/EulerHamilton.h"
+#include "nucleo/algoritmos/AnalizadorGrafo.h"
 #include <cmath>
 #include "interfaz/estado/EstadoAeroGrafos.h"
 
@@ -489,27 +490,34 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 break;
             }
             case EstadoAeroGrafos::Algoritmo::AnalizarRed: {
-                int n = (int)g.nodos.size();
-                int m = (int)g.aristas.size();
-                // Calcular grado promedio
-                std::vector<int> grado(n, 0);
-                for (const auto& a : g.aristas) {
-                    grado[a.origen_id]++;
-                    grado[a.destino_id]++;
-                }
-                float grado_prom = 0;
-                int min_grado = n, max_grado = 0, id_min=0, id_max=0;
-                for (int i = 0; i < n; i++) {
-                    grado_prom += grado[i];
-                    if (grado[i] < min_grado) { min_grado = grado[i]; id_min = i; }
-                    if (grado[i] > max_grado) { max_grado = grado[i]; id_max = i; }
-                }
-                grado_prom /= n;
+                auto analisis = Algoritmos::AnalizadorGrafo::analisisDetallado(g);
                 const auto& c = DatosMundo::obtenerCiudades();
-                char buf[512];
+                
+                // Guardar para el popup detallado
+                estado.analisis_cache_detallado = analisis;
+
+                char buf[1024];
+                int hub_id = analisis.id_hub_max;
+                const char* hub_nombre = (hub_id >= 0 && hub_id < (int)c.size()) ? c[hub_id].codigo_iata : "?";
+                int min_id = analisis.id_hub_min;
+                const char* min_nombre = (min_id >= 0 && min_id < (int)c.size()) ? c[min_id].codigo_iata : "?";
+
                 snprintf(buf, sizeof(buf),
-                    ICON_FA_MAGNIFYING_GLASS " ANALISIS DE LA RED (Escaneando...)\n"
-                    "  Espere mientras se completa el barrido global.");
+                    ICON_FA_MAGNIFYING_GLASS " ANALISIS GLOBAL DE RED\n"
+                    "  Ciudades: %d  |  Rutas: %d  |  Densidad: %.2f%%\n"
+                    "  Grado prom: %.1f  |  Max hub: %s (%d)  |  Min: %s (%d)\n"
+                    "  Componentes: %d  |  Diametro aprox: %.0f saltos\n"
+                    "  Clustering: %.2f  |  Conectada: %.1f%%\n"
+                    "  %s%s%s%s",
+                    analisis.num_nodos, analisis.num_aristas, analisis.densidad * 100.0f,
+                    analisis.grado_promedio, hub_nombre, analisis.grado_max, min_nombre, analisis.grado_min,
+                    analisis.num_componentes, analisis.diametro_aproximado,
+                    analisis.coeficiente_clustering_global,
+                    analisis.proporcion_conectada * 100.0f,
+                    analisis.es_conexo ? "Conexo ✓" : "Disconexo",
+                    analisis.es_arbol ? " | Arbol" : "",
+                    analisis.es_completo ? " | Completo" : "",
+                    analisis.es_regular ? " | Regular" : "");
                 estado.descripcion_resultado = buf;
                 
                 estado.algoritmo_ejecutado = true;
@@ -517,23 +525,25 @@ inline void dibujar(Interfaz& self, Grafo& red) {
                 estado.orden_visita.clear();
                 estado.aristas_mst.clear();
 
+                // Animacion rapida tipo scanner (solo si modo animacion activo)
                 if (estado.modo_animacion) {
                     std::vector<PasoAnimacion> pasos;
-                    for(int i=0; i<n; i++) {
+                    for (int i = 0; i < std::min(analisis.num_nodos, 100); i++) {
                         PasoAnimacion p;
                         p.accion = PasoAnimacion::COLOREAR;
-                        p.nodo_id = i;
+                        p.nodo_id = g.nodos[i % g.nodos.size()].id;
                         p.color_asignado = 5;
-                        p.descripcion = std::string("Radar escaneando red global... Analizando nodo ") + c[i].codigo_iata;
+                        p.descripcion = std::string("Escaneando red... ") + c[i % c.size()].codigo_iata;
                         pasos.push_back(p);
                     }
                     Animacion::iniciar(estado.animacion, pasos);
-                    estado.animacion.velocidad = 3.0f; // Animacion rapida para que parezca radar
+                    estado.animacion.velocidad = 4.0f;
+                } else {
+                    // Sin animacion: marcar como completa para que el popup aparezca
+                    estado.animacion.completa = true;
                 }
                 
-                // Guardamos los datos para el popup que se abrirá después
-                estado.analisis_cache = {n, m, grado_prom, c[id_max].nombre, c[id_max].codigo_iata, max_grado, c[id_min].nombre, c[id_min].codigo_iata, min_grado};
-
+                estado.mostrar_popup_analisis = true; // Abrir popup al completar
                 break;
             }
         }
@@ -653,9 +663,59 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.1f, 0.15f, 0.4f));
         ImGui::BeginChild("panel_resultado", ImVec2(0, 0), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Borders);
         ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.6f, 1.0f), "%s", "RESULTADO");
-        ImGui::PushTextWrapPos(0.0f);
-        ImGui::TextWrapped("%s", estado.descripcion_resultado.c_str());
-        ImGui::PopTextWrapPos();
+
+        // Mostrar análisis en formato dashboard si es AnalizarRed
+        if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed) {
+            const auto& a = estado.analisis_cache_detallado;
+            const auto& ciudades = DatosMundo::obtenerCiudades();
+            ImGui::PushTextWrapPos(0.0f);
+            ImGui::TextWrapped("%s", estado.descripcion_resultado.c_str());
+            ImGui::PopTextWrapPos();
+            ImGui::Spacing();
+            
+            // Mini dashboard
+            if (ImGui::BeginTable("dashboard_mini", 2, ImGuiTableFlags_RowBg)) {
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+
+                auto fila = [](const char* label, const char* val) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("%s", label);
+                    ImGui::TableSetColumnIndex(1); ImGui::Text("%s", val);
+                };
+                char buf[64];
+                snprintf(buf, sizeof(buf), "%d | %d (%.2f%%)", a.num_nodos, a.num_aristas, a.densidad*100.0f);
+                fila("Nodos | Aristas", buf);
+                snprintf(buf, sizeof(buf), "%.1f (max: %d, min: %d)", a.grado_promedio, a.grado_max, a.grado_min);
+                fila("Grado prom", buf);
+                
+                const char* hub = (a.id_hub_max >= 0 && a.id_hub_max < (int)ciudades.size()) ? ciudades[a.id_hub_max].codigo_iata : "?";
+                snprintf(buf, sizeof(buf), "%s (%d)", hub, a.grado_max);
+                fila("Hub mayor", buf);
+                
+                snprintf(buf, sizeof(buf), "%d componente(s), diam: %.0f", a.num_componentes, a.diametro_aproximado);
+                fila("Conectividad", buf);
+                
+                snprintf(buf, sizeof(buf), "%.1f%% en componente gigante", a.proporcion_conectada*100.0f);
+                fila("Cobertura", buf);
+
+                snprintf(buf, sizeof(buf), "%.3f", a.coeficiente_clustering_global);
+                fila("Clustering", buf);
+
+                ImGui::EndTable();
+            }
+
+            ImGui::Spacing();
+            ImGui::TextDisabled("Abrir popup para informe completo");
+            if (ImGui::Button(ICON_FA_UP_RIGHT_FROM_SQUARE " Ver informe completo", ImVec2(-1, 28))) {
+                estado.mostrar_popup_analisis = true;
+                ImGui::OpenPopup("Reporte Global de Red");
+            }
+        } else {
+            ImGui::PushTextWrapPos(0.0f);
+            ImGui::TextWrapped("%s", estado.descripcion_resultado.c_str());
+            ImGui::PopTextWrapPos();
+        }
 
         // Mostrar información adicional según el algoritmo
         if (!estado.ruta_resultado.empty()) {
@@ -800,27 +860,9 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     // Popup Modal Analizar Red
     if (estado.algoritmo_activo == EstadoAeroGrafos::Algoritmo::AnalizarRed &&
         estado.algoritmo_ejecutado &&
-        estado.animacion.completa && !estado.mostrar_popup_analisis) {
+        (estado.animacion.completa || !estado.modo_animacion) && estado.mostrar_popup_analisis) {
         
-        // Actualizar el texto del panel derecho
-        char buf[512];
-        float densidad = 0;
-        if (estado.analisis_cache.n > 1) {
-            densidad = (2.0f * estado.analisis_cache.m) / (estado.analisis_cache.n * (estado.analisis_cache.n - 1.0f));
-        }
-        snprintf(buf, sizeof(buf),
-            ICON_FA_MAGNIFYING_GLASS " ANALISIS COMPLETADO\n"
-            "  Ciudades: %d\n  Rutas: %d\n  Grado prom: %.1f\n"
-            "  Mayor hub: %s (%s) con %d rutas\n"
-            "  Menor hub: %s (%s) con %d rutas\n"
-            "  Densidad: %.4f",
-            estado.analisis_cache.n, estado.analisis_cache.m, estado.analisis_cache.grado_prom,
-            estado.analisis_cache.hub_max_nombre.c_str(), estado.analisis_cache.hub_max_iata.c_str(), estado.analisis_cache.max_grado,
-            estado.analisis_cache.hub_min_nombre.c_str(), estado.analisis_cache.hub_min_iata.c_str(), estado.analisis_cache.min_grado,
-            densidad);
-        estado.descripcion_resultado = buf;
-        
-        estado.mostrar_popup_analisis = true;
+        estado.mostrar_popup_analisis = false;
         ImGui::OpenPopup("Reporte Global de Red");
     }
 
@@ -829,42 +871,106 @@ inline void dibujar(Interfaz& self, Grafo& red) {
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
     if (ImGui::BeginPopupModal("Reporte Global de Red", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        const auto& a = estado.analisis_cache_detallado;
+        const auto& ciudades = DatosMundo::obtenerCiudades();
+        
         ImGui::SetWindowFontScale(1.2f);
-        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "%s ANALISIS TOPOLOGICO FINALIZADO", ICON_FA_GLOBE);
+        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "%s ANALISIS TOPOLOGICO COMPLETO", ICON_FA_GLOBE);
         ImGui::SetWindowFontScale(1.0f);
         ImGui::Separator();
         ImGui::Spacing();
-        
-        ImGui::Text("Ciudades Escaneadas: %d", estado.analisis_cache.n);
-        ImGui::Text("Rutas Totales: %d", estado.analisis_cache.m);
-        ImGui::Text("Grado Promedio: %.1f aerografos por ciudad", estado.analisis_cache.grado_prom);
-        
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s Hub Principal Global (El mas conectado):", ICON_FA_STAR);
-        ImGui::Text("   %s (%s) - %d conexiones", estado.analisis_cache.hub_max_nombre.c_str(), estado.analisis_cache.hub_max_iata.c_str(), estado.analisis_cache.max_grado);
-        
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s Cuello de Botella (Aislamiento Extremo):", ICON_FA_TRIANGLE_EXCLAMATION);
-        ImGui::Text("   %s (%s) - %d conexiones", estado.analisis_cache.hub_min_nombre.c_str(), estado.analisis_cache.hub_min_iata.c_str(), estado.analisis_cache.min_grado);
-        
-        ImGui::Spacing();
-        float densidad = 0;
-        if (estado.analisis_cache.n > 1) {
-            densidad = (2.0f * estado.analisis_cache.m) / (estado.analisis_cache.n * (estado.analisis_cache.n - 1.0f));
+
+        // ── Métricas principales en tabla ──
+        if (ImGui::BeginTable("tabla_analisis", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+            ImGui::TableSetupColumn("Metrica", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+            ImGui::TableSetupColumn("Valor", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+
+            auto fila = [](const char* label, const char* valor, ImVec4 col_valor) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", label);
+                ImGui::TableSetColumnIndex(1); ImGui::TextColored(col_valor, "%s", valor);
+            };
+
+            char buf[64];
+            snprintf(buf, sizeof(buf), "%d", a.num_nodos); fila(ICON_FA_CIRCLE " Nodos", buf, ImVec4(0.5f, 0.8f, 1.0f, 1.0f));
+            snprintf(buf, sizeof(buf), "%d", a.num_aristas); fila(ICON_FA_LINK " Aristas", buf, ImVec4(0.5f, 0.8f, 1.0f, 1.0f));
+            snprintf(buf, sizeof(buf), "%.2f%%", a.densidad * 100.0f); fila(ICON_FA_BEZIER_CURVE " Densidad", buf, a.densidad > 0.5f ? ImVec4(0.0f, 1.0f, 0.5f, 1.0f) : ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+            snprintf(buf, sizeof(buf), "%.1f", a.grado_promedio); fila(ICON_FA_GRIP_LINES " Grado promedio", buf, ImVec4(0.5f, 1.0f, 0.5f, 1.0f));
+            snprintf(buf, sizeof(buf), "%.2f", a.grado_desviacion); fila(ICON_FA_CHART_LINE " Desviacion estandar", buf, ImVec4(0.8f, 0.6f, 1.0f, 1.0f));
+            
+            const char* hub = (a.id_hub_max >= 0 && a.id_hub_max < (int)ciudades.size()) 
+                ? ciudades[a.id_hub_max].codigo_iata : "?";
+            snprintf(buf, sizeof(buf), "%s (%d)", hub, a.grado_max); 
+            fila(ICON_FA_STAR " Hub maximo", buf, ImVec4(1.0f, 0.8f, 0.2f, 1.0f));
+            
+            const char* min_hub = (a.id_hub_min >= 0 && a.id_hub_min < (int)ciudades.size())
+                ? ciudades[a.id_hub_min].codigo_iata : "?";
+            snprintf(buf, sizeof(buf), "%s (%d)", min_hub, a.grado_min);
+            fila(ICON_FA_TRIANGLE_EXCLAMATION " Hub minimo", buf, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+            
+            snprintf(buf, sizeof(buf), "%d", a.num_componentes); 
+            fila(ICON_FA_OBJECT_GROUP " Componentes conexos", buf, a.es_conexo ? ImVec4(0.0f, 1.0f, 0.5f, 1.0f) : ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
+            
+            snprintf(buf, sizeof(buf), "%.0f", a.diametro_aproximado); fila(ICON_FA_MAXIMIZE " Diametro aprox", buf, ImVec4(0.2f, 0.8f, 1.0f, 1.0f));
+            snprintf(buf, sizeof(buf), "%.3f", a.coeficiente_clustering_global); fila(ICON_FA_OBJECT_GROUP " Clustering global", buf, ImVec4(0.5f, 0.9f, 0.7f, 1.0f));
+            snprintf(buf, sizeof(buf), "%.1f%%", a.proporcion_conectada * 100.0f); fila(ICON_FA_WIFI " Nodos en componente gigante", buf, ImVec4(0.3f, 1.0f, 0.8f, 1.0f));
+
+            ImGui::EndTable();
         }
-        ImGui::Text("Densidad de Red: %.2f%%", densidad * 100.0f);
-        if (densidad < 0.1f) {
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Red dispersa - Tipica del mundo real con distribucion de Pareto)");
-        }
+
+        ImGui::Spacing();
+        
+        // ── Clasificación del grafo ──
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "%s CLASIFICACION DEL GRAFO:", ICON_FA_TAGS);
+        ImGui::Spacing();
+
+        auto badge = [](const char* icono, const char* txt, bool activo, ImVec4 col_on) {
+            if (activo) {
+                ImGui::SameLine();
+                ImGui::TextColored(col_on, "%s %s", icono, txt);
+            }
+        };
+        
+        ImGui::Text("%s ", ICON_FA_CHECK);
+        badge(ICON_FA_CHECK, "Conexo", a.es_conexo, ImVec4(0.0f, 1.0f, 0.5f, 1.0f));
+        badge(ICON_FA_XMARK, "Disconexo", !a.es_conexo, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+        badge(ICON_FA_TREE, "Arbol", a.es_arbol, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));
+        badge(ICON_FA_STAR, "Completo", a.es_completo, ImVec4(1.0f, 0.8f, 0.0f, 1.0f));
+        badge(ICON_FA_SLIDERS, "Regular", a.es_regular, ImVec4(0.5f, 0.5f, 1.0f, 1.0f));
         
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
+
+        // ── Interpretación ──
+        ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "%s INTERPRETACION:", ICON_FA_LIGHTBULB);
+        ImGui::PushTextWrapPos(0.0f);
+        if (a.densidad < 0.05f) {
+            ImGui::TextWrapped("Red dispersa (tipica de aerolineas). Pocas rutas directas comparado con el maximo posible. La mayoria de ciudades necesitan escalas.");
+        } else if (a.densidad < 0.2f) {
+            ImGui::TextWrapped("Red semidensa. Hay buena conectividad pero siguen existiendo ciudades poco conectadas.");
+        } else {
+            ImGui::TextWrapped("Red densa. Casi todas las ciudades estan fuertemente interconectadas.");
+        }
         
-        if (ImGui::Button("Cerrar y Volver", ImVec2(200, 35))) {
+        if (!a.es_conexo) {
+            ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "Hay %d componentes desconectados. Existen ciudades a las que no se puede llegar desde otras.", a.num_componentes);
+        }
+        
+        if (a.grado_desviacion > a.grado_promedio) {
+            ImGui::TextWrapped("Alta heterogeneidad (desv=%.1f). La red tiene hubs muy dominantes y muchas ciudades con pocas conexiones.", a.grado_desviacion);
+        }
+        ImGui::PopTextWrapPos();
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        if (ImGui::Button(ICON_FA_CHECK " Cerrar y Volver", ImVec2(220, 38))) {
             estado.mostrar_popup_analisis = false;
-            // Evitar que el popup vuelva a abrirse hasta la proxima ejecucion reseteando la animacion
-            estado.animacion.completa = false; 
+            estado.animacion.completa = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();

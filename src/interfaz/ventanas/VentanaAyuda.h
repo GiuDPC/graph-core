@@ -13,7 +13,7 @@ struct VentanaAyuda {
         
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.08f, 0.08f, 0.11f, 0.98f));
-        if (ImGui::Begin(ICON_FA_BOOK_OPEN " Enciclopedia OptiClusters PRO", &ui.mostrar_ventana_ayuda, ImGuiWindowFlags_NoCollapse)) {
+        if (ImGui::Begin(ICON_FA_BOOK_OPEN " Enciclopedia GraphCore", &ui.mostrar_ventana_ayuda, ImGuiWindowFlags_NoCollapse)) {
             
             if (ImGui::BeginTable("split_ayuda", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
                 ImGui::TableSetupColumn("nav", ImGuiTableColumnFlags_WidthFixed, 220.0f);
@@ -167,11 +167,11 @@ private:
     // secciones
 
     static void secIntroduccion() {
-        titulo(ICON_FA_HOUSE " Bienvenido a OptiClusters PRO");
-        ImGui::TextWrapped("OptiClusters es un entorno profesional avanzado para el analisis visual, simulacion termodinamica y resolucion de algoritmos sobre Grafos Matematicos y Redes Computacionales Globales.");
+        titulo(ICON_FA_HOUSE " Bienvenido a GraphCore");
+        ImGui::TextWrapped("GraphCore es un entorno profesional avanzado para el analisis visual, simulacion termodinamica y resolucion de algoritmos sobre Grafos Matematicos y Redes Computacionales Globales.");
         ImGui::Spacing();
         
-        subtitulo("El Enfoque Dual de OptiClusters");
+        subtitulo("El Enfoque Dual de GraphCore");
         ImGui::TextWrapped("El software se divide estructuralmente en dos motores independientes, seleccionables desde la barra superior:");
         bullet_text_wrapped("Modo Grafos Libres (Laboratorio Abstracto): Lienzo en blanco, sin restricciones fisicas. Aqui puedes crear desde cero cualquier estructura topologica, aplicar fuerzas fisicas (ForceAtlas2) para desenredarlos, buscar isomorfismos o aplicar coloreos.");
         bullet_text_wrapped("Modo AeroGrafos (Simulador Logistico Real): Carga una red fija de 63 aeropuertos mundiales reales usando coordenadas geograficas de satelite. Aplica distancias ortodromicas (curvatura terrestre) para encontrar rutas con Dijkstra o Kruskal, enfrentandote a crisis geopoliticas.");
@@ -214,7 +214,7 @@ private:
     static void secAeroGrafos() {
         titulo(ICON_FA_PLANE " Modo AeroGrafos: Simulacion Terrestre Avanzada");
         
-        ImGui::TextWrapped("El Modo AeroGrafos transforma OptiClusters en un Centro de Control Logistico Global (ATC). El motor grafico proyecta la Tierra utilizando proyeccion equirectangular, mapeando 63 'Hubs' (los aeropuertos internacionales mas masivos del mundo).");
+        ImGui::TextWrapped("El Modo AeroGrafos transforma GraphCore en un Centro de Control Logistico Global (ATC). El motor grafico proyecta la Tierra utilizando proyeccion equirectangular, mapeando 63 'Hubs' (los aeropuertos internacionales mas masivos del mundo).");
         ImGui::Spacing();
         
         subtitulo("Matematica de Curvatura (Formula del Semiverseno)");
@@ -343,7 +343,7 @@ private:
         ImGui::Spacing();
         
         subtitulo("Teoria: Greedy (Voraz)");
-        ImGui::TextWrapped("OptiClusters revisa a los vecinos de un nodo: 'Si no usan Rojo, te pinto Rojo. Si ya lo usan, pruebo Azul. Si todos estan ocupados, invento Verde'. Es local (no planea a futuro), pero es veloz.");
+        ImGui::TextWrapped("GraphCore revisa a los vecinos de un nodo: 'Si no usan Rojo, te pinto Rojo. Si ya lo usan, pruebo Azul. Si todos estan ocupados, invento Verde'. Es local (no planea a futuro), pero es veloz.");
         ImGui::Spacing();
         
         subtitulo("Guia de Interfaz (Modo Grafos Libres)");
@@ -361,7 +361,7 @@ private:
         
         subtitulo("Camino Euleriano: La Perfeccion de las Aristas");
         bullet_text_wrapped("Mision: Caminar por TODAS las aristas del mapa sin repetir ninguna.");
-        bullet_text_wrapped("Regla Dorada: Solo es posible si TODO nodo tiene un grado par, o si hay exactamente 2 nodos de grado impar. La IA de OptiClusters lo sabe al instante comprobando los grados.");
+        bullet_text_wrapped("Regla Dorada: Solo es posible si TODO nodo tiene un grado par, o si hay exactamente 2 nodos de grado impar. La IA de GraphCore lo sabe al instante comprobando los grados.");
         ImGui::Spacing();
         
         subtitulo("Circuito Hamiltoniano: El Terror NP");

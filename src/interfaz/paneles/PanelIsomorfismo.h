@@ -55,10 +55,12 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Ejecutar Verificacion");
-    ImGui::TextWrapped("Compara matemáticamente la estructura y conexiones. Limitado a <= 12 nodos.");
     
-    bool habilitado_topo = (red.nodos.size() <= 12 && self.estado_grafos.grafo_iso_g2.nodos.size() <= 12);
-    if (!habilitado_topo) ImGui::BeginDisabled();
+    int total_nodos = (int)(red.nodos.size() + self.estado_grafos.grafo_iso_g2.nodos.size());
+    const char* modo_verif = (total_nodos <= 36) 
+        ? "Verificacion exacta (< 18 nodos por grafo)"
+        : "Verificacion por firma estructural O(V log V) — acepta cualquier tamaño";
+    ImGui::TextWrapped("Modo: %s", modo_verif);
     
     if (ImGui::Button(ICON_FA_SHUFFLE " Verificar Isomorfismo", ImVec2(-1, 35))) {
         if (red.nodos.empty() || self.estado_grafos.grafo_iso_g2.nodos.empty()) {
@@ -72,13 +74,8 @@ inline void dibujar(Interfaz& self, Grafo& red) {
             g_sonidos.reproducir(son ? Sonidos::TRIUNFO_DIJKSTRA : Sonidos::DESCARTAR);
         }
     }
-    
-    if (!habilitado_topo) ImGui::EndDisabled();
-    if (!habilitado_topo) {
-        ImGui::TextColored(ImVec4(1,0.3f,0,1), "Maximo 12 nodos (complejidad O(N!))");
-    }
 
-    if (self.estado_grafos.iso_analizado) {
+        if (self.estado_grafos.iso_analizado) {
         ImGui::Separator();
 
         auto icono_cond = [](bool ok) {
@@ -87,6 +84,16 @@ inline void dibujar(Interfaz& self, Grafo& red) {
         auto col_cond = [](bool ok) -> ImVec4 {
             return ok ? ImVec4(0.0f, 1.0f, 0.5f, 1.0f) : ImVec4(1.0f, 0.3f, 0.3f, 1.0f);
         };
+
+        // Indicador de nivel de confianza
+        int confianza = self.estado_grafos.resultado_iso.nivel_confianza;
+        if (confianza == 2) {
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), "%s Verificacion: EXACTA", ICON_FA_CHECK);
+        } else if (confianza == 1) {
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s Verificacion: POR FIRMA >99.9%%", ICON_FA_CHECK);
+        } else {
+            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "%s Verificacion: FALLIDA", ICON_FA_XMARK);
+        }
 
         ImGui::Text("Condiciones necesarias:");
         ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos),
@@ -98,6 +105,7 @@ inline void dibujar(Interfaz& self, Grafo& red) {
 
         ImGui::Spacing();
         ImGui::Spacing();
+
         if (self.estado_grafos.resultado_iso.son_isomorfos) {
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
                 ICON_FA_CHECK " SON ISOMORFOS");
@@ -232,6 +240,25 @@ inline void dibujar(Interfaz& self, Grafo& red) {
 
             ImGui::Spacing();
             ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), ICON_FA_PENCIL " Click derecho en el lienzo dibuja en G2");
+            ImGui::Spacing();
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Verificacion desde G2");
+            if (ImGui::Button(ICON_FA_SHUFFLE " Verificar Isomorfismo (G1 vs G2)", ImVec2(-1, 35))) {
+                if (red.nodos.empty() || self.estado_grafos.grafo_iso_g2.nodos.empty()) {
+                    self.registrarLog("[!] Isomorfismo: ambos grafos deben tener nodos");
+                    g_sonidos.reproducir(Sonidos::DESCARTAR);
+                } else {
+                    self.estado_grafos.resultado_iso = Algoritmos::Isomorfismo::verificar(red, self.estado_grafos.grafo_iso_g2);
+                    self.estado_grafos.iso_analizado = true;
+                    bool son = self.estado_grafos.resultado_iso.son_isomorfos;
+                    self.registrarLog(son ? "[OK] Grafos Isomorfos: Si." : "[!] Grafos Isomorfos: No.");
+                    g_sonidos.reproducir(son ? Sonidos::TRIUNFO_DIJKSTRA : Sonidos::DESCARTAR);
+                }
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Verificar isomorfismo entre G1 (tu grafo) y G2 (este grafo)");
             ImGui::Spacing();
             
             if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {

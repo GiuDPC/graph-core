@@ -8,14 +8,14 @@
 #include "tipos/Nodo.h"
 #include "tipos/Arista.h"
 
-// Clase grafo — solo estructura y operaciones basicas
+// Clase grafo aqui solo estructura y operaciones basicas
 class Grafo {
 public:
     std::vector<Nodo>   nodos;
     std::vector<Arista> aristas;
     int contador_ids = 0;
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers
 
     std::string nombreNodo(int id) const {
         const Nodo* n = obtenerNodo(id);
@@ -33,7 +33,7 @@ public:
 
     bool estaVacio() const { return nodos.empty(); }
 
-    // ── CRUD nodos ────────────────────────────────────────────────────────────
+    // CRUD de nodos 
 
     void agregarNodo(ImVec2 posicion, TipoHardware tipo = TipoHardware::Servidor) {
         nodos.push_back(Nodo(contador_ids, posicion, tipo));
@@ -68,11 +68,11 @@ public:
         contador_ids = 0;
     }
 
-    // ── CRUD aristas ──────────────────────────────────────────────────────────
+    //  CRUD aristas 
 
     // Overload con flag dirigida (nuevo)
     // dirigida=true:  permite self-loops, A→B y B→A NO son duplicados
-    // dirigida=false: rechaza self-loops, A→B y B→A SÍ son duplicados (legacy)
+    // dirigida=false: rechaza self-loops, A→B y B→A SÍ son duplicados
     void agregarArista(int id1, int id2, float peso, bool dirigida) {
         if (!dirigida && id1 == id2) return;
         for (const auto& a : aristas) {
@@ -83,15 +83,15 @@ public:
         aristas.push_back(Arista(id1, id2, peso, dirigida));
     }
 
-    // Overload legacy — delega al nuevo con dirigida=false (backward compat)
+    // Overload legacy — delega al nuevo con dirigida=false
     void agregarArista(int id1, int id2, float peso = 1.0f) {
         agregarArista(id1, id2, peso, false);
     }
 
-    // ── Simulacion ────────────────────────────────────────────────────────────
+    // Simulacion 
 
     void aplicarJitter(float porcentaje) {
-        // Usar referencia a generador global (unico por programa)
+        // Usar referencia a generador global
         // definido al final de este archivo
         static std::mt19937& gen = obtenerGeneradorAleatorio();
         for (auto& a : aristas) {
@@ -105,9 +105,9 @@ public:
         for (auto& a : aristas) a.peso_actual = a.peso;
     }
 
-    // ── Queries estructurales ─────────────────────────────────────────────────
+    // Queries estructurales 
 
-    // Grado de un nodo (numero de aristas conectadas)
+    // Grado de un nodo numero de aristas conectadas
     int gradoNodo(int id) const {
         int grado = 0;
         for (const auto& a : aristas) {
@@ -127,7 +127,7 @@ public:
         return result;
     }
 
-    // Arista entre dos nodos (nullptr si no existe)
+    // Arista entre dos nodos y nullptr si no existe
     const Arista* obtenerArista(int id1, int id2) const {
         for (const auto& a : aristas) {
             if ((a.origen_id == id1 && a.destino_id == id2) ||
@@ -137,7 +137,7 @@ public:
         return nullptr;
     }
 
-    // ── Generador aleatorio global (unico por programa) ───────────────────
+    // Generador aleatorio global (unico por programa)
     static std::mt19937& obtenerGeneradorAleatorio() {
         static std::mt19937 gen(42);
         return gen;
