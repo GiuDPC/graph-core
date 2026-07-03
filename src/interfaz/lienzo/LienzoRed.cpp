@@ -1186,7 +1186,14 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     if (ui.fisicas_activas) {
         ui.fa2.nodo_arrastrado = ui.arrastrando ? ui.nodo_seleccionado : -1;
-        ui.fa2.step(grafo_actual, ui.fa2_params);
+        static int skip_fa2 = 0;
+        if (skip_fa2 > 0) { skip_fa2--; }
+        else {
+            double fa2_t0 = ImGui::GetTime();
+            ui.fa2.step(grafo_actual, ui.fa2_params);
+            double fa2_ms = (ImGui::GetTime() - fa2_t0) * 1000.0;
+            if (fa2_ms > 20.0) skip_fa2 = (int)(fa2_ms / 16.0);
+        }
     }
 
     // ── Creación de arista (drag con botón derecho) ──

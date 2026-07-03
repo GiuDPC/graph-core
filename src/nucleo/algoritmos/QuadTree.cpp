@@ -30,8 +30,8 @@ void QuadTree::insert_rec(int node_idx, float x, float y, float m, int id, int d
     }
 
     if (pool[node_idx].NW == -1) {
-        float mx = (pool[node_idx].x_min + pool[node_idx].x_max) / 2.0f;
-        float my = (pool[node_idx].y_min + pool[node_idx].y_max) / 2.0f;
+        float mx = (pool[node_idx].x_min + pool[node_idx].x_max) * 0.5f;
+        float my = (pool[node_idx].y_min + pool[node_idx].y_max) * 0.5f;
         pool[node_idx].NW = allocNode(pool[node_idx].x_min, pool[node_idx].y_min, mx, my);
         pool[node_idx].NE = allocNode(mx, pool[node_idx].y_min, pool[node_idx].x_max, my);
         pool[node_idx].SW = allocNode(pool[node_idx].x_min, my, mx, pool[node_idx].y_max);
@@ -44,18 +44,23 @@ void QuadTree::insert_rec(int node_idx, float x, float y, float m, int id, int d
                 old_x += ((rand() % 100) - 50) * 0.01f;
                 old_y += ((rand() % 100) - 50) * 0.01f;
             }
-            insert_rec(pool[node_idx].NW, old_x, old_y, pool[node_idx].mass, pool[node_idx].nodo_id, depth + 1);
-            insert_rec(pool[node_idx].NE, old_x, old_y, pool[node_idx].mass, pool[node_idx].nodo_id, depth + 1);
-            insert_rec(pool[node_idx].SW, old_x, old_y, pool[node_idx].mass, pool[node_idx].nodo_id, depth + 1);
-            insert_rec(pool[node_idx].SE, old_x, old_y, pool[node_idx].mass, pool[node_idx].nodo_id, depth + 1);
+            // ponytail: solo recursar en el cuadrante correcto, no en los 4
+            float omx = (pool[node_idx].x_min + pool[node_idx].x_max) * 0.5f;
+            float omy = (pool[node_idx].y_min + pool[node_idx].y_max) * 0.5f;
+            int o_child = (old_x < omx) ? ((old_y < omy) ? pool[node_idx].NW : pool[node_idx].SW)
+                                        : ((old_y < omy) ? pool[node_idx].NE : pool[node_idx].SE);
+            insert_rec(o_child, old_x, old_y, pool[node_idx].mass, pool[node_idx].nodo_id, depth + 1);
             pool[node_idx].nodo_id = -1;
         }
     }
 
-    insert_rec(pool[node_idx].NW, x, y, m, id, depth + 1);
-    insert_rec(pool[node_idx].NE, x, y, m, id, depth + 1);
-    insert_rec(pool[node_idx].SW, x, y, m, id, depth + 1);
-    insert_rec(pool[node_idx].SE, x, y, m, id, depth + 1);
+    { // ponytail: solo recursar en el cuadrante correcto
+        float mx2 = (pool[node_idx].x_min + pool[node_idx].x_max) * 0.5f;
+        float my2 = (pool[node_idx].y_min + pool[node_idx].y_max) * 0.5f;
+        int child = (x < mx2) ? ((y < my2) ? pool[node_idx].NW : pool[node_idx].SW)
+                              : ((y < my2) ? pool[node_idx].NE : pool[node_idx].SE);
+        insert_rec(child, x, y, m, id, depth + 1);
+    }
 
     float total_mass = pool[node_idx].mass + m;
     pool[node_idx].cm_x = (pool[node_idx].cm_x * pool[node_idx].mass + x * m) / total_mass;

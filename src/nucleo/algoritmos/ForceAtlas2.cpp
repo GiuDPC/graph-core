@@ -1,6 +1,7 @@
 #include "ForceAtlas2.hpp"
 #include <algorithm>
 #include <cstdlib>
+#include <unordered_set>
 
 namespace Algoritmos {
 
@@ -90,6 +91,12 @@ void ForceAtlas2::step(Grafo& g, const ParametrosFA2& p) {
         }
     }
 
+    // Pre-build reverse edge lookup: O(1) per edge, elimina el O(m²) de la busqueda de dobles
+    std::unordered_set<uint64_t> edge_dir;
+    edge_dir.reserve(g.aristas.size());
+    for (const auto& ae : g.aristas)
+        edge_dir.insert(((uint64_t)ae.origen_id << 32) | (uint32_t)ae.destino_id);
+
     for (const auto& a : g.aristas) {
         auto* no = g.obtenerNodo(a.origen_id);
         auto* nd = g.obtenerNodo(a.destino_id);
@@ -117,12 +124,8 @@ void ForceAtlas2::step(Grafo& g, const ParametrosFA2& p) {
         }
 
         if (!a.es_dirigida) {
-            for (const auto& otra : g.aristas) {
-                if (&otra != &a && otra.origen_id == a.destino_id && otra.destino_id == a.origen_id) {
-                    atr *= 0.5f;
-                    break;
-                }
-            }
+            uint64_t rev_key = ((uint64_t)a.destino_id << 32) | (uint32_t)a.origen_id;
+            if (edge_dir.count(rev_key)) atr *= 0.5f;
         }
 
         float atr_x = (dx / dist) * atr;

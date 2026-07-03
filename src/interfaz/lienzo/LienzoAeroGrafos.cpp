@@ -130,10 +130,10 @@ static std::vector<ImVec2> generarRutaOrtodromica(float lat1, float lon1,
     std::vector<ImVec2> puntos;
     puntos.reserve(num_puntos);
 
-    float lat1_r = lat1 * (M_PI / 180.0f);
-    float lon1_r = lon1 * (M_PI / 180.0f);
-    float lat2_r = lat2 * (M_PI / 180.0f);
-    float lon2_r = lon2 * (M_PI / 180.0f);
+    float lat1_r = lat1 * (IM_PI / 180.0f);
+    float lon1_r = lon1 * (IM_PI / 180.0f);
+    float lat2_r = lat2 * (IM_PI / 180.0f);
+    float lon2_r = lon2 * (IM_PI / 180.0f);
 
     float dlon = lon2_r - lon1_r;
     float cos_lat1 = cosf(lat1_r), sin_lat1 = sinf(lat1_r);
@@ -161,7 +161,7 @@ static std::vector<ImVec2> generarRutaOrtodromica(float lat1, float lon1,
         float lat_r = atan2f(z, sqrtf(x * x + y * y));
         float lon_r = atan2f(y, x);
 
-        puntos.emplace_back(lon_r * (180.0f / M_PI), lat_r * (180.0f / M_PI));
+        puntos.emplace_back(lon_r * (180.0f / IM_PI), lat_r * (180.0f / IM_PI));
     }
     return puntos;
 }
