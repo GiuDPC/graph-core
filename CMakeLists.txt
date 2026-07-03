@@ -111,6 +111,7 @@ add_library(graph-core-lib STATIC
     src/nucleo/datos/DatosMundo.cpp
     src/nucleo/SimuladorRed.cpp
     src/nucleo/Topologias.cpp
+    src/audio/miniaudio_impl.cpp
     src/audio/Sonidos.cpp
     src/interfaz/estado/EstadoAeroGrafos.cpp
     src/interfaz/Interfaz.cpp
@@ -153,7 +154,6 @@ target_link_libraries(graph-core-lib PUBLIC
 
 add_executable(graph-core
     src/main.cpp
-    src/audio/miniaudio_impl.cpp
     src/interfaz/util/stb_image_impl.cpp
 )
 
@@ -217,6 +217,7 @@ if(BUILD_TESTS)
     add_graphcore_test(test_unionfind tests/test_unionfind.cpp)
     add_graphcore_test(test_bfs tests/test_bfs.cpp)
     add_graphcore_test(test_ciclos tests/test_ciclos.cpp)
+    add_graphcore_test(test_simulador tests/test_simulador.cpp)
 
     # Habilitar descubrimiento automatico de tests con CTest
     include(GoogleTest)
@@ -225,4 +226,5 @@ if(BUILD_TESTS)
     gtest_discover_tests(test_unionfind)
     gtest_discover_tests(test_bfs)
     gtest_discover_tests(test_ciclos)
+    gtest_discover_tests(test_simulador)
 endif()
