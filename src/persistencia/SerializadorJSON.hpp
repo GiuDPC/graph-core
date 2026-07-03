@@ -12,7 +12,7 @@ namespace Persistencia {
 
 inline bool guardar(const Grafo& g, const std::string& ruta) {
     json j;
-    j["version"] = "3.0";
+    j["version"] = "3.1";
     j["contador_ids"] = g.contador_ids;
 
     j["nodos"] = json::array();

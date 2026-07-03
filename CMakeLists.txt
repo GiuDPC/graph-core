@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Nombre del proyecto, versión y lenguaje
 project(graph-core
-    VERSION 3.0.0
+    VERSION 3.1.0
     LANGUAGES CXX
 )
 

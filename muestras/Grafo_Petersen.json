@@ -1,0 +1,168 @@
+{
+  "version": "3.1",
+  "contador_ids": 10,
+  "nodos": [
+    {
+      "id": 0,
+      "nombre": "P0",
+      "x": 400.0,
+      "y": 700.0,
+      "tipo": 0
+    },
+    {
+      "id": 5,
+      "nombre": "P5",
+      "x": 488.167787843871,
+      "y": 521.3525491562422,
+      "tipo": 0
+    },
+    {
+      "id": 1,
+      "nombre": "P1",
+      "x": 685.316954888546,
+      "y": 492.7050983124842,
+      "tipo": 0
+    },
+    {
+      "id": 6,
+      "nombre": "P6",
+      "x": 542.658477444273,
+      "y": 353.6474508437579,
+      "tipo": 0
+    },
+    {
+      "id": 2,
+      "nombre": "P2",
+      "x": 576.335575687742,
+      "y": 157.29490168751576,
+      "tipo": 0
+    },
+    {
+      "id": 7,
+      "nombre": "P7",
+      "x": 400.0,
+      "y": 250.0,
+      "tipo": 0
+    },
+    {
+      "id": 3,
+      "nombre": "P3",
+      "x": 223.6644243122581,
+      "y": 157.29490168751576,
+      "tipo": 0
+    },
+    {
+      "id": 8,
+      "nombre": "P8",
+      "x": 257.341522555727,
+      "y": 353.6474508437579,
+      "tipo": 0
+    },
+    {
+      "id": 4,
+      "nombre": "P4",
+      "x": 114.68304511145391,
+      "y": 492.7050983124842,
+      "tipo": 0
+    },
+    {
+      "id": 9,
+      "nombre": "P9",
+      "x": 311.832212156129,
+      "y": 521.352549156242,
+      "tipo": 0
+    }
+  ],
+  "aristas": [
+    {
+      "origen": 0,
+      "destino": 1,
+      "peso": 3.9,
+      "dirigida": false
+    },
+    {
+      "origen": 5,
+      "destino": 7,
+      "peso": 1.1,
+      "dirigida": false
+    },
+    {
+      "origen": 0,
+      "destino": 5,
+      "peso": 1.8,
+      "dirigida": false
+    },
+    {
+      "origen": 1,
+      "destino": 2,
+      "peso": 2.7,
+      "dirigida": false
+    },
+    {
+      "origen": 6,
+      "destino": 8,
+      "peso": 2.5,
+      "dirigida": false
+    },
+    {
+      "origen": 1,
+      "destino": 6,
+      "peso": 3.0,
+      "dirigida": false
+    },
+    {
+      "origen": 2,
+      "destino": 3,
+      "peso": 4.7,
+      "dirigida": false
+    },
+    {
+      "origen": 7,
+      "destino": 9,
+      "peso": 1.2,
+      "dirigida": false
+    },
+    {
+      "origen": 2,
+      "destino": 7,
+      "peso": 2.3,
+      "dirigida": false
+    },
+    {
+      "origen": 3,
+      "destino": 4,
+      "peso": 2.1,
+      "dirigida": false
+    },
+    {
+      "origen": 8,
+      "destino": 5,
+      "peso": 1.4,
+      "dirigida": false
+    },
+    {
+      "origen": 3,
+      "destino": 8,
+      "peso": 2.5,
+      "dirigida": false
+    },
+    {
+      "origen": 4,
+      "destino": 0,
+      "peso": 2.1,
+      "dirigida": false
+    },
+    {
+      "origen": 9,
+      "destino": 6,
+      "peso": 1.4,
+      "dirigida": false
+    },
+    {
+      "origen": 4,
+      "destino": 9,
+      "peso": 2.9,
+      "dirigida": false
+    }
+  ]
+}

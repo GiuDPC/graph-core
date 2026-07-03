@@ -41,10 +41,11 @@ graph-core
 .DS_Store
 Thumbs.db
 
-# Herramientas de desarrollo (opencode, atl, etc.)
+# Herramientas de desarrollo (opencode, atl, agents, etc.)
 openspec/
 .atl/
 .opencode/
+agents/
 
 # Configuración en tiempo de ejecución
 imgui.ini

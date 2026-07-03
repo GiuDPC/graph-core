@@ -934,6 +934,8 @@ void subpanelForceAtlas2(Interfaz& self, Grafo& red) {
     ImGui::Spacing();
     if (ImGui::Button(ICON_FA_ROTATE_LEFT " Resetear Motor", ImVec2(-1, 28))) {
         self.estado_ui.fa2.reset();
+        // Resetear también los parámetros a valores por defecto
+        p = Algoritmos::ParametrosFA2();
         // Leve temblor para que el usuario perciba visualmente que se reseteó la física
         for (auto& n : red.nodos) {
             n.posicion.x += ((rand() % 100) - 50) * 0.1f;

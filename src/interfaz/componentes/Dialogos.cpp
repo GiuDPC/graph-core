@@ -18,8 +18,8 @@ void acercaDe() {
         ImGui::Text("graphCore");
         ImGui::PopStyleColor();
         
-        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v3.0").x) * 0.5f);
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.7f, 1.0f), "graph-core v3.0");
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("graph-core v3.1").x) * 0.5f);
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.7f, 1.0f), "graph-core v3.1");
         
         ImGui::Spacing();
         ImGui::Separator();

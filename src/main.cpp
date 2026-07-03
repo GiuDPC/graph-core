@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* ventana = glfwCreateWindow(
-        1500, 900, "graphCore v3.0", nullptr, nullptr
+        1500, 900, "graphCore v3.1", nullptr, nullptr
     );
     if (!ventana) {
         fprintf(stderr, "Error: No se pudo crear la ventana GLFW\n");
