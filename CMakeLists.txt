@@ -110,6 +110,7 @@ add_library(graph-core-lib STATIC
     src/nucleo/algoritmos/Isomorfismo.cpp
     src/nucleo/datos/DatosMundo.cpp
     src/interfaz/estado/EstadoAeroGrafos.cpp
+    src/interfaz/Interfaz.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC
@@ -136,6 +137,7 @@ target_link_libraries(graph-core-lib PUBLIC
 add_executable(graph-core
     src/main.cpp
     src/audio/miniaudio_impl.cpp
+    src/interfaz/util/stb_image_impl.cpp
 )
 
 target_link_libraries(graph-core PRIVATE graph-core-lib)

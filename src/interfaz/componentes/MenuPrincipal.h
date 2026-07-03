@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include "interfaz/Interfaz.h"
+#include "interfaz/Interfaz.hpp"
 #include "persistencia/SerializadorJSON.h"
 #include "persistencia/SerializadorGEXF.h"
 #include "portable-file-dialogs.h"

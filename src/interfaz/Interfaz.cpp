@@ -1,105 +1,34 @@
-#pragma once
+#include "Interfaz.hpp"
 
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "nucleo/Grafo.hpp"
-#include "nucleo/tipos/PasoAnimacion.h"
-#include "nucleo/algoritmos/Dijkstra.hpp"
-#include "nucleo/algoritmos/Kruskal.hpp"
-#include "nucleo/algoritmos/BFS.hpp"
-#include "nucleo/algoritmos/DFS.hpp"
-#include "nucleo/algoritmos/Ciclos.hpp"
-#include "nucleo/algoritmos/Coloreo.hpp"
-#include "nucleo/algoritmos/Isomorfismo.hpp"
-#include "nucleo/algoritmos/Arbol.hpp"
-#include "IconsFontAwesome6.h"
-#include "audio/Sonidos.h"
-#include "interfaz/util/Animacion.h"
-#include <GLFW/glfw3.h>
-#include "estado/EstadoGrafos.hpp"
-#include "estado/EstadoRedes.hpp"
-#include "estado/EstadoAeroGrafos.hpp"
-#include "estado/EstadoUI.hpp"
-#include "nucleo/HistorialGrafos.hpp"
-
-extern Sonidos g_sonidos;
-
-// clase interfaz
-class Interfaz {
-public:
-    using ModoPanel = EstadoGrafos::ModoPanel;
-    using ModoApp   = EstadoUI::ModoApp;
-
-    // -- estado modular --
-    EstadoGrafos      estado_grafos;
-    EstadoRedes       estado_redes;
-    EstadoAeroGrafos  estado_aerografos;
-    EstadoUI          estado_ui;
-    HistorialGrafos   historial;
-
-    // -- workspace tracking --
-    ModoApp ultimo_modo_workspace = ModoApp::Grafos;
-
-    void dibujar(Grafo& red, GLFWwindow* ventana);
-    void construirLayout(ImGuiID dock_id, ImVec2 tamano);
-
-    void registrarLog(const std::string& msg) {
-        estado_ui.registrarLog(msg);
-    }
-
-    void resetGrafoIsomorfismo() {
-        estado_grafos.resetGrafoIsomorfismo();
-    }
-};
-
-// includes de modulos de ui
+// UI module includes — moved here to break compile coupling
 #include "interfaz/componentes/MenuPrincipal.h"
 #include "interfaz/componentes/StatusBar.h"
 #include "interfaz/componentes/Dialogos.h"
 #include "interfaz/componentes/Toolbar.h"
-#include "interfaz/paneles/PanelIsomorfismo.h"
-#include "interfaz/util/AnimacionUI.h"
-#include "interfaz/util/AtajosTeclado.h"
+#include "interfaz/componentes/LogPanel.h"
 #include "interfaz/paneles/PanelGrafos.h"
 #include "interfaz/paneles/PanelAeroGrafos.h"
+#include "interfaz/paneles/PanelIsomorfismo.h"
+#include "interfaz/paneles/Matrices.h"
 #include "interfaz/lienzo/LienzoRed.h"
 #include "interfaz/lienzo/LienzoAeroGrafos.h"
-#include "interfaz/paneles/Matrices.h"
-#include "interfaz/componentes/LogPanel.h"
+#include "interfaz/util/AnimacionUI.h"
+#include "interfaz/util/AtajosTeclado.h"
 #include "interfaz/ventanas/VentanaAyuda.h"
 
-// -- layout: izq info, centro (lienzo + matrices + log como tabs), der herramientas --
-inline void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
-    ImGuiID main = dock_id;
+// Algorithm headers needed in dibujar()
+#include "nucleo/algoritmos/Dijkstra.hpp"
+#include "nucleo/algoritmos/Kruskal.hpp"
+#include "nucleo/algoritmos/BFS.hpp"
+#include "nucleo/algoritmos/DFS.hpp"
 
-    // split izquierdo (info del grafo) - compacto
-    ImGuiID izq = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, 0.13f, nullptr, &main);
+// imgui_internal.h needed for DockBuilder APIs and ImHashStr
+#include "imgui_internal.h"
 
-    // split derecho (solo herramientas)
-    ImGuiID der = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, 0.25f, nullptr, &main);
-
-    // El centro tiene todo: Lienzo (activo), Matrices y Log como pestanas
-    ImGui::DockBuilderDockWindow("Info del Grafo", izq);
-    ImGui::DockBuilderDockWindow("Algoritmos", der);
-    ImGui::DockBuilderDockWindow("Lienzo de Red", main);
-    ImGui::DockBuilderDockWindow("Matrices", main);           // pestana centro
-    ImGui::DockBuilderDockWindow("Registro del Kernel", main); // pestana centro
-
-    // Asegurar que Lienzo sea la pestana activa por defecto
-    ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
-
-    // Layout para AeroGrafos: mapa mundial ocupa el centro, panel de control a la derecha
-    if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
-        ImGui::DockBuilderDockWindow("Info del Grafo", izq);
-        ImGui::DockBuilderDockWindow("Opciones AeroGrafos", der);
-        ImGui::DockBuilderDockWindow("Mapa AeroGrafos", main);
-        ImGui::DockBuilderDockWindow("Registro del Kernel", main);
-        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Mapa AeroGrafos");
-    }
-}
-
-// -- aplica tema moderno, elegante y vibrante --
-inline void aplicarTemaCisco() {
+// ---------------------------------------------------------------------------
+// aplica tema moderno, elegante y vibrante
+// ---------------------------------------------------------------------------
+void aplicarTemaCisco() {
     auto& style = ImGui::GetStyle();
     style.FrameRounding = 8.0f;
     style.GrabRounding  = 8.0f;
@@ -180,8 +109,42 @@ inline void aplicarTemaCisco() {
     colors[ImGuiCol_ModalWindowDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.60f);
 }
 
+// ---------------------------------------------------------------------------
+// layout: izq info, centro (lienzo + matrices + log como tabs), der herramientas
+// ---------------------------------------------------------------------------
+void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
+    ImGuiID main = dock_id;
 
-inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
+    // split izquierdo (info del grafo) - compacto
+    ImGuiID izq = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, 0.13f, nullptr, &main);
+
+    // split derecho (solo herramientas)
+    ImGuiID der = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, 0.25f, nullptr, &main);
+
+    // El centro tiene todo: Lienzo (activo), Matrices y Log como pestanas
+    ImGui::DockBuilderDockWindow("Info del Grafo", izq);
+    ImGui::DockBuilderDockWindow("Algoritmos", der);
+    ImGui::DockBuilderDockWindow("Lienzo de Red", main);
+    ImGui::DockBuilderDockWindow("Matrices", main);           // pestana centro
+    ImGui::DockBuilderDockWindow("Registro del Kernel", main); // pestana centro
+
+    // Asegurar que Lienzo sea la pestana activa por defecto
+    ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Lienzo de Red");
+
+    // Layout para AeroGrafos: mapa mundial ocupa el centro, panel de control a la derecha
+    if (estado_ui.modo_actual == ModoApp::AeroGrafos) {
+        ImGui::DockBuilderDockWindow("Info del Grafo", izq);
+        ImGui::DockBuilderDockWindow("Opciones AeroGrafos", der);
+        ImGui::DockBuilderDockWindow("Mapa AeroGrafos", main);
+        ImGui::DockBuilderDockWindow("Registro del Kernel", main);
+        ImGui::DockBuilderGetNode(main)->SelectedTabId = ImHashStr("Mapa AeroGrafos");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// dibujar: toolbar, workspace, paneles acoplables, status bar
+// ---------------------------------------------------------------------------
+void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
 
     static bool theme_set = false;
     if (!theme_set) { aplicarTemaCisco(); theme_set = true; }
@@ -339,7 +302,7 @@ inline void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
     }
     LogPanel::dibujar(*this);
 
-    // dialogos modales 
+    // dialogos modales
     if (estado_ui.mostrar_acerca_de) {
         ImGui::OpenPopup("Acerca de");
         estado_ui.mostrar_acerca_de = false;

@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
+#include "interfaz/util/AnimacionUI.h"
 #include "nucleo/Grafo.hpp"
 #include "nucleo/algoritmos/Dijkstra.hpp"
 #include "nucleo/algoritmos/Kruskal.hpp"

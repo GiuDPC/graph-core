@@ -1,4 +1,4 @@
-#include "interfaz/Interfaz.h"
+#include "interfaz/Interfaz.hpp"
 #include "audio/Sonidos.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

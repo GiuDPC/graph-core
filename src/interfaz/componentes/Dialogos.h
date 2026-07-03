@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interfaz/Interfaz.h"
+#include "interfaz/Interfaz.hpp"
 #include "persistencia/SerializadorJSON.h"
 
 // Diálogos modales: Acerca de, fallback de carga/guardado

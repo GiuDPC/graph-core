@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interfaz/Interfaz.h"
+#include "interfaz/Interfaz.hpp"
 #include "audio/Sonidos.h"
 
 // Barra de estado inferior — modo actual, FPS, simulacion, audio
