@@ -16,8 +16,10 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
 
     const float INF = std::numeric_limits<float>::infinity();
     int rango = g.rangoIds();
+
     std::vector<float> dist(rango, INF);
     std::vector<int>   prev(rango, -1);
+    std::vector<bool>  visitado(rango, false);
     dist[id_origen] = 0.0f;
 
     using Par = std::pair<float, int>;
@@ -26,6 +28,8 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
 
     while (!cola.empty()) {
         auto [d, u] = cola.top(); cola.pop();
+        if (visitado[u]) continue;
+        visitado[u] = true;
         if (u == id_destino) break;
         if (d > dist[u]) continue;
 
@@ -57,7 +61,7 @@ ResultadoDijkstra dijkstra(const Grafo& g, int id_origen, int id_destino,
     }
 
     resultado.distancias = dist;
-    if (dist[id_destino] == INF) return resultado;
+    if (!visitado[id_destino]) return resultado;
 
     for (int at = id_destino; at != -1; at = prev[at])
         resultado.ruta.push_back(at);
