@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imgui.h"
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include <vector>
 #include <string>
 #include <cmath>

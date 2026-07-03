@@ -8,7 +8,7 @@
 #include <queue>
 #include <limits>
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 
 namespace Algoritmos {
 namespace Arbol {

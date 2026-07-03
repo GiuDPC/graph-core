@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 #include "IconsFontAwesome6.h"
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 #include "nucleo/datos/DatosMundo.h"
 #include "nucleo/algoritmos/Dijkstra.h"
 #include "nucleo/algoritmos/Kruskal.h"

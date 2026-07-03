@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 #include "nucleo/algoritmos/Dijkstra.h"
 #include "nucleo/algoritmos/Kruskal.h"
 #include "nucleo/algoritmos/BFS.h"

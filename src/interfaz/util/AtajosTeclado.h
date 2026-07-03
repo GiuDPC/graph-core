@@ -1,5 +1,5 @@
 #pragma once
-#include "../../nucleo/Grafo.h"
+#include "../../nucleo/Grafo.hpp"
 #include "../../nucleo/HistorialGrafos.h"
 #include "../estado/EstadoUI.h"
 #include "../estado/EstadoGrafos.h"

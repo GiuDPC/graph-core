@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include "QuadTree.h"
 #include "imgui.h"
 #include <vector>

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 
 // ── Grafo: creacion y nodos ───────────────────────────────────────────────
 

@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <deque>
 #include <chrono>
-#include "Grafo.h"
+#include "Grafo.hpp"
 #include "tipos/EstadoRed.h"
 #include "algoritmos/Dijkstra.h"
 #include "audio/Sonidos.h"

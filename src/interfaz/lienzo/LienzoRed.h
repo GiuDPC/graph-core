@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 #include "nucleo/SimuladorRed.h"
 #include "interfaz/util/Easing.h"
 #include <cmath>

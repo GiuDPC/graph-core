@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include "../tipos/PasoAnimacion.h"
 
 namespace Algoritmos {

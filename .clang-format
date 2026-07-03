@@ -1,0 +1,9 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 120
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+BreakConstructorInitializers: BeforeComma
+PointerAlignment: Left
+AccessModifierOffset: -4

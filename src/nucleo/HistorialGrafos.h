@@ -1,5 +1,5 @@
 #pragma once
-#include "Grafo.h"
+#include "Grafo.hpp"
 #include <deque>
 
 struct HistorialGrafos {

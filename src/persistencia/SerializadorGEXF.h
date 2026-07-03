@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "../nucleo/Grafo.h"
+#include "../nucleo/Grafo.hpp"
 
 namespace Persistencia {
 

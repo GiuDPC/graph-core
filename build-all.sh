@@ -58,7 +58,7 @@ ok "Linux package: dist/graph-core-linux-x86_64.tar.gz"
 if command -v x86_64-w64-mingw32-g++ &> /dev/null; then
   info "Building for Windows (MinGW cross-compilation)..."
   cmake -B "$PROJ_DIR/build-windows" \
-    -DCMAKE_TOOLCHAIN_FILE="$PROJ_DIR/mingw-toolchain.cmake" \
+    -DCMAKE_TOOLCHAIN_FILE="$PROJ_DIR/cmake/toolchain-mingw.cmake" \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_TESTS=OFF \
     -S "$PROJ_DIR"

@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include "../UnionFind.h"
 
 namespace Algoritmos {

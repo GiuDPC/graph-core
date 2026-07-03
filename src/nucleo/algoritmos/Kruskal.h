@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include "../UnionFind.h"
 #include "../tipos/PasoAnimacion.h"
 

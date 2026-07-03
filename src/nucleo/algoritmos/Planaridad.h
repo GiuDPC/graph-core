@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include <set>
 #include <string>
 #include <vector>

@@ -10,7 +10,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 
 ImFont* g_fontMono = nullptr;
 Sonidos g_sonidos; 

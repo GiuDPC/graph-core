@@ -8,7 +8,7 @@
 
 #include <functional>
 
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 #include "../tipos/PasoAnimacion.h"
 #include "../tipos/TipoHardware.h"
 

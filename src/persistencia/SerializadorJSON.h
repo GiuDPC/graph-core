@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include "../nucleo/Grafo.h"
+#include "../nucleo/Grafo.hpp"
 
 using json = nlohmann::json;
 

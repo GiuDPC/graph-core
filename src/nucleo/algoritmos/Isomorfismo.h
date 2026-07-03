@@ -7,7 +7,7 @@
 #include <sstream>
 #include <set>
 #include <cmath>
-#include "../Grafo.h"
+#include "../Grafo.hpp"
 
 namespace Algoritmos {
 namespace Isomorfismo {

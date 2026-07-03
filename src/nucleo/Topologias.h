@@ -1,5 +1,5 @@
 #pragma once
-#include "Grafo.h"
+#include "Grafo.hpp"
 
 // Topologias de red predefinidas
 namespace Topologias {

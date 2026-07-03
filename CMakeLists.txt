@@ -88,14 +88,40 @@ target_link_libraries(imgui_lib PUBLIC OpenGL::GL)
 find_package(Threads REQUIRED)
 
 # ============================================================================
+# Librería estática común (para testabilidad)
+# ============================================================================
+
+add_library(graph-core-lib STATIC
+    src/nucleo/Grafo.cpp
+)
+
+target_include_directories(graph-core-lib PUBLIC
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/nucleo
+    ${CMAKE_SOURCE_DIR}/src/nucleo/tipos
+    ${CMAKE_SOURCE_DIR}/src/nucleo/algoritmos
+    ${CMAKE_SOURCE_DIR}/src/persistencia
+    ${CMAKE_SOURCE_DIR}/src/interfaz
+    ${CMAKE_SOURCE_DIR}/src/audio
+)
+
+target_link_libraries(graph-core-lib PUBLIC
+    imgui_lib
+    nlohmann_json::nlohmann_json
+    ${CMAKE_DL_LIBS}
+    Threads::Threads
+)
+
+# ============================================================================
 # Nuestro ejecutable
 # ============================================================================
-# Ejecutable principal
 
 add_executable(graph-core
     src/main.cpp
     src/audio/miniaudio_impl.cpp
 )
+
+target_link_libraries(graph-core PRIVATE graph-core-lib)
 
 # Cuando compilamos para Windows (nativo o cross), ocultamos la consola
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -144,45 +170,17 @@ if(BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     # Include paths para tests (necesitan imgui para ImVec2 en Nodo.h)
-    set(TEST_INCLUDE_DIRS
-        ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/src/nucleo
-        ${CMAKE_SOURCE_DIR}/src/nucleo/tipos
-        ${CMAKE_SOURCE_DIR}/src/nucleo/algoritmos
-        ${CMAKE_SOURCE_DIR}/src/audio
-        ${imgui_SOURCE_DIR}
-        ${imgui_SOURCE_DIR}/backends
-    )
+    # Tests link against graph-core-lib so they get all source and deps
+    macro(add_graphcore_test name source)
+        add_executable(${name} ${source})
+        target_link_libraries(${name} PRIVATE graph-core-lib GTest::gtest_main)
+    endmacro()
 
-    add_executable(test_grafo
-        tests/test_grafo.cpp
-    )
-    target_include_directories(test_grafo PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_grafo PRIVATE GTest::gtest_main)
-
-    add_executable(test_dijkstra
-        tests/test_dijkstra.cpp
-    )
-    target_include_directories(test_dijkstra PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_dijkstra PRIVATE GTest::gtest_main)
-
-    add_executable(test_unionfind
-        tests/test_unionfind.cpp
-    )
-    target_include_directories(test_unionfind PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_unionfind PRIVATE GTest::gtest_main)
-
-    add_executable(test_bfs
-        tests/test_bfs.cpp
-    )
-    target_include_directories(test_bfs PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_bfs PRIVATE GTest::gtest_main)
-
-    add_executable(test_ciclos
-        tests/test_ciclos.cpp
-    )
-    target_include_directories(test_ciclos PRIVATE ${TEST_INCLUDE_DIRS})
-    target_link_libraries(test_ciclos PRIVATE GTest::gtest_main)
+    add_graphcore_test(test_grafo tests/test_grafo.cpp)
+    add_graphcore_test(test_dijkstra tests/test_dijkstra.cpp)
+    add_graphcore_test(test_unionfind tests/test_unionfind.cpp)
+    add_graphcore_test(test_bfs tests/test_bfs.cpp)
+    add_graphcore_test(test_ciclos tests/test_ciclos.cpp)
 
     # Habilitar descubrimiento automatico de tests con CTest
     include(GoogleTest)

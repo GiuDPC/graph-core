@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "IconsFontAwesome6.h"
-#include "nucleo/Grafo.h"
+#include "nucleo/Grafo.hpp"
 #include "nucleo/datos/DatosMundo.h"
 #include "interfaz/estado/EstadoAeroGrafos.h"
 #include "interfaz/util/TextureLoader.h"
