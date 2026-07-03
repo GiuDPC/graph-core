@@ -115,6 +115,8 @@ add_library(graph-core-lib STATIC
     src/interfaz/paneles/PanelAeroGrafos.cpp
     src/interfaz/paneles/PanelIsomorfismo.cpp
     src/interfaz/paneles/Matrices.cpp
+    src/interfaz/lienzo/LienzoRed.cpp
+    src/interfaz/lienzo/LienzoAeroGrafos.cpp
 )
 
 target_include_directories(graph-core-lib PUBLIC
