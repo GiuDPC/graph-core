@@ -1,5 +1,7 @@
 #include "LienzoRed.hpp"
 #include "Interfaz.hpp"
+#include "imgui.h"
+#include "imgui_internal.h"
 #include "nucleo/SimuladorRed.hpp"
 #include "interfaz/util/Easing.hpp"
 #include "interfaz/util/Animacion.hpp"
