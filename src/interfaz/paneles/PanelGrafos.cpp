@@ -17,6 +17,7 @@
 #include "nucleo/algoritmos/AnalizadorGrafo.hpp"
 #include "nucleo/algoritmos/TopologiasFractales.hpp"
 #include "nucleo/algoritmos/EulerHamilton.hpp"
+#include "nucleo/Plantillas.hpp"
 #include "interfaz/paneles/PanelIsomorfismo.hpp"
 #include "interfaz/paneles/Matrices.hpp"
 
@@ -1323,13 +1324,41 @@ void panelContextual(Interfaz& self, Grafo& red) {
     ImGui::Separator();
 
     switch (self.estado_ui.herramienta_activa) {
-        case EstadoUI::CatGeneral:
+        case EstadoUI::CatGeneral: {
             ImGui::TextWrapped("Selecciona una herramienta desde el menu desplegable de arriba.");
             if (red.nodos.empty()) {
                 ImGui::Spacing();
                 ImGui::TextDisabled(ICON_FA_CIRCLE_INFO " clic derecho en el lienzo para crear nodos.");
             }
+            ImGui::SeparatorText(ICON_FA_SHAPES " Plantillas de Grafos");
+            ImGui::TextWrapped("Carga una estructura clasica para probar algoritmos. Esto reemplazara el grafo actual.");
+            static int n_nodos = 5;
+            static int n_nodos_bi = 3;
+            ImGui::SliderInt("Nodos (n)", &n_nodos, 3, 20);
+
+            auto reset_estado = [&]() {
+                self.estado_grafos.ruta_optima.clear();
+                self.estado_grafos.aristas_mst.clear();
+                self.estado_grafos.mostrar_mst = false;
+                self.estado_ui.zoom_velocity = 0.0f;
+                self.estado_ui.zoom_lienzo = 1.0f;
+                self.estado_ui.offset_lienzo = ImVec2(0, 0);
+                self.estado_ui.fisicas_activas = false;
+                AnimacionUI::reset(self);
+            };
+
+            if (ImGui::Button("Completo K_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::completo(n_nodos); reset_estado(); }
+            if (ImGui::Button("Ciclo C_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::ciclo(n_nodos); reset_estado(); }
+            if (ImGui::Button("Camino P_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::camino(n_nodos); reset_estado(); }
+            if (ImGui::Button("Estrella S_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::estrella(n_nodos); reset_estado(); }
+            if (ImGui::Button("Rueda W_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::rueda(n_nodos); reset_estado(); }
+            if (ImGui::Button("Petersen", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::petersen(); reset_estado(); }
+            
+            ImGui::Separator();
+            ImGui::SliderInt("Nodos Bipartito (m)", &n_nodos_bi, 1, 10);
+            if (ImGui::Button("Bipartito K_m,n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::bipartito(n_nodos_bi, n_nodos); reset_estado(); }
             break;
+        }
         case EstadoUI::CatRutas:    subpanelDijkstra(self, red); break;
         case EstadoUI::CatArbol:
             subpanelKruskal(self, red);

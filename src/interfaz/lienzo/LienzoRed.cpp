@@ -4,7 +4,7 @@
 #include "interfaz/util/Easing.hpp"
 #include "interfaz/util/Animacion.hpp"
 #include "interfaz/util/AnimacionUI.hpp"
-#include "interfaz/util/AnimacionCarga.hpp"
+
 #include "IconsFontAwesome6.h"
 #include <cmath>
 #include <unordered_set>
@@ -385,12 +385,7 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             if (!es_g2 && editando_g2) {
                 col = (col & 0x00FFFFFF) | (40 << 24);
             }
-            // Fade edges in during the load animation
-            if (!es_g2 && ui.anim_carga.activa) {
-                int base_a = (col >> IM_COL32_A_SHIFT) & 0xFF;
-                int fade_a = (base_a * ui.anim_carga.alphaAristas()) / 255;
-                col = (col & 0x00FFFFFF) | (fade_a << IM_COL32_A_SHIFT);
-            }
+
             lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, col, grosor);
 
             if (a.es_dirigida) {
@@ -760,19 +755,8 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             colorBorde = (colorBorde & 0x00FFFFFF) | (40 << 24);
         }
 
-        // Apply load animation: scale each node around its own center
-        float anim_scale = 1.0f;
-        if (ui.anim_carga.activa) {
-            anim_scale = ui.anim_carga.escalaParaNodo(n.id);
-            if (!es_g2 && anim_scale <= 0.01f) {
-                // Node not yet born — skip entirely
-                continue;
-            }
-        }
-        float radio_anim = radio_dibujo * anim_scale;
-
-        dl->AddCircleFilled(n.posicion, radio_anim, colorFondo, 32);
-        dl->AddCircle(n.posicion, radio_anim, colorBorde, 32, 2.5f);
+        dl->AddCircleFilled(n.posicion, radio_dibujo, colorFondo, 32);
+        dl->AddCircle(n.posicion, radio_dibujo, colorBorde, 32, 2.5f);
 
         if (grafos.mostrar_coloreo && grafos.modo_fractal && !es_g2) {
             float fp = sinf(tiempo * 2.0f + (float)n.id * 1.7f) * 0.3f + 0.7f;
@@ -1068,11 +1052,9 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     bool tooltip_mostrado = false;
 
-    // Advance load animation every frame
-    if (ui.anim_carga.activa) {
-        float dt = ImGui::GetIO().DeltaTime;
-        ui.anim_carga.actualizar(dt);
-    }
+    // guardar rect del lienzo para exportar png
+    ui.lienzo_origin = origin;
+    ui.lienzo_size   = tamano;
 
     // Grid
     dibujarGrid(dl, ui, origin, tamano);
@@ -1128,6 +1110,17 @@ void dibujar(Grafo& red, Interfaz& self) {
                 paquete_clickeado = true;
             }
         }
+    }
+
+    // doble clic para anotaciones
+    if (en_canvas && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && ui.nodo_hover == -1 && !paquete_clickeado) {
+        ImVec2 mouse_mundo((mouse.x - ui.offset_lienzo.x) / ui.zoom_lienzo,
+                           (mouse.y - ui.offset_lienzo.y) / ui.zoom_lienzo);
+        self.historial.capturar(grafo_actual);
+        int new_id = grafo_actual.anotaciones.agregar(mouse_mundo);
+        grafo_actual.anotaciones.editando_id = new_id;
+        grafo_actual.anotaciones.creando = true;
+        grafo_actual.anotaciones.buffer[0] = '\0';
     }
 
     // Arrastre
@@ -1470,6 +1463,40 @@ void dibujar(Grafo& red, Interfaz& self) {
 
     // Notificaciones
     dibujarNotificaciones(dl, redes, origin, tamano);
+
+    // Anotaciones
+    for (auto& a : red.anotaciones.items) {
+        ImVec2 sc_pos(a.posicion.x * ui.zoom_lienzo + ui.offset_lienzo.x,
+                      a.posicion.y * ui.zoom_lienzo + ui.offset_lienzo.y);
+        
+        if (red.anotaciones.editando_id == a.id) {
+            ImGui::SetCursorScreenPos(sc_pos);
+            if (red.anotaciones.creando) {
+                ImGui::SetKeyboardFocusHere();
+                red.anotaciones.creando = false;
+            }
+            ImGui::PushItemWidth(200);
+            if (ImGui::InputText(std::string("##nota" + std::to_string(a.id)).c_str(), red.anotaciones.buffer, sizeof(red.anotaciones.buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                self.historial.capturar(red);
+                a.texto = red.anotaciones.buffer;
+                red.anotaciones.editando_id = -1;
+                if (a.texto.empty()) red.anotaciones.eliminar(a.id);
+            }
+            ImGui::PopItemWidth();
+            if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+                red.anotaciones.editando_id = -1;
+                if (a.texto.empty()) red.anotaciones.eliminar(a.id);
+            }
+        } else {
+            ImVec2 ts = ImGui::CalcTextSize(a.texto.c_str());
+            ImRect bb(sc_pos, ImVec2(sc_pos.x + ts.x, sc_pos.y + ts.y));
+            if (bb.Contains(mouse) && en_canvas && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                red.anotaciones.editando_id = a.id;
+                strncpy(red.anotaciones.buffer, a.texto.c_str(), sizeof(red.anotaciones.buffer));
+            }
+            dl->AddText(sc_pos, a.color, a.texto.c_str());
+        }
+    }
 
     // Overlay de algoritmos
     dibujarOverlayAlgoritmos(dl, ui, grafos, red, origin);

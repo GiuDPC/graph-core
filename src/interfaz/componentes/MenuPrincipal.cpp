@@ -24,8 +24,6 @@ void contenido(Interfaz& self, Grafo& red, GLFWwindow* ventana) {
             ImGui::OpenPopup("FallbackCargar");
         } else {
             Persistencia::cargar(red, resultado[0]);
-            // Kick off the smooth load animation
-            self.estado_ui.anim_carga.iniciar(red);
             Animacion::reset(self.estado_grafos.anim_estado);
             self.estado_grafos.ruta_optima.clear(); self.estado_grafos.aristas_mst.clear(); self.estado_grafos.mostrar_mst = false;
             self.registrarLog("[OK] Proyecto cargado: " + resultado[0]);
