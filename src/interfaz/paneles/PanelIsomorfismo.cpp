@@ -51,116 +51,12 @@ void dibujar(Interfaz& self, Grafo& red) {
             }
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Acomoda todos los nodos del grafo en un circulo perfecto.");
-            
-    ImGui::Separator();
-    ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Ejecutar Verificacion");
-    
-    int total_nodos = (int)(red.nodos.size() + self.estado_grafos.grafo_iso_g2.nodos.size());
-    const char* modo_verif = (total_nodos <= 36) 
-        ? "Verificacion exacta (< 18 nodos por grafo)"
-        : "Verificacion por firma estructural O(V log V) — acepta cualquier tamaño";
-    ImGui::TextWrapped("Modo: %s", modo_verif);
-    
-    if (ImGui::Button(ICON_FA_SHUFFLE " Verificar Isomorfismo", ImVec2(-1, 35))) {
-        if (red.nodos.empty() || self.estado_grafos.grafo_iso_g2.nodos.empty()) {
-            self.registrarLog("[!] Isomorfismo: ambos grafos deben tener nodos");
-            g_sonidos.reproducir(Sonidos::DESCARTAR);
-        } else {
-            self.estado_grafos.resultado_iso = Algoritmos::Isomorfismo::verificar(red, self.estado_grafos.grafo_iso_g2);
-            self.estado_grafos.iso_analizado = true;
-            bool son = self.estado_grafos.resultado_iso.son_isomorfos;
-            self.registrarLog(son ? "[OK] Grafos Isomorfos: Si." : "[!] Grafos Isomorfos: No.");
-            g_sonidos.reproducir(son ? Sonidos::TRIUNFO_DIJKSTRA : Sonidos::DESCARTAR);
-        }
-    }
-
-        if (self.estado_grafos.iso_analizado) {
-        ImGui::Separator();
-
-        auto icono_cond = [](bool ok) {
-            return ok ? ICON_FA_CHECK : ICON_FA_XMARK;
-        };
-        auto col_cond = [](bool ok) -> ImVec4 {
-            return ok ? ImVec4(0.0f, 1.0f, 0.5f, 1.0f) : ImVec4(1.0f, 0.3f, 0.3f, 1.0f);
-        };
-
-        // Indicador de nivel de confianza
-        int confianza = self.estado_grafos.resultado_iso.nivel_confianza;
-        if (confianza == 2) {
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), "%s Verificacion: EXACTA", ICON_FA_CHECK);
-        } else if (confianza == 1) {
-            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s Verificacion: POR FIRMA >99.9%%", ICON_FA_CHECK);
-        } else {
-            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "%s Verificacion: FALLIDA", ICON_FA_XMARK);
-        }
-
-        ImGui::Text("Condiciones necesarias:");
-        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos),
-            "%s Misma cantidad de nodos", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos));
-        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas),
-            "%s Misma cantidad de aristas", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas));
-        ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados),
-            "%s Misma secuencia de grados", icono_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados));
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-
-        if (self.estado_grafos.resultado_iso.son_isomorfos) {
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f),
-                ICON_FA_CHECK " SON ISOMORFOS");
-            
-            // --- Nueva seccion visual de Matrices ---
-            if (ImGui::TreeNode("Ver Matrices de Adyacencia")) {
-                ImGui::Text("Grafo 1 (G1):");
-                for (size_t i = 0; i < red.nodos.size(); i++) {
-                    std::string fila = "[ ";
-                    for (size_t j = 0; j < red.nodos.size(); j++) {
-                        bool hay = red.obtenerArista(red.nodos[i].id, red.nodos[j].id) != nullptr;
-                        fila += (hay ? "1 " : "0 ");
-                    }
-                    fila += "]";
-                    ImGui::TextDisabled("%s", fila.c_str());
-                }
-                ImGui::Spacing();
-                ImGui::Text("Grafo 2 (G2) reordenado por mapeo:");
-                for (size_t i = 0; i < red.nodos.size(); i++) {
-                    std::string fila = "[ ";
-                    for (size_t j = 0; j < red.nodos.size(); j++) {
-                        int id_g1_i = red.nodos[i].id;
-                        int id_g1_j = red.nodos[j].id;
-                        
-                        int id_g2_i = -1;
-                        int id_g2_j = -1;
-                        for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
-                            if (par.first == id_g1_i) id_g2_i = par.second;
-                            if (par.first == id_g1_j) id_g2_j = par.second;
-                        }
-
-                        bool hay = false;
-                        if (id_g2_i != -1 && id_g2_j != -1) {
-                            hay = self.estado_grafos.grafo_iso_g2.obtenerArista(id_g2_i, id_g2_j) != nullptr;
-                        }
-                        fila += (hay ? "1 " : "0 ");
-                    }
-                    fila += "]";
-                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s", fila.c_str());
-                }
-                ImGui::TreePop();
-            }
 
             ImGui::Spacing();
-            ImGui::Text("Mapeo de nodos:");
-            for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
-                ImGui::BulletText("%s (G1) <-> %s (G2)",
-                    red.nombreNodo(par.first).c_str(),
-                    self.estado_grafos.grafo_iso_g2.nombreNodo(par.second).c_str());
-            }
-        } else {
-            ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
-                ICON_FA_XMARK " NO SON ISOMORFOS");
-            ImGui::TextWrapped("%s", self.estado_grafos.resultado_iso.descripcion.c_str());
-        }
-    }
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.6f, 1.0f));
+            ImGui::TextWrapped(ICON_FA_CIRCLE_INFO " Para verificar el isomorfismo, abre el tab G2 y usa el boton de verificacion.");
+            ImGui::PopStyleColor();
+
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("G2 (El Grafo a Comparar)")) {
@@ -243,7 +139,15 @@ void dibujar(Interfaz& self, Grafo& red) {
             
             ImGui::Spacing();
             ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Verificacion desde G2");
+            ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), ICON_FA_CHECK_DOUBLE " Verificar Isomorfismo");
+
+            int total_nodos = (int)(red.nodos.size() + self.estado_grafos.grafo_iso_g2.nodos.size());
+            const char* modo_verif = (total_nodos <= 36)
+                ? "Modo: verificacion exacta (< 18 nodos por grafo)"
+                : "Modo: firma estructural O(V log V) — acepta cualquier tamanio";
+            ImGui::TextDisabled("%s", modo_verif);
+            ImGui::Spacing();
+
             if (ImGui::Button(ICON_FA_SHUFFLE " Verificar Isomorfismo (G1 vs G2)", ImVec2(-1, 35))) {
                 if (red.nodos.empty() || self.estado_grafos.grafo_iso_g2.nodos.empty()) {
                     self.registrarLog("[!] Isomorfismo: ambos grafos deben tener nodos");
@@ -257,10 +161,91 @@ void dibujar(Interfaz& self, Grafo& red) {
                 }
             }
             if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Verificar isomorfismo entre G1 (tu grafo) y G2 (este grafo)");
+                ImGui::SetTooltip("Compara G1 (tu grafo principal) con G2 y determina si son isomorfos.");
             ImGui::Spacing();
-            
-            if (ImGui::Button("Limpiar G2", ImVec2(-1, 32))) {
+
+            // --- Resultado inline en G2 ---
+            if (self.estado_grafos.iso_analizado) {
+                ImGui::Separator();
+
+                auto icono_cond = [](bool ok) {
+                    return ok ? ICON_FA_CHECK : ICON_FA_XMARK;
+                };
+                auto col_cond = [](bool ok) -> ImVec4 {
+                    return ok ? ImVec4(0.0f, 1.0f, 0.5f, 1.0f) : ImVec4(1.0f, 0.3f, 0.3f, 1.0f);
+                };
+
+                int confianza = self.estado_grafos.resultado_iso.nivel_confianza;
+                if (confianza == 2) {
+                    ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), "%s Verificacion: EXACTA", ICON_FA_CHECK);
+                } else if (confianza == 1) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s Verificacion: POR FIRMA >99.9%%", ICON_FA_CHECK);
+                } else {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "%s Verificacion: FALLIDA", ICON_FA_XMARK);
+                }
+
+                ImGui::Text("Condiciones necesarias:");
+                ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos),
+                    "%s Misma cantidad de nodos", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_nodos));
+                ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas),
+                    "%s Misma cantidad de aristas", icono_cond(self.estado_grafos.resultado_iso.misma_cantidad_aristas));
+                ImGui::TextColored(col_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados),
+                    "%s Misma secuencia de grados", icono_cond(self.estado_grafos.resultado_iso.misma_secuencia_grados));
+
+                ImGui::Spacing();
+
+                if (self.estado_grafos.resultado_iso.son_isomorfos) {
+                    ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.5f, 1.0f), ICON_FA_CHECK " SON ISOMORFOS");
+
+                    if (ImGui::TreeNode("Ver Matrices de Adyacencia")) {
+                        ImGui::Text("Grafo 1 (G1):");
+                        for (size_t i = 0; i < red.nodos.size(); i++) {
+                            std::string fila = "[ ";
+                            for (size_t j = 0; j < red.nodos.size(); j++) {
+                                bool hay = red.obtenerArista(red.nodos[i].id, red.nodos[j].id) != nullptr;
+                                fila += (hay ? "1 " : "0 ");
+                            }
+                            fila += "]";
+                            ImGui::TextDisabled("%s", fila.c_str());
+                        }
+                        ImGui::Spacing();
+                        ImGui::Text("Grafo 2 (G2) reordenado por mapeo:");
+                        for (size_t i = 0; i < red.nodos.size(); i++) {
+                            std::string fila = "[ ";
+                            for (size_t j = 0; j < red.nodos.size(); j++) {
+                                int id_g1_i = red.nodos[i].id;
+                                int id_g1_j = red.nodos[j].id;
+                                int id_g2_i = -1, id_g2_j = -1;
+                                for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
+                                    if (par.first == id_g1_i) id_g2_i = par.second;
+                                    if (par.first == id_g1_j) id_g2_j = par.second;
+                                }
+                                bool hay = false;
+                                if (id_g2_i != -1 && id_g2_j != -1)
+                                    hay = self.estado_grafos.grafo_iso_g2.obtenerArista(id_g2_i, id_g2_j) != nullptr;
+                                fila += (hay ? "1 " : "0 ");
+                            }
+                            fila += "]";
+                            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s", fila.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::Spacing();
+                    ImGui::Text("Mapeo de nodos:");
+                    for (const auto& par : self.estado_grafos.resultado_iso.mapeo) {
+                        ImGui::BulletText("%s (G1) <-> %s (G2)",
+                            red.nombreNodo(par.first).c_str(),
+                            self.estado_grafos.grafo_iso_g2.nombreNodo(par.second).c_str());
+                    }
+                } else {
+                    ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), ICON_FA_XMARK " NO SON ISOMORFOS");
+                    ImGui::TextWrapped("%s", self.estado_grafos.resultado_iso.descripcion.c_str());
+                }
+            }
+
+            ImGui::Spacing();
+            if (ImGui::Button(ICON_FA_TRASH " Limpiar G2", ImVec2(-1, 32))) {
                 self.estado_grafos.grafo_iso_g2.limpiar();
                 self.estado_grafos.iso_analizado = false;
             }

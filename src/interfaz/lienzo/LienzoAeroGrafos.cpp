@@ -338,7 +338,8 @@ static int dibujarCiudades(ImDrawList* dl, EstadoAeroGrafos& estado,
         dl->AddCircleFilled(ImVec2(sx, sy), std::max(1.8f, radio * 0.3f),
                             centro_col, 8);
 
-        bool mostrar_label = (sobre || selec || estado.zoom_mapa > 0.8f);
+        bool mostrar_label = sobre || selec ||
+                             (estado.mostrar_nombres && estado.zoom_mapa > 0.8f);
         if (mostrar_label) {
             char buf[64];
             snprintf(buf, sizeof(buf), "%s (%s)", c.nombre, c.codigo_iata);
