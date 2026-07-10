@@ -7,7 +7,6 @@
 
 #include "tipos/Nodo.hpp"
 #include "tipos/Arista.hpp"
-#include "tipos/Anotacion.hpp"
 
 // Grafo: vector-of-vertices, vector-of-edges (no adjacency lists)
 // Nodo.h pulls in ImVec2 via imgui.h — TODO: extract Posicion2D
@@ -15,7 +14,6 @@ class Grafo {
 public:
     std::vector<Nodo>   nodos;
     std::vector<Arista> aristas;
-    EstadoAnotaciones anotaciones;
     int contador_ids = 0;
 
     // Inline helpers (trivial getters, keeps .cpp lean)
@@ -40,7 +38,6 @@ public:
     void limpiar() {
         nodos.clear();
         aristas.clear();
-        anotaciones.items.clear();
         contador_ids = 0;
     }
 

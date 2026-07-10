@@ -26,4 +26,13 @@ Grafo bipartito(int m, int n);
 // petersen (clasico, 10 nodos)
 Grafo petersen();
 
+// malla bidimensional (grid m x n)
+Grafo malla(int m, int n);
+
+// arbol binario perfecto o casi perfecto
+Grafo arbol_binario(int n);
+
+// red de mundo pequeno (anillo con atajos aleatorios)
+Grafo mundo_pequeno(int n);
+
 } // namespace Plantillas

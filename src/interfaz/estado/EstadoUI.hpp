@@ -12,6 +12,7 @@ struct EstadoUI {
 
     enum Categoria {
         CatGeneral,
+        CatPlantillas,
         CatRutas,
         CatArbol,
         CatBusqueda,

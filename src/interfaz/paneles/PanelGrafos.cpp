@@ -1271,9 +1271,9 @@ void panelContextual(Interfaz& self, Grafo& red) {
 
     ImGui::Begin("Algoritmos");
     
-    // menu desplegable de las herramienetas
     const char* items[] = {
         ICON_FA_WRENCH " General",
+        ICON_FA_SHAPES " Plantillas",
         ICON_FA_ROUTE " Rutas",
         ICON_FA_TREE " Arbol",
         ICON_FA_MAGNIFYING_GLASS " Busqueda",
@@ -1286,23 +1286,24 @@ void panelContextual(Interfaz& self, Grafo& red) {
     };
 
     int current_item = 0;
-    if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)          current_item = 1;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatArbol)     current_item = 2;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatBusqueda)  current_item = 3;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatCiclos)    current_item = 4;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatColoreo)   current_item = 5;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo) current_item = 6;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFractales)  current_item = 7;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatEulerHamilton) current_item = 8;
-    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFA2)       current_item = 9;
+    if (self.estado_ui.herramienta_activa == EstadoUI::CatPlantillas)      current_item = 1;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatRutas)          current_item = 2;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatArbol)     current_item = 3;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatBusqueda)  current_item = 4;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatCiclos)    current_item = 5;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatColoreo)   current_item = 6;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatIsomorfismo) current_item = 7;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFractales)  current_item = 8;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatEulerHamilton) current_item = 9;
+    else if (self.estado_ui.herramienta_activa == EstadoUI::CatFA2)       current_item = 10;
 
     int prev_item = current_item;
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::Combo("##algo_select", &current_item, items, 10)) {
+    if (ImGui::Combo("##algo_select", &current_item, items, 11)) {
         if (current_item != prev_item) {
             // Limpieza Automatica de Estado al cambiar de algoritmo
-            // No limpiamos si el destino es Coloreo (index 5) o FA2 (index 9) para mantener visuales
-            if (current_item != 5 && current_item != 9) {
+            // No limpiamos si el destino es Coloreo (index 6) o FA2 (index 10) para mantener visuales
+            if (current_item != 6 && current_item != 10) {
                 self.estado_grafos.ruta_optima.clear();
                 self.estado_grafos.aristas_mst.clear();
                 self.estado_grafos.mostrar_mst = false;
@@ -1311,15 +1312,16 @@ void panelContextual(Interfaz& self, Grafo& red) {
             }
         }
         if (current_item == 0)       self.estado_ui.herramienta_activa = EstadoUI::CatGeneral;
-        else if (current_item == 1)  self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
-        else if (current_item == 2)  self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
-        else if (current_item == 3)  self.estado_ui.herramienta_activa = EstadoUI::CatBusqueda;
-        else if (current_item == 4)  self.estado_ui.herramienta_activa = EstadoUI::CatCiclos;
-        else if (current_item == 5)  self.estado_ui.herramienta_activa = EstadoUI::CatColoreo;
-        else if (current_item == 6)  self.estado_ui.herramienta_activa = EstadoUI::CatIsomorfismo;
-        else if (current_item == 7)  self.estado_ui.herramienta_activa = EstadoUI::CatFractales;
-        else if (current_item == 8)  self.estado_ui.herramienta_activa = EstadoUI::CatEulerHamilton;
-        else if (current_item == 9)  self.estado_ui.herramienta_activa = EstadoUI::CatFA2;
+        else if (current_item == 1)  self.estado_ui.herramienta_activa = EstadoUI::CatPlantillas;
+        else if (current_item == 2)  self.estado_ui.herramienta_activa = EstadoUI::CatRutas;
+        else if (current_item == 3)  self.estado_ui.herramienta_activa = EstadoUI::CatArbol;
+        else if (current_item == 4)  self.estado_ui.herramienta_activa = EstadoUI::CatBusqueda;
+        else if (current_item == 5)  self.estado_ui.herramienta_activa = EstadoUI::CatCiclos;
+        else if (current_item == 6)  self.estado_ui.herramienta_activa = EstadoUI::CatColoreo;
+        else if (current_item == 7)  self.estado_ui.herramienta_activa = EstadoUI::CatIsomorfismo;
+        else if (current_item == 8)  self.estado_ui.herramienta_activa = EstadoUI::CatFractales;
+        else if (current_item == 9)  self.estado_ui.herramienta_activa = EstadoUI::CatEulerHamilton;
+        else if (current_item == 10) self.estado_ui.herramienta_activa = EstadoUI::CatFA2;
     }
     ImGui::Separator();
 
@@ -1330,11 +1332,17 @@ void panelContextual(Interfaz& self, Grafo& red) {
                 ImGui::Spacing();
                 ImGui::TextDisabled(ICON_FA_CIRCLE_INFO " clic derecho en el lienzo para crear nodos.");
             }
-            ImGui::SeparatorText(ICON_FA_SHAPES " Plantillas de Grafos");
-            ImGui::TextWrapped("Carga una estructura clasica para probar algoritmos. Esto reemplazara el grafo actual.");
+            break;
+        }
+        case EstadoUI::CatPlantillas: {
+            ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), ICON_FA_BOOK " Generador de Estructuras");
+            ImGui::TextWrapped("Estas son configuraciones tipicas en teoria de grafos. Selecciona una para estudiar sus propiedades matematicas. ¡Cuidado, borrara tu grafo actual!");
+            ImGui::Spacing();
+            ImGui::Separator();
+            
             static int n_nodos = 5;
             static int n_nodos_bi = 3;
-            ImGui::SliderInt("Nodos (n)", &n_nodos, 3, 20);
+            ImGui::SliderInt("Nodos (n)", &n_nodos, 3, 30);
 
             auto reset_estado = [&]() {
                 self.estado_grafos.ruta_optima.clear();
@@ -1347,16 +1355,21 @@ void panelContextual(Interfaz& self, Grafo& red) {
                 AnimacionUI::reset(self);
             };
 
-            if (ImGui::Button("Completo K_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::completo(n_nodos); reset_estado(); }
-            if (ImGui::Button("Ciclo C_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::ciclo(n_nodos); reset_estado(); }
-            if (ImGui::Button("Camino P_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::camino(n_nodos); reset_estado(); }
-            if (ImGui::Button("Estrella S_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::estrella(n_nodos); reset_estado(); }
-            if (ImGui::Button("Rueda W_n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::rueda(n_nodos); reset_estado(); }
-            if (ImGui::Button("Petersen", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::petersen(); reset_estado(); }
+            if (ImGui::Button("Completo", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::completo(n_nodos); reset_estado(); }
+            if (ImGui::Button("Ciclo", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::ciclo(n_nodos); reset_estado(); }
+            if (ImGui::Button("Camino", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::camino(n_nodos); reset_estado(); }
+            if (ImGui::Button("Estrella", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::estrella(n_nodos); reset_estado(); }
+            if (ImGui::Button("Rueda", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::rueda(n_nodos); reset_estado(); }
+            if (ImGui::Button("Petersen", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::petersen(); reset_estado(); }
             
             ImGui::Separator();
-            ImGui::SliderInt("Nodos Bipartito (m)", &n_nodos_bi, 1, 10);
-            if (ImGui::Button("Bipartito K_m,n", ImVec2(-1, 0))) { self.historial.capturar(red); red = Plantillas::bipartito(n_nodos_bi, n_nodos); reset_estado(); }
+            ImGui::SliderInt("Nodos Lado A (m)", &n_nodos_bi, 1, 15);
+            if (ImGui::Button("Bipartito", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::bipartito(n_nodos_bi, n_nodos); reset_estado(); }
+            
+            ImGui::Separator();
+            if (ImGui::Button("Malla / Grid", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::malla(n_nodos_bi, n_nodos); reset_estado(); }
+            if (ImGui::Button("Arbol Binario", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::arbol_binario(n_nodos); reset_estado(); }
+            if (ImGui::Button("Mundo Pequeño", ImVec2(-1, 30))) { self.historial.capturar(red); red = Plantillas::mundo_pequeno(n_nodos); reset_estado(); }
             break;
         }
         case EstadoUI::CatRutas:    subpanelDijkstra(self, red); break;

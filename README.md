@@ -9,6 +9,7 @@ graphCore is an interactive application for creating, editing, visualizing, and 
 - **Graph Engine** — directed/undirected weighted graphs, 15+ algorithms (Dijkstra, Kruskal, BFS, DFS, Cycle Detection, Coloring, Isomorphism, Planarity, Euler/Hamilton, and more)
 - **Network Simulation** — real-time traffic simulation (HTTP, DNS, VOIP, DDOS) with latency, jitter, packet loss, failover, traceroute, and network storms
 - **ForceAtlas2 Layout** — Barnes-Hut physics simulation for large graphs (QuadTree-accelerated)
+- **Graph Templates** — Instant generators for classic structures (Grids, Binary Trees, Watts-Strogatz, Petersen, etc.)
 - **Visualization** — interactive canvas with zoom, pan, drag, real-time algorithm visualization with animated paths
 - **Audio** — procedurally generated sound effects (no external samples)
 - **Persistence** — save/load in JSON and GEXF formats
@@ -94,16 +95,17 @@ ctest --test-dir build --output-on-failure
 
 | File | Nodes | Edges | Description |
 |------|-------|-------|-------------|
-| `Grafo_Petersen.json` | 10 | 15 | Classic Petersen graph — the most famous graph in graph theory |
 | `Grafo_Dodecaedro.json` | 20 | 30 | Dodecahedron graph — platonic solid structure |
 | `Grafo_Desargues.json` | 20 | 50 | Desargues graph — symmetric transitive graph |
 | `Muestra_Arbol_BFS.json` | 40 | 39 | BFS tree — hierarchical structure |
 | `Muestra_Dijkstra_Caminos.json` | 35 | 58 | Grid graph — Dijkstra pathfinding demo |
-| `grafo_100_nodos_completo.json` | 100 | 4950 | Complete graph — stress test |
-| `grafo_bipartito_completo.json` | 25 | 150 | Complete bipartite graph — K₅,₅ layout |
+| `Muestra_Estrella_Doble.json` | 12 | 11 | Double star graph — central hub topology |
+| `Muestra_Anillo_Enlazado.json` | 20 | 40 | Linked ring — circular graph with long-range edges |
+| `Muestra_Fractal_Sierpinski.json` | 9 | 9 | Sierpinski fractal triangle (depth 2) |
 
 ## Version History
 
+- **v3.2** — Added Graph Templates (Grids, Trees, Watts-Strogatz), cleaned up UI, removed annotations and zoom bar.
 - **v3.1** — Massive codebase refactor: all headers split into .hpp + .cpp, modular build, 55 tests, CI pipeline, Dijkstra bugfixes, ForceAtlas2 reset fix
 - **v3.0** — Network simulation, audio engine, algorithm animation, ForceAtlas2 layout
 - **v2.0** — ImGui migration, graph editing, visualization

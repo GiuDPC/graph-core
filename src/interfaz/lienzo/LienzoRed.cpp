@@ -995,43 +995,7 @@ static void dibujarOverlayAlgoritmos(ImDrawList* dl, EstadoUI& ui,
     }
 }
 
-// Barra de zoom flotante
-static void dibujarZoomBar(Grafo& red, EstadoUI& ui, EstadoGrafos& grafos)
-{
-    ImVec2 pos_ventana = ImGui::GetWindowPos();
-    ImVec2 tam_ventana = ImGui::GetWindowSize();
-    ImVec2 zoom_pos(pos_ventana.x + tam_ventana.x - 120, pos_ventana.y + tam_ventana.y - 60);
 
-    ImDrawList* dl_bg = ImGui::GetWindowDrawList();
-    dl_bg->AddRectFilled(zoom_pos, ImVec2(zoom_pos.x + 100, zoom_pos.y + 32), IM_COL32(30, 30, 40, 200), 16.0f);
-    dl_bg->AddRect(zoom_pos, ImVec2(zoom_pos.x + 100, zoom_pos.y + 32), IM_COL32(80, 80, 90, 150), 16.0f, 0, 1.5f);
-
-    ImGui::SetNextWindowPos(zoom_pos);
-    if (ImGui::BeginChild("zoom_bar", ImVec2(100, 32), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(255, 255, 255, 40));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(255, 255, 255, 80));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-
-        ImGui::SetCursorPos(ImVec2(10, 4));
-        if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_MINUS, ImVec2(24, 24))) ui.zoom_velocity -= 0.3f;
-        ImGui::SameLine(0, 4);
-        if (ImGui::Button(ICON_FA_HOUSE, ImVec2(24, 24))) {
-            float initial_radius = 20.0f;
-            for (auto& n : red.nodos) n.radio = initial_radius;
-            for (auto& n : grafos.grafo_iso_g2.nodos) n.radio = initial_radius;
-            ui.offset_lienzo = ImVec2(0, 0);
-            ui.zoom_velocity = 0.0f;
-            ui.zoom_lienzo = 1.0f;
-        }
-        ImGui::SameLine(0, 4);
-        if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_PLUS, ImVec2(24, 24))) ui.zoom_velocity += 0.3f;
-
-        ImGui::PopStyleVar();
-        ImGui::PopStyleColor(3);
-    }
-    ImGui::EndChild();
-}
 
 // entrada principal
 namespace LienzoRed {
@@ -1112,17 +1076,6 @@ void dibujar(Grafo& red, Interfaz& self) {
                 paquete_clickeado = true;
             }
         }
-    }
-
-    // doble clic para anotaciones
-    if (en_canvas && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && ui.nodo_hover == -1 && !paquete_clickeado) {
-        ImVec2 mouse_mundo((mouse.x - ui.offset_lienzo.x) / ui.zoom_lienzo,
-                           (mouse.y - ui.offset_lienzo.y) / ui.zoom_lienzo);
-        self.historial.capturar(grafo_actual);
-        int new_id = grafo_actual.anotaciones.agregar(mouse_mundo);
-        grafo_actual.anotaciones.editando_id = new_id;
-        grafo_actual.anotaciones.creando = true;
-        grafo_actual.anotaciones.buffer[0] = '\0';
     }
 
     // Arrastre
@@ -1466,45 +1419,8 @@ void dibujar(Grafo& red, Interfaz& self) {
     // Notificaciones
     dibujarNotificaciones(dl, redes, origin, tamano);
 
-    // Anotaciones
-    for (auto& a : red.anotaciones.items) {
-        ImVec2 sc_pos(a.posicion.x * ui.zoom_lienzo + ui.offset_lienzo.x,
-                      a.posicion.y * ui.zoom_lienzo + ui.offset_lienzo.y);
-        
-        if (red.anotaciones.editando_id == a.id) {
-            ImGui::SetCursorScreenPos(sc_pos);
-            if (red.anotaciones.creando) {
-                ImGui::SetKeyboardFocusHere();
-                red.anotaciones.creando = false;
-            }
-            ImGui::PushItemWidth(200);
-            if (ImGui::InputText(std::string("##nota" + std::to_string(a.id)).c_str(), red.anotaciones.buffer, sizeof(red.anotaciones.buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                self.historial.capturar(red);
-                a.texto = red.anotaciones.buffer;
-                red.anotaciones.editando_id = -1;
-                if (a.texto.empty()) red.anotaciones.eliminar(a.id);
-            }
-            ImGui::PopItemWidth();
-            if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-                red.anotaciones.editando_id = -1;
-                if (a.texto.empty()) red.anotaciones.eliminar(a.id);
-            }
-        } else {
-            ImVec2 ts = ImGui::CalcTextSize(a.texto.c_str());
-            ImRect bb(sc_pos, ImVec2(sc_pos.x + ts.x, sc_pos.y + ts.y));
-            if (bb.Contains(mouse) && en_canvas && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                red.anotaciones.editando_id = a.id;
-                strncpy(red.anotaciones.buffer, a.texto.c_str(), sizeof(red.anotaciones.buffer));
-            }
-            dl->AddText(sc_pos, a.color, a.texto.c_str());
-        }
-    }
-
     // Overlay de algoritmos
     dibujarOverlayAlgoritmos(dl, ui, grafos, red, origin);
-
-    // Barra de zoom
-    dibujarZoomBar(red, ui, grafos);
 
     ImGui::End();
 }

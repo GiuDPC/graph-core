@@ -9,6 +9,7 @@ graphCore es una aplicación interactiva para crear, editar, visualizar y analiz
 - **Motor de Grafos** — grafos dirigidos/no-dirigidos con pesos, 15+ algoritmos (Dijkstra, Kruskal, BFS, DFS, Detección de Ciclos, Coloreo, Isomorfismo, Planaridad, Euler/Hamilton, y más)
 - **Simulación de Red** — tráfico en tiempo real (HTTP, DNS, VOIP, DDOS) con latencia, jitter, pérdida de paquetes, failover, traceroute y tormentas de red
 - **ForceAtlas2** — simulación física Barnes-Hut para grafos grandes (acelerado con QuadTree)
+- **Plantillas de Grafos** — Generadores instantáneos para estructuras clásicas (Mallas, Árboles, Watts-Strogatz, Petersen, etc.)
 - **Visualización** — lienzo interactivo con zoom, arrastre, visualización de algoritmos en tiempo real con caminos animados
 - **Audio** — efectos de sonido generados proceduralmente (sin samples externos)
 - **Persistencia** — guardar/cargar en JSON y GEXF
@@ -93,16 +94,17 @@ ctest --test-dir build --output-on-failure
 
 | Archivo | Nodos | Aristas | Descripción |
 |---------|-------|---------|-------------|
-| `Grafo_Petersen.json` | 10 | 15 | Grafo clásico de Petersen — el más famoso en teoría de grafos |
 | `Grafo_Dodecaedro.json` | 20 | 30 | Grafo de dodecaedro — estructura de sólido platónico |
 | `Grafo_Desargues.json` | 20 | 50 | Grafo de Desargues — grafo simétrico transitivo |
 | `Muestra_Arbol_BFS.json` | 40 | 39 | Árbol BFS — estructura jerárquica |
 | `Muestra_Dijkstra_Caminos.json` | 35 | 58 | Grafo reticular — demostración de Dijkstra |
-| `grafo_100_nodos_completo.json` | 100 | 4950 | Grafo completo — prueba de estrés |
-| `grafo_bipartito_completo.json` | 25 | 150 | Bipartito completo K₅,₅ |
+| `Muestra_Estrella_Doble.json` | 12 | 11 | Estrella doble — topología de hub central |
+| `Muestra_Anillo_Enlazado.json` | 20 | 40 | Anillo enlazado — red circular con atajos largos |
+| `Muestra_Fractal_Sierpinski.json` | 9 | 9 | Triángulo fractal de Sierpinski (nivel 2) |
 
 ## Historial de Versiones
 
+- **v3.2** — Nuevas plantillas de grafos (Mallas, Árboles, Watts-Strogatz), limpieza general de la interfaz (eliminadas anotaciones y barra de zoom).
 - **v3.1** — Refactor masivo del código: todos los headers divididos en .hpp + .cpp, build modular, 55 tests, CI pipeline, correcciones de Dijkstra, fix de reset en ForceAtlas2
 - **v3.0** — Simulación de red, motor de audio, animación de algoritmos, layout ForceAtlas2
 - **v2.0** — Migración a ImGui, edición de grafos, visualización

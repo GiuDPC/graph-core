@@ -1,5 +1,7 @@
 #include "Plantillas.hpp"
 #include <cmath>
+#include <functional>
+#include <random>
 
 static const float PI = 3.14159265f;
 
@@ -38,11 +40,22 @@ Grafo ciclo(int n) {
 Grafo camino(int n) {
     Grafo g;
     if (n < 2) n = 2;
-    if (n > 30) n = 30;
-    float startX = 200.0f;
-    float spacing = std::min(60.0f, 600.0f / (float)(n - 1));
+    if (n > 50) n = 50;
+    
+    float startX = 150.0f;
+    float startY = 150.0f;
+    float spacingX = 80.0f;
+    float spacingY = 80.0f;
+    int items_per_row = 8;
+    
     for (int i = 0; i < n; ++i) {
-        g.agregarNodo(ImVec2(startX + i * spacing, 300.0f));
+        int row = i / items_per_row;
+        int col = i % items_per_row;
+        // alternar direccion para hacer curva en S
+        if (row % 2 == 1) {
+            col = (items_per_row - 1) - col;
+        }
+        g.agregarNodo(ImVec2(startX + col * spacingX, startY + row * spacingY));
         g.nodos.back().nombre = "V" + std::to_string(i);
     }
     for (int i = 0; i < n - 1; ++i)
@@ -142,6 +155,113 @@ Grafo petersen() {
     // radios
     for (int i = 0; i < 5; ++i)
         g.agregarArista(i, 5 + i, 1.0f);
+    return g;
+}
+
+Grafo malla(int m, int n) {
+    Grafo g;
+    if (m < 2) m = 2; if (m > 15) m = 15;
+    if (n < 2) n = 2; if (n > 15) n = 15;
+    float startX = 400.0f - (n - 1) * 35.0f;
+    float startY = 300.0f - (m - 1) * 35.0f;
+    
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            g.agregarNodo(ImVec2(startX + j * 70.0f, startY + i * 70.0f));
+            g.nodos.back().nombre = "N" + std::to_string(i*n + j);
+        }
+    }
+    
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            int current = i * n + j;
+            if (j < n - 1) g.agregarArista(current, current + 1, 1.0f); // derecha
+            if (i < m - 1) g.agregarArista(current, current + n, 1.0f); // abajo
+        }
+    }
+    return g;
+}
+
+Grafo arbol_binario(int n) {
+    Grafo g;
+    if (n < 3) n = 3;
+    if (n > 63) n = 63; // max 6 niveles
+    
+    // calculo recursivo visual para posicionar bonito
+    std::function<void(int, int, float, float, float)> generar_nodo = 
+    [&](int id, int nivel, float x, float y, float x_offset) {
+        if (id >= n) return;
+        g.agregarNodo(ImVec2(x, y));
+        g.nodos.back().nombre = "V" + std::to_string(id);
+        
+        int izq = 2 * id + 1;
+        int der = 2 * id + 2;
+        float y_next = y + 80.0f;
+        float x_next_offset = x_offset * 0.5f;
+        
+        if (izq < n) {
+            generar_nodo(izq, nivel + 1, x - x_offset, y_next, x_next_offset);
+            g.agregarArista(id, izq, 1.0f);
+        }
+        if (der < n) {
+            generar_nodo(der, nivel + 1, x + x_offset, y_next, x_next_offset);
+            g.agregarArista(id, der, 1.0f);
+        }
+    };
+    
+    // raiz id=0
+    generar_nodo(0, 0, 400.0f, 100.0f, 200.0f);
+    
+    // el orden de agregado no es secuencial al id exacto de g.nodos, 
+    // pero los id lógicos y visuales quedan unidos igual
+    // correccion: generar_nodo los agrega in-order, por lo que el indice local de g.nodos != id logico.
+    // vamos a arreglar mapeo:
+    std::vector<int> real_idx(n, -1);
+    for (size_t i = 0; i < g.nodos.size(); ++i) {
+        int logico = std::stoi(g.nodos[i].nombre.substr(1));
+        real_idx[logico] = i;
+    }
+    g.aristas.clear();
+    for (int i = 0; i < n; ++i) {
+        int izq = 2 * i + 1;
+        int der = 2 * i + 2;
+        if (izq < n) g.agregarArista(real_idx[i], real_idx[izq], 1.0f);
+        if (der < n) g.agregarArista(real_idx[i], real_idx[der], 1.0f);
+    }
+    
+    return g;
+}
+
+Grafo mundo_pequeno(int n) {
+    // modelo watts-strogatz simplificado
+    Grafo g;
+    if (n < 6) n = 6;
+    if (n > 40) n = 40;
+    ponerEnCirculo(g, n, 400.0f, 300.0f, 140.0f + n * 6.0f);
+    
+    // anillo base k=4 (cada nodo se conecta a 2 vecinos de cada lado)
+    for (int i = 0; i < n; ++i) {
+        g.agregarArista(i, (i + 1) % n, 1.0f);
+        g.agregarArista(i, (i + 2) % n, 1.0f);
+    }
+    
+    // reconexion (atajos aleatorios)
+    auto& gen = Grafo::obtenerGeneradorAleatorio();
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    std::uniform_int_distribution<int> rand_n(0, n - 1);
+    
+    float beta = 0.2f; // probabilidad de reconexion
+    for (size_t a_idx = 0; a_idx < g.aristas.size(); ++a_idx) {
+        if (dist(gen) < beta) {
+            int u = g.aristas[a_idx].origen_id;
+            int v_nuevo = rand_n(gen);
+            if (v_nuevo != u) {
+                // simple swap (no comprobamos multiplicidad perfecta para mantener simple)
+                g.aristas[a_idx].destino_id = v_nuevo;
+            }
+        }
+    }
+    
     return g;
 }
 

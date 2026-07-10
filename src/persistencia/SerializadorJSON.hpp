@@ -32,16 +32,6 @@ inline bool guardar(const Grafo& g, const std::string& ruta) {
         });
     }
 
-    j["anotaciones"] = json::array();
-    for (const auto& an : g.anotaciones.items) {
-        j["anotaciones"].push_back({
-            {"id", an.id}, {"texto", an.texto},
-            {"x", an.posicion.x}, {"y", an.posicion.y},
-            {"color", an.color}
-        });
-    }
-    j["contador_anotaciones"] = g.anotaciones.contador_ids;
-
     std::ofstream archivo(ruta);
     if (!archivo.is_open()) return false;
     archivo << j.dump(4);
@@ -68,18 +58,6 @@ inline bool cargar(Grafo& g, const std::string& ruta) {
     for (const auto& aj : j["aristas"]) {
         bool dirigida = aj.value("dirigida", false);
         g.aristas.push_back(Arista(aj["origen"], aj["destino"], aj["peso"], dirigida));
-    }
-
-    g.anotaciones.contador_ids = j.value("contador_anotaciones", 0);
-    if (j.contains("anotaciones")) {
-        for (const auto& an_j : j["anotaciones"]) {
-            Anotacion an;
-            an.id = an_j.value("id", 0);
-            an.texto = an_j.value("texto", "");
-            an.posicion = ImVec2(an_j.value("x", 0.0f), an_j.value("y", 0.0f));
-            an.color = an_j.value("color", IM_COL32(255, 220, 80, 255));
-            g.anotaciones.items.push_back(an);
-        }
     }
 
     return true;
