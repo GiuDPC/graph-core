@@ -130,6 +130,8 @@ add_library(graph-core-lib STATIC
     src/interfaz/componentes/Toolbar.cpp
     src/interfaz/util/Animacion.cpp
     src/interfaz/util/AnimacionUI.cpp
+    src/interfaz/util/AnimacionCarga.cpp
+    src/interfaz/util/ExportadorPNG.cpp
     src/interfaz/util/AtajosTeclado.cpp
     src/interfaz/ventanas/VentanaAyuda.cpp
 )

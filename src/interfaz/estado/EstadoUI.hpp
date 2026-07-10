@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include "nucleo/algoritmos/ForceAtlas2.hpp"
+#include "interfaz/util/AnimacionCarga.hpp"
 
 struct EstadoUI {
     enum class ModoApp { Grafos, AeroGrafos };
@@ -91,4 +92,7 @@ struct EstadoUI {
     
     // flags de dialogo
     bool mostrar_acerca_de = false;
+
+    // --- graph load animation ---
+    AnimacionCarga anim_carga;
 };

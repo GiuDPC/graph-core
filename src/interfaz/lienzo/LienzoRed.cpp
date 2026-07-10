@@ -4,6 +4,7 @@
 #include "interfaz/util/Easing.hpp"
 #include "interfaz/util/Animacion.hpp"
 #include "interfaz/util/AnimacionUI.hpp"
+#include "interfaz/util/AnimacionCarga.hpp"
 #include "IconsFontAwesome6.h"
 #include <cmath>
 #include <unordered_set>
@@ -384,6 +385,12 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             if (!es_g2 && editando_g2) {
                 col = (col & 0x00FFFFFF) | (40 << 24);
             }
+            // Fade edges in during the load animation
+            if (!es_g2 && ui.anim_carga.activa) {
+                int base_a = (col >> IM_COL32_A_SHIFT) & 0xFF;
+                int fade_a = (base_a * ui.anim_carga.alphaAristas()) / 255;
+                col = (col & 0x00FFFFFF) | (fade_a << IM_COL32_A_SHIFT);
+            }
             lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, col, grosor);
 
             if (a.es_dirigida) {
@@ -753,8 +760,19 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             colorBorde = (colorBorde & 0x00FFFFFF) | (40 << 24);
         }
 
-        dl->AddCircleFilled(n.posicion, radio_dibujo, colorFondo, 32);
-        dl->AddCircle(n.posicion, radio_dibujo, colorBorde, 32, 2.5f);
+        // Apply load animation: scale each node around its own center
+        float anim_scale = 1.0f;
+        if (ui.anim_carga.activa) {
+            anim_scale = ui.anim_carga.escalaParaNodo(n.id);
+            if (!es_g2 && anim_scale <= 0.01f) {
+                // Node not yet born — skip entirely
+                continue;
+            }
+        }
+        float radio_anim = radio_dibujo * anim_scale;
+
+        dl->AddCircleFilled(n.posicion, radio_anim, colorFondo, 32);
+        dl->AddCircle(n.posicion, radio_anim, colorBorde, 32, 2.5f);
 
         if (grafos.mostrar_coloreo && grafos.modo_fractal && !es_g2) {
             float fp = sinf(tiempo * 2.0f + (float)n.id * 1.7f) * 0.3f + 0.7f;
@@ -1049,6 +1067,12 @@ void dibujar(Grafo& red, Interfaz& self) {
     float tiempo = (float)ImGui::GetTime();
 
     bool tooltip_mostrado = false;
+
+    // Advance load animation every frame
+    if (ui.anim_carga.activa) {
+        float dt = ImGui::GetIO().DeltaTime;
+        ui.anim_carga.actualizar(dt);
+    }
 
     // Grid
     dibujarGrid(dl, ui, origin, tamano);
