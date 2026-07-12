@@ -1208,6 +1208,10 @@ void sidebarInfo(Interfaz& self, Grafo& red) {
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Si esta activo, las nuevas aristas se crean con direccion (flecha).\n"
             "Self-loops solo se permiten en modo dirigido.");
+    ImGui::Checkbox(ICON_FA_HIGHLIGHTER " Resaltado Vecinos", &self.estado_ui.resaltado_vecinos);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Al hacer hover sobre un nodo, resalta sus vecinos\n"
+            "y atenua el resto del grafo (estilo Gephi).");
 
     // Deteccion automatica de propiedades
     auto props = Algoritmos::AnalizadorGrafo::analizar(red);

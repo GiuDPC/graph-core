@@ -27,4 +27,6 @@ private:
     static void secIsomorfismo();
     static void secMatrices();
     static void secAnalizarRed();
+    static void secPlantillas();
+    static void secResaltadoVecinos();
 };

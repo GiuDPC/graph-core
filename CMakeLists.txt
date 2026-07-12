@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Nombre del proyecto, versión y lenguaje
 project(graph-core
-    VERSION 3.1.0
+    VERSION 3.3.0
     LANGUAGES CXX
 )
 
@@ -112,7 +112,6 @@ add_library(graph-core-lib STATIC
     src/nucleo/algoritmos/AnalizadorGrafo.cpp
     src/nucleo/algoritmos/Isomorfismo.cpp
     src/nucleo/datos/DatosMundo.cpp
-    src/nucleo/SimuladorRed.cpp
     src/nucleo/Topologias.cpp
     src/nucleo/Plantillas.cpp
     src/audio/miniaudio_impl.cpp
@@ -222,8 +221,6 @@ if(BUILD_TESTS)
     add_graphcore_test(test_unionfind tests/test_unionfind.cpp)
     add_graphcore_test(test_bfs tests/test_bfs.cpp)
     add_graphcore_test(test_ciclos tests/test_ciclos.cpp)
-    add_graphcore_test(test_simulador tests/test_simulador.cpp)
-
     # Habilitar descubrimiento automatico de tests con CTest
     include(GoogleTest)
     gtest_discover_tests(test_grafo)
@@ -231,5 +228,4 @@ if(BUILD_TESTS)
     gtest_discover_tests(test_unionfind)
     gtest_discover_tests(test_bfs)
     gtest_discover_tests(test_ciclos)
-    gtest_discover_tests(test_simulador)
 endif()

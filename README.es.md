@@ -1,4 +1,4 @@
-# graphCore v3.1
+# graphCore v3.3
 
 **Motor avanzado de visualización y análisis de grafos y redes.**
 
@@ -7,10 +7,12 @@ graphCore es una aplicación interactiva para crear, editar, visualizar y analiz
 ## Características
 
 - **Motor de Grafos** — grafos dirigidos/no-dirigidos con pesos, 15+ algoritmos (Dijkstra, Kruskal, BFS, DFS, Detección de Ciclos, Coloreo, Isomorfismo, Planaridad, Euler/Hamilton, y más)
+- **Resaltado por Adyacencia** — efecto estilo Gephi: al hacer hover sobre un nodo, resalta sus vecinos directos y atenúa el resto del grafo para exploración visual intuitiva
 - **Simulación de Red** — tráfico en tiempo real (HTTP, DNS, VOIP, DDOS) con latencia, jitter, pérdida de paquetes, failover, traceroute y tormentas de red
 - **ForceAtlas2** — simulación física Barnes-Hut para grafos grandes (acelerado con QuadTree)
-- **Plantillas de Grafos** — Generadores instantáneos para estructuras clásicas (Mallas, Árboles, Watts-Strogatz, Petersen, etc.)
+- **Plantillas de Grafos** — generadores instantáneos para estructuras clásicas (Completo, Ciclo, Mallas, Árboles Binarios, Estrella, Watts-Strogatz, Petersen, etc.)
 - **Visualización** — lienzo interactivo con zoom, arrastre, visualización de algoritmos en tiempo real con caminos animados
+- **Ranking Visual** — mapear grado de nodo a tamaño y color para análisis estructural rápido
 - **Audio** — efectos de sonido generados proceduralmente (sin samples externos)
 - **Persistencia** — guardar/cargar en JSON y GEXF
 
@@ -39,7 +41,7 @@ sudo pacman -S cmake gcc glfw-x11 mesa
 cd graphCore
 
 # Compilar + tests
-make test
+make build
 
 # Ejecutar
 make run
@@ -74,21 +76,22 @@ src/
 │   ├── Interfaz.hpp/.cpp
 │   ├── paneles/         # paneles de control
 │   ├── lienzo/          # renderizado del lienzo
-│   ├── componentes/     # componentes de UI
+│   ├── componentes/     # componentes de UI (toolbar, barra de estado, diálogos)
+│   ├── ventanas/        # enciclopedia / ventana de ayuda
 │   └── estado/          # estado de la UI
 ├── audio/               # audio procedural
 └── persistencia/        # guardar/cargar JSON, GEXF
-tests/                   # 55 tests (GTest)
+tests/                   # tests unitarios (GTest)
 muestras/                # grafos de ejemplo (.json)
 ```
 
 ## Tests
 
 ```bash
-ctest --test-dir build --output-on-failure
+make test
 ```
 
-55 tests cubriendo: CRUD de grafos, Dijkstra (dirigido/no-dirigido), BFS, detección de ciclos, Union-Find, y simulación de red.
+Tests unitarios cubriendo: CRUD de grafos, Dijkstra (dirigido/no-dirigido), BFS, detección de ciclos, Union-Find, y simulación de red.
 
 ## Grafos de Ejemplo
 
@@ -104,8 +107,9 @@ ctest --test-dir build --output-on-failure
 
 ## Historial de Versiones
 
+- **v3.3** — Resaltado por Adyacencia (hover estilo Gephi: resalta vecinos del nodo, atenúa el resto). Nuevas secciones en la enciclopedia (Plantillas de Grafos, Resaltado Vecinos). Consistencia de versión corregida en todas las ventanas de UI.
 - **v3.2** — Nuevas plantillas de grafos (Mallas, Árboles, Watts-Strogatz), limpieza general de la interfaz (eliminadas anotaciones y barra de zoom).
-- **v3.1** — Refactor masivo del código: todos los headers divididos en .hpp + .cpp, build modular, 55 tests, CI pipeline, correcciones de Dijkstra, fix de reset en ForceAtlas2
+- **v3.1** — Refactor masivo del código: todos los headers divididos en .hpp + .cpp, build modular, tests, CI pipeline, correcciones de Dijkstra, fix de reset en ForceAtlas2
 - **v3.0** — Simulación de red, motor de audio, animación de algoritmos, layout ForceAtlas2
 - **v2.0** — Migración a ImGui, edición de grafos, visualización
 - **v1.0** — Versión inicial en consola con algoritmos de grafos

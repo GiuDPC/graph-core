@@ -60,14 +60,14 @@ struct EstadoUI {
     int seccion_ayuda_actual = 0;
     bool mostrar_tutorial_rapido = true; // Se muestra al iniciar por primera vez
 
-    // --- forceatlas2 ---
+    // forceatlas2
     bool fisicas_activas          = false;
     bool fisicas_estado_cambiado  = false;
     std::unordered_map<int, ImVec2> fisicas_posiciones_guardadas;
     Algoritmos::ParametrosFA2 fa2_params;
     Algoritmos::ForceAtlas2   fa2;
 
-    // --- ranking visual ---
+    // ranking visual
     struct EstadoRanking {
         bool activo = false;
         // atributos disponibles para mapear a size/color
@@ -81,6 +81,7 @@ struct EstadoUI {
     } ranking;
 
     bool aristas_dirigidas = false;  // toggle global: true = nuevas aristas se crean dirigidas
+    bool resaltado_vecinos = false;  // adjacency highlighting: hover resalta vecinos y atenua el resto
 
     // fuentes
     ImFont* fontMono = nullptr;

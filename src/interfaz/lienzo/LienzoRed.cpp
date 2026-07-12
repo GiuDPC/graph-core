@@ -2,7 +2,6 @@
 #include "Interfaz.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "nucleo/SimuladorRed.hpp"
 #include "interfaz/util/Easing.hpp"
 #include "interfaz/util/Animacion.hpp"
 #include "interfaz/util/AnimacionUI.hpp"
@@ -69,11 +68,6 @@ static ImU32 colorHealth(float v) {
         float t = (v - 0.5f) * 2.0f;
         return IM_COL32(255, (int)((1.0f - t) * 200), (int)((1.0f - t) * 50), 200);
     }
-}
-
-static ImU32 imColorProtocolo(const std::string& tipo) {
-    uint32_t c = ColoresProtocolo::paraTipo(tipo);
-    return IM_COL32((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF, (c >> 24) & 0xFF);
 }
 
 // Helpers para aristas dirigidas y curvas
@@ -143,13 +137,14 @@ static void lineaArista(ImDrawList* dl, ImVec2 o, ImVec2 d, float r_o, float r_d
 
 // Dibujar aristas de un grafo
 static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
-    EstadoUI& ui, EstadoRedes& redes, EstadoGrafos& grafos,
+    EstadoUI& ui, EstadoGrafos& grafos,
     const std::unordered_set<uint64_t>& edge_lookup,
     bool usar_ranking, float rank_size_min, float rank_size_max,
     float rank_color_min, float rank_color_max,
-    bool modo_red, bool es_g2, bool editando_g2,
+    bool es_g2, bool editando_g2,
     ImVec2 origin, ImVec2 tamano, float tiempo, ImVec2 mouse,
-    bool& tooltip_mostrado)
+    bool& tooltip_mostrado,
+    const std::unordered_set<int>* vecinos_hover)
 {
     (void)rank_size_min; (void)rank_size_max;
     (void)rank_color_min; (void)rank_color_max;
@@ -209,30 +204,9 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             ImU32 col_self = es_g2 ? IM_COL32(200, 200, 50, 150) : IM_COL32(120, 130, 140, 120);
             float grosor_self = 2.0f + std::min(a.peso_actual / 10.0f, 4.0f);
 
-            bool self_caida = false;
-            float self_uso = 0.0f;
-            if (modo_red) {
-                self_uso = redes.simulador.usoArista(a.origen_id, a.destino_id);
-                auto skey = std::make_pair(a.origen_id, a.destino_id);
-                if (redes.simulador.estado.aristas.count(skey))
-                    self_caida = !redes.simulador.estado.aristas.at(skey).activa;
-                if (self_caida) {
-                    col_self = IM_COL32(255, 50, 50, 180);
-                } else if (self_uso > 0.02f) {
-                    col_self = colorSaturacion(self_uso);
-                    grosor_self = 2.0f + self_uso * 4.0f;
-                }
-            }
-
             dl->AddBezierCubic(p0, pc1, pc2, p3, col_self, grosor_self);
-            if (!self_caida && self_uso > 0.02f) {
-                float gi = 0.2f + self_uso * 0.5f;
-                ImU32 gc = colorSaturacion(self_uso);
-                gc = (gc & 0x00FFFFFF) | ((int)(gi * 60) << 24);
-                dl->AddBezierCubic(p0, pc1, pc2, p3, gc, grosor_self + 4.0f);
-            }
 
-            if (a.es_dirigida && !self_caida) {
+            if (a.es_dirigida) {
                 float t1 = 0.95f, t2 = 0.99f;
                 float u1 = 1-t1, u2 = 1-t2;
                 ImVec2 prev(
@@ -251,10 +225,7 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             if (alpha_lod > 0.0f) {
                 ImVec2 peso_pos(o->posicion.x, o->posicion.y - r - h * 0.45f);
                 char peso_txt[16];
-                if (modo_red && self_uso > 0.02f)
-                    snprintf(peso_txt, sizeof(peso_txt), "%.0f%%", self_uso * 100.0f);
-                else
-                    snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
+                snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
                 ImVec2 ts = ImGui::CalcTextSize(peso_txt);
                 dl->AddRectFilled(
                     ImVec2(peso_pos.x - ts.x*0.5f - 3, peso_pos.y - ts.y*0.5f - 1),
@@ -329,63 +300,21 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             }
         }
 
-        // brillo de saturacion modo red
-        bool modo_red_edge = (modo_red && !es_g2);
-        float uso_arista = 0.0f;
-        bool arista_caida = false;
-        if (modo_red_edge) {
-            uso_arista = redes.simulador.usoArista(a.origen_id, a.destino_id);
-            auto key = std::make_pair(a.origen_id, a.destino_id);
-            if (redes.simulador.estado.aristas.count(key))
-                arista_caida = !redes.simulador.estado.aristas.at(key).activa;
-
-            if (arista_caida) {
-                col = IM_COL32(255, 50, 50, 180);
-                grosor = 2.0f;
-                int segmentos = 8;
-                for (int seg = 0; seg < segmentos; seg++) {
-                    float t0 = (float)seg / segmentos;
-                    float t1 = (float)(seg + 1) / segmentos;
-                    ImVec2 p0 = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, t0);
-                    if (seg % 2 == 0) {
-                        ImVec2 p1 = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, t1);
-                        dl->AddLine(p0, p1, col, grosor);
-                    }
-                }
-            } else if (uso_arista > 0.02f) {
-                auto key_ea = std::make_pair(a.origen_id, a.destino_id);
-                float bw_factor = 1.0f;
-                if (redes.simulador.estado.aristas.count(key_ea)) {
-                    const auto& ea = redes.simulador.estado.aristas.at(key_ea);
-                    bw_factor = std::min(ea.bandwidth_mbps / 100.0f, 4.0f);
-                }
-                float grosor_fondo = 2.0f + bw_factor * 3.0f;
-
-                lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(60, 65, 75, 100), grosor_fondo);
-
-                float glow_intensity = 0.2f + uso_arista * 0.4f;
-                ImU32 glow_col = colorSaturacion(uso_arista);
-                glow_col = (glow_col & 0x00FFFFFF) | ((int)(glow_intensity * 50) << 24);
-                lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, glow_col, grosor_fondo + 4.0f);
-
-                float t_onda = fmod(tiempo * (0.5f + uso_arista * 2.0f), 1.0f);
-                ImVec2 pos_onda = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, t_onda);
-                ImU32 col_onda = colorSaturacion(uso_arista);
-                dl->AddCircleFilled(pos_onda, 3.0f + uso_arista * 3.0f, col_onda, 10);
-
-                col = colorSaturacion(uso_arista);
-                grosor = 1.5f + uso_arista * grosor_fondo * 0.8f;
-            }
-
-            if (uso_arista > 0.92f && !arista_caida) {
-                float pulse = sinf(tiempo * 4.0f) * 0.3f + 0.7f;
-                lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, IM_COL32(255, 50, 50, (int)(80 * pulse)), grosor + 6.0f);
-            }
-        }
-
-        if (!arista_caida) {
+        {
             if (!es_g2 && editando_g2) {
                 col = (col & 0x00FFFFFF) | (40 << 24);
+            }
+
+            // Adjacency highlighting
+            if (vecinos_hover) {
+                bool adyacente = vecinos_hover->count(a.origen_id) && vecinos_hover->count(a.destino_id);
+                if (adyacente) {
+                    col = (col & 0x00FFFFFF) | (255 << 24);
+                    grosor = std::max(grosor, 3.5f);
+                } else {
+                    col = (col & 0x00FFFFFF) | (25 << 24);
+                    grosor = std::min(grosor, 1.0f);
+                }
             }
 
             lineaArista(dl, o->posicion, d->posicion, get_radio_dibujo(o), get_radio_dibujo(d), punto_control, es_curva, col, grosor);
@@ -405,19 +334,16 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
         }
 
         float alpha_lod = std::clamp((ui.zoom_lienzo - 0.25f) / 0.25f, 0.0f, 1.0f);
-        if (!arista_caida && alpha_lod > 0.0f) {
+        if (alpha_lod > 0.0f) {
             ImVec2 mid = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, 0.5f);
             char peso_txt[16];
-            if (modo_red && uso_arista > 0.02f)
-                snprintf(peso_txt, sizeof(peso_txt), "%.0f%%", uso_arista * 100.0f);
-            else
-                snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
+            snprintf(peso_txt, sizeof(peso_txt), "%.1f", a.peso_actual);
             ImVec2 ts = ImGui::CalcTextSize(peso_txt);
             dl->AddRectFilled(
                 ImVec2(mid.x - ts.x * 0.5f - 3, mid.y - ts.y * 0.5f - 1),
                 ImVec2(mid.x + ts.x * 0.5f + 3, mid.y + ts.y * 0.5f + 1),
                 IM_COL32(20, 20, 25, (int)(200 * alpha_lod)), 3.0f);
-            ImU32 col_txt = (modo_red && uso_arista > 0.02f) ? colorSaturacion(uso_arista) : IM_COL32(200, 210, 220, 255);
+            ImU32 col_txt = IM_COL32(200, 210, 220, 255);
             col_txt = (col_txt & 0x00FFFFFF) | ((int)(220 * alpha_lod) << 24);
             dl->AddText(ImVec2(mid.x - ts.x * 0.5f, mid.y - ts.y * 0.5f), col_txt, peso_txt);
         }
@@ -438,139 +364,18 @@ static void dibujarAristasEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             }
         }
 
-        // x animada
-        if (arista_caida) {
-            ImVec2 mid2 = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, 0.5f);
-            float pulse_a = (sinf(tiempo * 4.0f) + 1.0f) * 0.5f;
-            float sz = 8.0f + pulse_a * 4.0f;
-            ImU32 col_x = IM_COL32(255, 50, 50, (int)(150 + pulse_a * 105));
-            dl->AddLine(ImVec2(mid2.x - sz, mid2.y - sz), ImVec2(mid2.x + sz, mid2.y + sz), col_x, 3.0f);
-            dl->AddLine(ImVec2(mid2.x + sz, mid2.y - sz), ImVec2(mid2.x - sz, mid2.y + sz), col_x, 3.0f);
-        }
-
-        // Tooltip de arista (hover)
-        if (modo_red && !arista_caida && !tooltip_mostrado) {
-            ImVec2 mouse_edge = ImGui::GetMousePos();
-            float dist_min_edge = 999.0f;
-            for (int s = 0; s < 20; s++) {
-                float t_s = s / 19.0f;
-                ImVec2 pt = puntoEnArista(o->posicion, d->posicion, punto_control, es_curva, t_s);
-                float d_e = hypotf(mouse_edge.x - pt.x, mouse_edge.y - pt.y);
-                if (d_e < dist_min_edge) dist_min_edge = d_e;
-            }
-            if (dist_min_edge < 12.0f) {
-                auto key_tt = std::make_pair(a.origen_id, a.destino_id);
-                if (redes.simulador.estado.aristas.count(key_tt)) {
-                    const auto& ea_tt = redes.simulador.estado.aristas.at(key_tt);
-                    ImGui::BeginTooltip();
-                    ImGui::Text("%s -> %s",
-                        g_dib.nombreNodo(a.origen_id).c_str(),
-                        g_dib.nombreNodo(a.destino_id).c_str());
-                    ImGui::Text("Uso: %.0f%%", uso_arista * 100.0f);
-                    ImGui::Text("BW: %.0f Mbps | Lat: %.1f ms", ea_tt.bandwidth_mbps, ea_tt.latencia_ms);
-                    ImGui::Text("Jitter: %.1f ms | Perdida: %.1f%%", ea_tt.jitter_ms, ea_tt.packet_loss * 100.0f);
-                    ImGui::EndTooltip();
-                    tooltip_mostrado = true;
-                }
-            }
-        }
-    }
-}
-
-// Dibujar paquetes
-static void dibujarPaquetesEnGrafo(ImDrawList* dl, const Grafo& g_dib,
-    const EstadoRedes& redes, float tiempo, ImVec2 mouse,
-    bool& tooltip_mostrado, bool modo_red, bool es_g2)
-{
-    if (!modo_red || es_g2) return;
-
-    for (const auto& pkt : redes.simulador.obtenerPaquetes()) {
-        if (pkt.paso_actual + 1 >= (int)pkt.ruta.size()) continue;
-        int u = pkt.ruta[pkt.paso_actual];
-        int v = pkt.ruta[pkt.paso_actual + 1];
-        const Nodo* no = g_dib.obtenerNodo(u);
-        const Nodo* nd = g_dib.obtenerNodo(v);
-        if (!no || !nd) continue;
-
-        bool pkt_curvo = false;
-        ImVec2 pkt_pc;
-        if (no != nd) {
-            for (const auto& other : g_dib.aristas) {
-                if (other.origen_id == v && other.destino_id == u) {
-                    pkt_curvo = true;
-                    float desp = (u != pkt.origen_id) ? -30.0f : 30.0f;
-                    pkt_pc = calcularPuntoControlCurva(no->posicion, nd->posicion, desp);
-                    break;
-                }
-            }
-        }
-
-        float t = Easing::easeInOutCubic(pkt.progreso);
-        ImVec2 pos_pkt = puntoEnArista(no->posicion, nd->posicion, pkt_pc, pkt_curvo, t);
-
-        if (pkt.tipo == "TRACE") {
-            float tam_trace = 6.0f + sinf(tiempo * 3.0f) * 2.0f;
-            dl->AddCircleFilled(pos_pkt, tam_trace * 6.0f,
-                IM_COL32(0, 188, 212, (int)(20 + sinf(tiempo * 2.0f) * 10)), 20);
-            dl->AddCircleFilled(pos_pkt, tam_trace, IM_COL32(0, 220, 255, 255), 20);
-            dl->AddCircleFilled(pos_pkt, tam_trace * 0.5f, IM_COL32(255, 255, 255, 200), 12);
-            dl->AddText(ImVec2(pos_pkt.x - 5, pos_pkt.y - 6), IM_COL32(255, 255, 255, 255), "T");
-        } else {
-            ImU32 col_pkt = imColorProtocolo(pkt.tipo);
-            float tam = 2.5f + pkt.tamaño_mb * 0.3f;
-            if (tam > 5.5f) tam = 5.5f;
-
-            for (int trail = 1; trail <= 4; trail++) {
-                float tt = std::max(0.0f, pkt.progreso - trail * 0.04f);
-                float t_trail = Easing::easeInOutCubic(tt);
-                ImVec2 pos_trail = puntoEnArista(no->posicion, nd->posicion, pkt_pc, pkt_curvo, t_trail);
-                float alpha_t = (1.0f - trail * 0.2f) * 0.6f;
-                dl->AddCircleFilled(pos_trail, tam * (1.0f - trail * 0.15f),
-                    IM_COL32(
-                        ((col_pkt >> IM_COL32_R_SHIFT) & 0xFF),
-                        ((col_pkt >> IM_COL32_G_SHIFT) & 0xFF),
-                        ((col_pkt >> IM_COL32_B_SHIFT) & 0xFF),
-                        (int)(alpha_t * 255)
-                    ), 10);
-            }
-
-            dl->AddCircleFilled(pos_pkt, tam * 4.0f,
-                ((col_pkt & 0x00FFFFFF) | (18 << 24)), 14);
-            dl->AddCircleFilled(pos_pkt, tam, col_pkt, 20);
-            dl->AddCircleFilled(pos_pkt, tam * 0.35f,
-                IM_COL32(255, 255, 255, 160), 10);
-
-            char label[2] = {ColoresProtocolo::icono(pkt.tipo)[0], '\0'};
-            ImVec2 ls = ImGui::CalcTextSize(label);
-            dl->AddText(ImVec2(pos_pkt.x - ls.x * 0.5f - 8, pos_pkt.y - ls.y * 0.5f - 8),
-                IM_COL32(255, 255, 255, 180), label);
-        }
-
-        if (!tooltip_mostrado && std::hypot(mouse.x - pos_pkt.x, mouse.y - pos_pkt.y) < 25.0f) {
-            ImGui::BeginTooltip();
-            ImGui::Text("Paquete ID: #%d", pkt.id);
-            ImGui::Text("Protocolo: %s", pkt.tipo.c_str());
-            if (pkt.paso_actual + 1 < (int)pkt.ruta.size()) {
-                ImGui::Text("Ruta: %s -> %s",
-                    g_dib.nombreNodo(pkt.ruta[pkt.paso_actual]).c_str(),
-                    g_dib.nombreNodo(pkt.ruta[pkt.paso_actual+1]).c_str()
-                );
-            }
-            ImGui::Text("Progreso: Salto %d de %d", pkt.paso_actual + 1, (int)pkt.ruta.size());
-            ImGui::EndTooltip();
-            tooltip_mostrado = true;
-        }
     }
 }
 
 // Dibujar nodos de un grafo
 static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
-    EstadoUI& ui, EstadoRedes& redes, EstadoGrafos& grafos,
+    EstadoUI& ui, EstadoGrafos& grafos,
     bool usar_ranking, float rank_size_min, float rank_size_max,
     float rank_color_min, float rank_color_max,
-    bool modo_red, bool es_g2, bool editando_g2,
+    bool es_g2, bool editando_g2,
     ImVec2 origin, ImVec2 tamano, float tiempo, ImVec2 mouse,
-    bool& tooltip_mostrado)
+    bool& tooltip_mostrado,
+    const std::unordered_set<int>* vecinos_hover)
 {
     auto getValorRank = [&](int nid, EstadoUI::EstadoRanking::Atributo attr) -> float {
         switch (attr) {
@@ -638,45 +443,7 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             colorBorde = IM_COL32(200, 220, 230, 200);
         }
 
-        // anillo de salud
-        if (modo_red && redes.simulador.estado.nodos.count(n.id) && !es_g2) {
-            const auto& en = redes.simulador.estado.nodos.at(n.id);
-            if (en.activo) {
-                float health = std::max(en.cpu_uso, en.memoria_uso);
-                ImU32 col_ring = colorHealth(health);
-                float pulse = sinf(tiempo * 2.0f + (float)n.id) * 0.3f + 1.0f;
-                float ring_r = n.radio + 4.0f + health * 4.0f * pulse;
-                dl->AddCircle(n.posicion, ring_r, col_ring, 32, 2.5f + health * 2.0f);
-            }
-        }
 
-        // Anillo de buffer (congestion)
-        if (modo_red && redes.simulador.estado.nodos.count(n.id) && !es_g2) {
-            const auto& en_buf = redes.simulador.estado.nodos.at(n.id);
-            if (en_buf.activo) {
-                float buf_ratio = std::min(1.0f, en_buf.buffer_mb / std::max(0.1f, en_buf.buffer_max_mb));
-                if (buf_ratio > 0.02f) {
-                    float r_inner = n.radio * 0.65f;
-                    ImU32 col_buf = IM_COL32(
-                        (int)(buf_ratio * 255),
-                        (int)((1.0f - buf_ratio) * 180),
-                        (int)((1.0f - buf_ratio) * 100), 180);
-                    dl->AddCircle(n.posicion, r_inner, col_buf, 24, 2.0f + buf_ratio * 3.0f);
-                }
-            }
-        }
-        // Indicador de cola de paquetes
-        if (modo_red && redes.simulador.estado.nodos.count(n.id) && !es_g2) {
-            const auto& en_q = redes.simulador.estado.nodos.at(n.id);
-            if (en_q.paquetes_cola > 0) {
-                char qtxt[8];
-                snprintf(qtxt, sizeof(qtxt), "%d", en_q.paquetes_cola);
-                ImVec2 qs = ImGui::CalcTextSize(qtxt);
-                dl->AddText(ImVec2(n.posicion.x - qs.x * 0.5f,
-                                   n.posicion.y + n.radio + 14),
-                            IM_COL32(255, 200, 100, 200), qtxt);
-            }
-        }
 
         // seleccion / hover
         if ((es_g2 && editando_g2 && n.id == ui.nodo_seleccionado) ||
@@ -757,6 +524,12 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             colorBorde = (colorBorde & 0x00FFFFFF) | (40 << 24);
         }
 
+        // Adjacency highlighting
+        if (vecinos_hover && !vecinos_hover->count(n.id)) {
+            colorFondo = (colorFondo & 0x00FFFFFF) | (40 << 24);
+            colorBorde = (colorBorde & 0x00FFFFFF) | (40 << 24);
+        }
+
         dl->AddCircleFilled(n.posicion, radio_dibujo, colorFondo, 32);
         dl->AddCircle(n.posicion, radio_dibujo, colorBorde, 32, 2.5f);
 
@@ -768,6 +541,7 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
         float alpha_lod = 1.0f;
         if (alpha_lod > 0.0f) {
             int alpha_base = (!es_g2 && editando_g2) ? 60 : 255;
+            if (vecinos_hover && !vecinos_hover->count(n.id)) alpha_base = 40;
             int alpha_texto = (int)(alpha_base * alpha_lod);
 
             if (!es_g2 && ui.modo_actual == EstadoUI::ModoApp::AeroGrafos) {
@@ -784,39 +558,12 @@ static void dibujarNodosEnGrafo(ImDrawList* dl, const Grafo& g_dib,
             }
         }
 
-        if (modo_red && redes.simulador.estado.nodos.count(n.id) && !es_g2) {
-            const auto& en = redes.simulador.estado.nodos.at(n.id);
-            if (!en.activo) {
-                float pulse_a = (sinf(tiempo * 3.0f) + 1.0f) * 0.5f;
-                dl->AddCircle(n.posicion, n.radio + 4, IM_COL32(255, 30, 30, (int)(150 + pulse_a * 105)), 32, 3.0f);
-                dl->AddLine(
-                    ImVec2(n.posicion.x - n.radio, n.posicion.y - n.radio),
-                    ImVec2(n.posicion.x + n.radio, n.posicion.y + n.radio),
-                    IM_COL32(255, 30, 30, (int)(150 + pulse_a * 105)), 3.0f);
-                dl->AddText(ImVec2(n.posicion.x - 6, n.posicion.y - n.radio - 16),
-                    IM_COL32(255, 80, 80, 200), ICON_FA_TRIANGLE_EXCLAMATION);
-            }
-        }
-
         // tooltip nodo
-        if (!modo_red && !es_g2 && n.id == ui.nodo_hover && !tooltip_mostrado) {
+        if (!es_g2 && n.id == ui.nodo_hover && !tooltip_mostrado) {
             ImGui::BeginTooltip();
             ImGui::Text("%s", n.nombre.c_str());
             ImGui::Text("Grado: %d", g_dib.gradoNodo(n.id));
             ImGui::EndTooltip();
-            tooltip_mostrado = true;
-        }
-
-        if (modo_red && n.id == ui.nodo_hover && !es_g2 &&
-            redes.simulador.estado.nodos.count(n.id) && !tooltip_mostrado) {
-            const auto& en = redes.simulador.estado.nodos.at(n.id);
-            char tooltip[256];
-            snprintf(tooltip, sizeof(tooltip),
-                "CPU: %.0f%%  RAM: %.0f%%\nRX: %.0f  TX: %.0f\n%s",
-                en.cpu_uso * 100.0f, en.memoria_uso * 100.0f,
-                en.paquetes_rx, en.paquetes_tx,
-                en.activo ? "✅ Activo" : "❌ CAIDO");
-            ImGui::SetTooltip("%s", tooltip);
             tooltip_mostrado = true;
         }
     }
@@ -864,39 +611,6 @@ static void dibujarParticulaAnimacion(ImDrawList* dl, EstadoGrafos& grafos,
 }
 
 // Notificaciones emergentes
-static void dibujarNotificaciones(ImDrawList* dl, EstadoRedes& redes,
-                                   ImVec2 origin, ImVec2 tamano)
-{
-    float now = (float)ImGui::GetTime();
-    auto& notifs = redes.simulador.estado.notificaciones;
-
-    for (size_t i = 0; i < notifs.size(); ) {
-        float edad = now - notifs[i].tiempo_real;
-        if (edad > notifs[i].duracion) {
-            notifs.erase(notifs.begin() + (int)i);
-            continue;
-        }
-        float alpha = 1.0f;
-        if (edad > notifs[i].duracion - 0.8f)
-            alpha = (notifs[i].duracion - edad) / 0.8f;
-
-        ImVec2 pos_n(origin.x + tamano.x * 0.5f, origin.y + 40.0f + (float)i * 32.0f);
-        ImVec2 ts_n = ImGui::CalcTextSize(notifs[i].mensaje.c_str());
-
-        dl->AddRectFilled(
-            ImVec2(pos_n.x - ts_n.x * 0.5f - 12, pos_n.y - 6),
-            ImVec2(pos_n.x + ts_n.x * 0.5f + 12, pos_n.y + ts_n.y + 6),
-            IM_COL32(10, 10, 15, (int)(180 * alpha)), 6.0f);
-
-        uint32_t col_n = notifs[i].color;
-        ImU32 col_final = IM_COL32(
-            ((col_n >> 16) & 0xFF), ((col_n >> 8) & 0xFF), (col_n & 0xFF),
-            (int)(255 * alpha));
-        dl->AddText(ImVec2(pos_n.x - ts_n.x * 0.5f, pos_n.y), col_final, notifs[i].mensaje.c_str());
-        i++;
-    }
-}
-
 // Overlay de resultados de algoritmos
 static void dibujarOverlayAlgoritmos(ImDrawList* dl, EstadoUI& ui,
                                       EstadoGrafos& grafos, const Grafo& red,
@@ -1003,8 +717,6 @@ namespace LienzoRed {
 void dibujar(Grafo& red, Interfaz& self) {
     auto& ui = self.estado_ui;
     auto& grafos = self.estado_grafos;
-    auto& redes = self.estado_redes;
-
     static int frames_init = 0;
     if (frames_init < 5) {
         ImGui::SetNextWindowFocus();
@@ -1041,46 +753,30 @@ void dibujar(Grafo& red, Interfaz& self) {
         if (sqrtf(dx * dx + dy * dy) <= screen_r) ui.nodo_hover = n.id;
     }
 
+    // Adjacency highlighting: neighbor set (computed once per frame)
+    std::unordered_set<int> vecinos_hover_set;
+    const std::unordered_set<int>* ptr_vecinos_hover = nullptr;
+    {
+        bool hay_anim = grafos.anim_estado.activa || grafos.anim_estado.paso_actual >= 0;
+        if (ui.resaltado_vecinos && ui.nodo_hover != -1 && !hay_anim && !grafos.mostrar_coloreo) {
+            auto v = grafo_actual.vecinos(ui.nodo_hover);
+            vecinos_hover_set.insert(v.begin(), v.end());
+            vecinos_hover_set.insert(ui.nodo_hover);
+            ptr_vecinos_hover = &vecinos_hover_set;
+        }
+    }
+
     // Click izquierdo
-    bool paquete_clickeado = false;
     if (en_canvas && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         ui.nodo_seleccionado = ui.nodo_hover;
         if (ui.nodo_seleccionado != -1) {
             self.historial.capturar(grafo_actual);
             ui.arrastrando = true;
         }
-        if (ui.modo_actual == Interfaz::ModoApp::AeroGrafos && redes.sim_inicializada) {
-            int pkt_id = -1;
-            float dist_min = 20.0f;
-            for (const auto& pkt : redes.simulador.obtenerPaquetes()) {
-                if (pkt.paso_actual + 1 >= (int)pkt.ruta.size()) continue;
-                int u = pkt.ruta[pkt.paso_actual];
-                int v = pkt.ruta[pkt.paso_actual + 1];
-                Nodo* no = red.obtenerNodo(u);
-                Nodo* nd = red.obtenerNodo(v);
-                if (!no || !nd) continue;
-                float t = Easing::easeInOutCubic(pkt.progreso);
-                ImVec2 pos_pkt(
-                    no->posicion.x + (nd->posicion.x - no->posicion.x) * t,
-                    no->posicion.y + (nd->posicion.y - no->posicion.y) * t
-                );
-                float d = sqrtf((mouse.x - pos_pkt.x) * (mouse.x - pos_pkt.x) + (mouse.y - pos_pkt.y) * (mouse.y - pos_pkt.y));
-                if (d < dist_min) {
-                    dist_min = d;
-                    pkt_id = pkt.id;
-                }
-            }
-            if (pkt_id >= 0) {
-                redes.paquete_inspector_id = pkt_id;
-                redes.mostrar_inspector = true;
-                paquete_clickeado = true;
-            }
-        }
     }
 
     // Arrastre
-    if (!paquete_clickeado) {
-        if (ui.arrastrando && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+    if (ui.arrastrando && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
             Nodo* n = grafo_actual.obtenerNodo(ui.nodo_seleccionado);
             if (n) {
                 ImVec2 d = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
@@ -1097,7 +793,6 @@ void dibujar(Grafo& red, Interfaz& self) {
             }
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) ui.arrastrando = false;
-    }
 
     // Paneo
     bool panning_activo = ImGui::IsMouseDragging(ImGuiMouseButton_Middle) ||
@@ -1299,22 +994,6 @@ void dibujar(Grafo& red, Interfaz& self) {
         Nodo* n = grafo_actual.obtenerNodo(ui.nodo_seleccionado);
         if (n) {
             ImGui::TextDisabled("nodo: %s", n->nombre.c_str());
-            ImGui::Separator();
-            if (redes.sim_inicializada && redes.simulador.estado.nodos.count(n->id)) {
-                auto& en = redes.simulador.estado.nodos[n->id];
-                if (en.activo) {
-                    if (ImGui::Selectable(ICON_FA_BOLT " derribar nodo")) {
-                        redes.simulador.simularFalloNodo(n->id, red);
-                    }
-                } else {
-                    if (ImGui::Selectable(ICON_FA_ROTATE_LEFT " restaurar nodo")) {
-                        redes.simulador.restaurarNodo(n->id, red);
-                    }
-                }
-                if (ImGui::Selectable(ICON_FA_PAPER_PLANE " enviar trafico desde aqui")) {
-                    redes.flujo_origen = n->id;
-                }
-            }
             if (ImGui::Selectable(ICON_FA_TRASH " eliminar nodo")) {
                 grafo_actual.eliminarNodo(n->id);
                 ui.nodo_seleccionado = -1;
@@ -1340,8 +1019,6 @@ void dibujar(Grafo& red, Interfaz& self) {
     std::vector<Grafo*> grafos_a_dibujar = {&red_dibujo};
     if (ui.herramienta_activa == EstadoUI::CatIsomorfismo)
         grafos_a_dibujar.push_back(&iso_dibujo);
-
-    bool modo_red = (ui.modo_actual == Interfaz::ModoApp::AeroGrafos && redes.sim_inicializada);
 
     if (editando_g2) {
         const char* cartel = "[ MODO ISOMORFISMO: DIBUJANDO GRAFO A COMPARAR (G2) ]";
@@ -1396,28 +1073,24 @@ void dibujar(Grafo& red, Interfaz& self) {
         }
 
         // Dibujar aristas
-        dibujarAristasEnGrafo(dl, g_dib, ui, redes, grafos,
+        dibujarAristasEnGrafo(dl, g_dib, ui, grafos,
             edge_lookup, usar_ranking, rank_size_min, rank_size_max,
             rank_color_min, rank_color_max,
-            modo_red, es_g2, editando_g2,
-            origin, tamano, tiempo, mouse, tooltip_mostrado);
-
-        // Dibujar paquetes
-        dibujarPaquetesEnGrafo(dl, g_dib, redes, tiempo, mouse, tooltip_mostrado, modo_red, es_g2);
+            es_g2, editando_g2,
+            origin, tamano, tiempo, mouse, tooltip_mostrado,
+            ptr_vecinos_hover);
 
         // Dibujar nodos
-        dibujarNodosEnGrafo(dl, g_dib, ui, redes, grafos,
+        dibujarNodosEnGrafo(dl, g_dib, ui, grafos,
             usar_ranking, rank_size_min, rank_size_max,
             rank_color_min, rank_color_max,
-            modo_red, es_g2, editando_g2,
-            origin, tamano, tiempo, mouse, tooltip_mostrado);
+            es_g2, editando_g2,
+            origin, tamano, tiempo, mouse, tooltip_mostrado,
+            ptr_vecinos_hover);
 
         // Particula de animacion
         dibujarParticulaAnimacion(dl, grafos, ui, g_dib, es_g2);
     }
-
-    // Notificaciones
-    dibujarNotificaciones(dl, redes, origin, tamano);
 
     // Overlay de algoritmos
     dibujarOverlayAlgoritmos(dl, ui, grafos, red, origin);

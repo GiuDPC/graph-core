@@ -40,6 +40,8 @@ void VentanaAyuda::dibujar(EstadoUI& ui) {
                 { ICON_FA_CLONE,            "Isomorfismo (VF2)"    },
                 { ICON_FA_GLOBE,            "Analisis de Red"      },
                 { ICON_FA_TABLE_CELLS,      "Matrices (Ady/Inc)"   },
+                { ICON_FA_SHAPES,           "Plantillas de Grafos" },
+                { ICON_FA_HIGHLIGHTER,      "Resaltado Vecinos"    },
             };
             int total = IM_ARRAYSIZE(secciones);
 
@@ -161,6 +163,8 @@ void VentanaAyuda::dibujarContenido(int sec) {
     case 10: secIsomorfismo(); break;
     case 11: secAnalizarRed(); break;
     case 12: secMatrices(); break;
+    case 13: secPlantillas(); break;
+    case 14: secResaltadoVecinos(); break;
     default: secIntroduccion(); break;
     }
 }
@@ -203,11 +207,8 @@ void VentanaAyuda::secControles() {
     bullet_text_wrapped("Ctrl + Y: Rehacer. Restaura una accion previamente deshecha.");
     bullet_text_wrapped("Ctrl + N: Boton del Panico / Reset. Borra absolutamente toda la memoria del grafo libre actual.");
     bullet_text_wrapped("Teclas [+] y [-]: Alternativas de hardware para hacer Zoom si no tienes rueda de mouse.");
-    ImGui::Spacing();
-    
-    subtitulo("La Barra de Zoom (Mini-HUD inferior derecho)");
-    bullet_text_wrapped("Icono de Casa (Reset Zoom): Presionalo si te perdiste en el espacio o hiciste demasiado zoom. Restaura la camara a las coordenadas (0,0) a escala 1:1 original.");
-    bullet_text_wrapped("Lupa (+ / -): Aumenta o disminuye la escala visual gradualmente.");
+    subtitulo("Controles del Lienzo");
+    bullet_text_wrapped("Shift + Arrastrar Nodo: Mueve todos los nodos del grafo a la vez.");
 }
 
 void VentanaAyuda::secAeroGrafos() {
@@ -428,4 +429,50 @@ void VentanaAyuda::secAnalizarRed() {
     bullet_text_wrapped("2. Abre el modulo 'Analisis de Red' en el panel derecho.");
     bullet_text_wrapped("3. Presiona 'Analizar Toda la Red'.");
     bullet_text_wrapped("4. El Super-Hub latira con un radar rojo en el lienzo. El panel de resultados imprimira el diagnostico exacto.");
+}
+
+void VentanaAyuda::secPlantillas() {
+    titulo(ICON_FA_SHAPES " Plantillas de Grafos");
+    
+    ImGui::TextWrapped("GraphCore incluye generadores instantaneos para crear estructuras clasicas de grafos con un solo clic. Ideal para estudiar propiedades topologicas sin tener que dibujar nodo por nodo.");
+    ImGui::Spacing();
+    
+    subtitulo("Plantillas Disponibles");
+    bullet_text_wrapped("Grafo Completo (Kn): Todos los nodos conectados entre si. Densidad 100%%.");
+    bullet_text_wrapped("Ciclo (Cn): Anillo simple donde cada nodo tiene exactamente grado 2.");
+    bullet_text_wrapped("Malla (Grid): Cuadricula rectangular. Util para pathfinding y Dijkstra.");
+    bullet_text_wrapped("Arbol Binario: Estructura jerarquica de profundidad configurable.");
+    bullet_text_wrapped("Estrella (Star): Un hub central conectado a N hojas.");
+    bullet_text_wrapped("Watts-Strogatz: Red de mundo pequeno con rewiring aleatorio.");
+    bullet_text_wrapped("Petersen: Grafo clasico de teoria de grafos, 3-regular, no-planar.");
+    ImGui::Spacing();
+    
+    subtitulo("Guia de Interfaz");
+    bullet_text_wrapped("1. Abre el panel derecho y selecciona 'Plantillas' en el menu desplegable.");
+    bullet_text_wrapped("2. Elige una plantilla y configura sus parametros (numero de nodos, profundidad, etc).");
+    bullet_text_wrapped("3. Presiona 'Generar'. El grafo aparecera en el lienzo listo para analizar.");
+    
+    tip("Combina plantillas con ForceAtlas2 para ver como las fisicas desenredan la estructura automaticamente.");
+}
+
+void VentanaAyuda::secResaltadoVecinos() {
+    titulo(ICON_FA_HIGHLIGHTER " Resaltado por Adyacencia (Adjacency Highlighting)");
+    
+    ImGui::TextWrapped("Efecto visual inspirado en Gephi. Al pasar el mouse sobre un nodo, se resaltan el nodo y todos sus vecinos directos, mientras el resto del grafo se atenua. Permite explorar visualmente la estructura local de un grafo de forma intuitiva.");
+    ImGui::Spacing();
+    
+    subtitulo("Como Funciona");
+    bullet_text_wrapped("El nodo bajo el cursor y sus vecinos directos mantienen opacidad completa.");
+    bullet_text_wrapped("Las aristas que conectan al nodo con sus vecinos se resaltan con mayor grosor y brillo.");
+    bullet_text_wrapped("Los nodos y aristas no conectados se atenuan (alpha reducido) para crear contraste visual.");
+    bullet_text_wrapped("El efecto se desactiva automaticamente durante animaciones de algoritmos (BFS, DFS) y coloreo para no interferir.");
+    ImGui::Spacing();
+    
+    subtitulo("Guia de Interfaz");
+    bullet_text_wrapped("1. En el panel izquierdo 'Info del Grafo', activa el checkbox 'Resaltado Vecinos'.");
+    bullet_text_wrapped("2. Pasa el mouse sobre cualquier nodo del lienzo.");
+    bullet_text_wrapped("3. Observa como se iluminan solo el nodo y sus conexiones directas.");
+    bullet_text_wrapped("4. Desactiva el checkbox para volver al comportamiento normal.");
+    
+    tip("Usa Resaltado Vecinos junto con Ranking Visual (tamano por grado) para identificar rapidamente los hubs mas importantes de tu red.");
 }

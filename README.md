@@ -1,4 +1,4 @@
-# graphCore v3.1
+# graphCore v3.3
 
 **Advanced graph visualization and network simulation engine.**
 
@@ -7,10 +7,12 @@ graphCore is an interactive application for creating, editing, visualizing, and 
 ## Features
 
 - **Graph Engine** — directed/undirected weighted graphs, 15+ algorithms (Dijkstra, Kruskal, BFS, DFS, Cycle Detection, Coloring, Isomorphism, Planarity, Euler/Hamilton, and more)
+- **Adjacency Highlighting** — Gephi-style hover effect: highlights the hovered node and its direct neighbors, dimming the rest of the graph for intuitive local exploration
 - **Network Simulation** — real-time traffic simulation (HTTP, DNS, VOIP, DDOS) with latency, jitter, packet loss, failover, traceroute, and network storms
 - **ForceAtlas2 Layout** — Barnes-Hut physics simulation for large graphs (QuadTree-accelerated)
-- **Graph Templates** — Instant generators for classic structures (Grids, Binary Trees, Watts-Strogatz, Petersen, etc.)
+- **Graph Templates** — Instant generators for classic structures (Complete, Cycle, Grids, Binary Trees, Star, Watts-Strogatz, Petersen, etc.)
 - **Visualization** — interactive canvas with zoom, pan, drag, real-time algorithm visualization with animated paths
+- **Visual Ranking** — map node degree to size and color for quick structural analysis
 - **Audio** — procedurally generated sound effects (no external samples)
 - **Persistence** — save/load in JSON and GEXF formats
 
@@ -40,7 +42,7 @@ git clone <repo-url> graphCore
 cd graphCore
 
 # Build + test
-make test
+make build
 
 # Run
 make run
@@ -75,21 +77,22 @@ src/
 │   ├── Interfaz.hpp/.cpp
 │   ├── paneles/         # control panels
 │   ├── lienzo/          # canvas rendering
-│   ├── componentes/     # UI components
+│   ├── componentes/     # UI components (toolbar, status bar, dialogs)
+│   ├── ventanas/        # encyclopedia / help window
 │   └── estado/          # UI state
 ├── audio/               # procedural audio
 └── persistencia/        # save/load JSON, GEXF
-tests/                   # 55 tests (GTest)
+tests/                   # unit tests (GTest)
 muestras/                # sample graphs (.json)
 ```
 
 ## Tests
 
 ```bash
-ctest --test-dir build --output-on-failure
+make test
 ```
 
-55 tests covering: graph CRUD, Dijkstra (with directed/undirected), BFS, cycle detection, Union-Find, and network simulation.
+Unit tests covering: graph CRUD, Dijkstra (with directed/undirected), BFS, cycle detection, Union-Find, and network simulation.
 
 ## Sample Graphs
 
@@ -105,8 +108,9 @@ ctest --test-dir build --output-on-failure
 
 ## Version History
 
+- **v3.3** — Adjacency Highlighting (Gephi-style hover: highlights node neighbors, dims the rest). New encyclopedia sections (Graph Templates, Adjacency Highlighting). Version consistency fix across all UI windows.
 - **v3.2** — Added Graph Templates (Grids, Trees, Watts-Strogatz), cleaned up UI, removed annotations and zoom bar.
-- **v3.1** — Massive codebase refactor: all headers split into .hpp + .cpp, modular build, 55 tests, CI pipeline, Dijkstra bugfixes, ForceAtlas2 reset fix
+- **v3.1** — Massive codebase refactor: all headers split into .hpp + .cpp, modular build, tests, CI pipeline, Dijkstra bugfixes, ForceAtlas2 reset fix
 - **v3.0** — Network simulation, audio engine, algorithm animation, ForceAtlas2 layout
 - **v2.0** — ImGui migration, graph editing, visualization
 - **v1.0** — Initial console-based graph algorithms

@@ -7,12 +7,12 @@
 
 using json = nlohmann::json;
 
-// Serializacion json — separado del grafo
+// Serializacion JSON, separado del grafo
 namespace Persistencia {
 
 inline bool guardar(const Grafo& g, const std::string& ruta) {
     json j;
-    j["version"] = "3.1";
+    j["version"] = "3.3";
     j["contador_ids"] = g.contador_ids;
 
     j["nodos"] = json::array();
