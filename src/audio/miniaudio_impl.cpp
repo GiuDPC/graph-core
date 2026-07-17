@@ -1,4 +1,3 @@
-// MINIAUDIO IMPLEMENTATION
-// Este archivo debe compilarse EXACTAMENTE UNA VEZ
+// MINIAUDIO IMPLEMENTACION
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"

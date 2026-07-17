@@ -45,17 +45,6 @@ void Grafo::agregarArista(int id1, int id2, float peso) {
     agregarArista(id1, id2, peso, false);
 }
 
-// Simulacion
-
-void Grafo::aplicarJitter(float porcentaje) {
-    static std::mt19937& gen = obtenerGeneradorAleatorio();
-    for (auto& a : aristas) {
-        std::uniform_real_distribution<float> dist(-porcentaje, porcentaje);
-        a.peso_actual = a.peso * (1.0f + dist(gen));
-        if (a.peso_actual < 0.1f) a.peso_actual = 0.1f;
-    }
-}
-
 // Queries estructurales
 
 int Grafo::gradoNodo(int id) const {

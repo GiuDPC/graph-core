@@ -22,12 +22,10 @@
 #include "nucleo/algoritmos/BFS.hpp"
 #include "nucleo/algoritmos/DFS.hpp"
 
-// imgui_internal.h necesario para APIs de DockBuilder
+// imgui_internal.h para APIs de DockBuilder
 #include "imgui_internal.h"
 
-// ---------------------------------------------------------------------------
 // aplica tema moderno, elegante y vibrante
-// ---------------------------------------------------------------------------
 void aplicarTemaCisco() {
     auto& style = ImGui::GetStyle();
     style.FrameRounding = 8.0f;
@@ -109,9 +107,7 @@ void aplicarTemaCisco() {
     colors[ImGuiCol_ModalWindowDimBg]= ImVec4(0.00f, 0.00f, 0.00f, 0.60f);
 }
 
-// ---------------------------------------------------------------------------
-// layout: izq info, centro (lienzo + matrices + log como tabs), der herramientas
-// ---------------------------------------------------------------------------
+// layout: izq info, centro lienzo, matrices y log como tabs
 void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     ImGuiID main = dock_id;
 
@@ -141,9 +137,7 @@ void Interfaz::construirLayout(ImGuiID dock_id, ImVec2 tamano) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // dibujar: toolbar, workspace, desplazamientoeles acoplables, status bar
-// ---------------------------------------------------------------------------
 void Interfaz::dibujar(Grafo& red, GLFWwindow* ventana) {
 
     static bool theme_set = false;

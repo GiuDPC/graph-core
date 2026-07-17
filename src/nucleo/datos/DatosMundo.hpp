@@ -6,14 +6,13 @@
 #include <string>
 #include <cmath>
 
-// ============================================================================
+
 // DatosMundo — Base de datos geografica mundial para AeroGrafos
 //
 // 63 ciudades reales con coordenadas verificadas
 // 200+ rutas aereas con distancias calculadas via Haversine
-// Grafo conexo garantizado
+// Grafo conexo
 // Incluye Venezuela (Caracas, Maracaibo, Valencia, Barquisimeto, Merida, Pto. Ordaz)
-// ============================================================================
 
 struct Ciudad {
     int id;

@@ -15,7 +15,7 @@ void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos
     bool ctrl  = io.KeyCtrl;
     bool shift = io.KeyShift;
 
-    // [Ctrl+Z] → Deshacer
+    // [Ctrl+Z] Deshacer
     if (ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_Z)) {
         if (historial.deshacer(red)) {
             ui.nodo_seleccionado = -1;
@@ -23,7 +23,7 @@ void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos
         }
     }
     
-    // [Ctrl+Y] o [Ctrl+Shift+Z] → Rehacer
+    // [Ctrl+Y] o [Ctrl+Shift+Z] Rehacer
     if ((ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_Y)) || 
         (ctrl && shift && ImGui::IsKeyPressed(ImGuiKey_Z))) {
         if (historial.rehacer(red)) {
@@ -32,7 +32,7 @@ void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos
         }
     }
     
-    // [Ctrl+N] → Nuevo grafo
+    // [Ctrl+N] Nuevo grafo
     if (ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_N)) {
         if (!red.nodos.empty()) {
             historial.capturar(red);
@@ -44,7 +44,7 @@ void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos
         }
     }
     
-    // [Delete] o [Backspace] → Borrar nodo/arista seleccionado
+    // [Delete] o [Backspace] Borrar nodo/arista seleccionado
     if (ImGui::IsKeyPressed(ImGuiKey_Delete) || ImGui::IsKeyPressed(ImGuiKey_Backspace)) {
         if (ui.nodo_seleccionado != -1) {
             historial.capturar(red);
@@ -53,7 +53,7 @@ void procesar(Grafo& red, HistorialGrafos& historial, EstadoUI& ui, EstadoGrafos
         }
     }
     
-    // [Ctrl+A] → Seleccionar todos los nodos
+    // [Ctrl+A] Seleccionar todos los nodos
     if (ctrl && !shift && ImGui::IsKeyPressed(ImGuiKey_A)) {
         // placeholder
     }

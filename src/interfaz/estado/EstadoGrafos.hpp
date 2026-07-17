@@ -90,6 +90,5 @@ struct EstadoGrafos {
     bool        arbol_layout_aplicado = false;
 
     // resultado de ruta
-    // resultado de ruta
     std::vector<int> ruta_optima;
 };

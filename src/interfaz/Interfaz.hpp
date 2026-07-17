@@ -5,7 +5,6 @@
 #include "nucleo/Grafo.hpp"
 #include "nucleo/tipos/PasoAnimacion.hpp"
 #include "estado/EstadoGrafos.hpp"
-#include "estado/EstadoRedes.hpp"
 #include "estado/EstadoAeroGrafos.hpp"
 #include "estado/EstadoUI.hpp"
 #include "nucleo/HistorialGrafos.hpp"
@@ -21,7 +20,6 @@ public:
     using ModoApp   = EstadoUI::ModoApp;
 
     EstadoGrafos      estado_grafos;
-    EstadoRedes       estado_redes;
     EstadoAeroGrafos  estado_aerografos;
     EstadoUI          estado_ui;
     HistorialGrafos   historial;

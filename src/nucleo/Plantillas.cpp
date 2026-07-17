@@ -211,11 +211,7 @@ Grafo arbol_binario(int n) {
     
     // raiz id=0
     generar_nodo(0, 0, 400.0f, 100.0f, 200.0f);
-    
-    // el orden de agregado no es secuencial al id exacto de g.nodos, 
-    // pero los id lógicos y visuales quedan unidos igual
-    // correccion: generar_nodo los agrega in-order, por lo que el indice local de g.nodos != id logico.
-    // vamos a arreglar mapeo:
+
     std::vector<int> real_idx(n, -1);
     for (size_t i = 0; i < g.nodos.size(); ++i) {
         int logico = std::stoi(g.nodos[i].nombre.substr(1));
@@ -256,7 +252,6 @@ Grafo mundo_pequeno(int n) {
             int u = g.aristas[a_idx].origen_id;
             int v_nuevo = rand_n(gen);
             if (v_nuevo != u) {
-                // simple swap (no comprobamos multiplicidad perfecta para mantener simple)
                 g.aristas[a_idx].destino_id = v_nuevo;
             }
         }

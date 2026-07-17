@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-// Union-find (disjoint set union) — con path compression y union by rank
+// Union-find con compresión de caminos y unión por rango
 class UnionFind {
 public:
     explicit UnionFind(int n) {
@@ -11,11 +11,11 @@ public:
     }
 
     int encontrar(int i) {
-        if (padre[i] != i) padre[i] = encontrar(padre[i]); // path compression
+        if (padre[i] != i) padre[i] = encontrar(padre[i]); // compresion de caminos
         return padre[i];
     }
 
-    // Retorna true si la union se realizo (eran componentes distintos)
+    // Retorna true si la union se realizo
     bool unir(int x, int y) {
         int rx = encontrar(x);
         int ry = encontrar(y);

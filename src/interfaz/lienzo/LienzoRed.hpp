@@ -1,5 +1,5 @@
 #pragma once
-#include "imgui.h"  // para ImDrawList
+#include "imgui.h" 
 #include "nucleo/Grafo.hpp"
 class Interfaz;
 namespace LienzoRed {

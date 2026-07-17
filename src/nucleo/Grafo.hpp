@@ -61,8 +61,6 @@ public:
     void agregarArista(int id1, int id2, float peso, bool dirigida);
     void agregarArista(int id1, int id2, float peso = 1.0f);
 
-    void aplicarJitter(float porcentaje);
-
     int gradoNodo(int id) const;
     std::vector<int> vecinos(int id) const;
     const Arista* obtenerArista(int id1, int id2) const;

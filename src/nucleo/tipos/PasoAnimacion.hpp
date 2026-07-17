@@ -12,7 +12,7 @@ struct PasoAnimacion {
     std::string descripcion;
     int         color_asignado = -1;
     
-    // Datos extendidos para animaciones ricas en proyector
+    // Datos extendidos para animaciones
     float       distancia_acumulada = -1.0f; // Para Dijkstra (carteles de km)
     int         nivel_profundidad   = -1;    // Para BFS/DFS (ondas/niveles)
 };

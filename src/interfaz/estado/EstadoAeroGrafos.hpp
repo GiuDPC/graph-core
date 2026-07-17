@@ -8,9 +8,8 @@
 #include <vector>
 #include <string>
 
-// ============================================================================
+
 // EstadoAeroGrafos — Estado del modo AeroGrafos
-// ============================================================================
 
 struct EstadoAeroGrafos {
     // Algoritmo activo
@@ -35,7 +34,7 @@ struct EstadoAeroGrafos {
     std::vector<int> ruta_resultado;          // Dijkstra/Euler/Hamilton: IDs ordenados
     float costo_total = 0.0f;                 // Dijkstra/Kruskal: peso total
     std::string descripcion_resultado;        // Texto descriptivo del resultado
-    std::vector<std::pair<int,int>> aristas_mst; // Kruskal: pares (origen, destino)
+    std::vector<std::pair<int,int>> aristas_mst; // Kruskal: pares, origen y destino
     std::vector<int> orden_visita;            // BFS/DFS: orden de ciudades visitadas
     std::vector<int> colores_asignados;       // Coloreo: color index por cada ciudad (size=63)
     int num_colores_usados = 0;               // Coloreo: cuantos colores distintos
@@ -54,7 +53,7 @@ struct EstadoAeroGrafos {
                                 DatosMundo::ALTO_VIRTUAL / 2.0f); // centro virtual
     float zoom_mapa = 1.0f;
 
-    // Camara cinematica (Lerp)
+    // Camara cinematica
     ImVec2 target_centro = centro_mapa;
     float target_zoom = 1.0f;
     bool interpolando_camara = false; // Solo verdadero por auto-encuadre

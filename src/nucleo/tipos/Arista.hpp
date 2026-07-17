@@ -5,7 +5,7 @@ struct Arista {
     int   origen_id;
     int   destino_id;
     float peso;
-    float peso_actual;   // puede variar con jitter en modo redes
+    float peso_actual;
     bool  es_dirigida;
 
     Arista(int _origen, int _destino, float _peso = 1.0f, bool _dirigida = false)

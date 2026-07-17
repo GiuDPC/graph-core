@@ -11,7 +11,7 @@ bool Toolbar::dibujar(EstadoUI& ui, bool en_modo_aero) {
     bool cambio = false;
     float avail = ImGui::GetContentRegionAvail().x;
 
-    // -- selector de modo a la izquierda --
+    // selector de modo a la izquierda
     {
         bool en_g = (ui.modo_actual == EstadoUI::ModoApp::Grafos);
         if (en_g) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.45f, 1.0f));
@@ -34,19 +34,19 @@ bool Toolbar::dibujar(EstadoUI& ui, bool en_modo_aero) {
         if (en_a) ImGui::PopStyleColor();
     }
 
-    // -- separador vertical visual --
+    // separador vertical visual
     ImGui::SameLine(0, 8);
     ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.4f, 1.0f), "|");
     ImGui::SameLine(0, 8);
 
-    // -- categorias segun modo --
+    // categorias segun modo
     if (ui.modo_actual == EstadoUI::ModoApp::Grafos) {
         ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para algoritmos");
     } else {
         ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), ICON_FA_CIRCLE_INFO " panel derecho para AeroGrafos");
     }
 
-    // -- boton de enciclopedia (wiki) --
+    // boton de enciclopedia (wiki)
     ImGui::SameLine(avail - 450);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.25f, 0.9f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.4f, 1.0f));
@@ -62,7 +62,7 @@ bool Toolbar::dibujar(EstadoUI& ui, bool en_modo_aero) {
     ImGui::PopStyleColor(2);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Abre la documentacion completa del programa");
 
-    // -- boton de fisicas (derecha) --
+    // boton de fisicas (derecha)
     if (ui.modo_actual == EstadoUI::ModoApp::Grafos) {
         ImGui::SameLine(avail - 150);
         bool fisicas_pushed = false;
