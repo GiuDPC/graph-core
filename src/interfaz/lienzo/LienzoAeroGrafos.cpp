@@ -382,10 +382,25 @@ static void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
 
     static bool prev_ejecutado = false;
     static float anim_progreso = 0.0f;
-    if (!prev_ejecutado && estado.algoritmo_ejecutado) {
+    static EstadoAeroGrafos::Algoritmo prev_algo = EstadoAeroGrafos::Algoritmo::RutaMasCorta;
+    static std::vector<int> prev_ruta;
+    static std::vector<std::pair<int, int>> prev_mst;
+
+    bool reset_anim = false;
+    if (!prev_ejecutado && estado.algoritmo_ejecutado) reset_anim = true;
+    if (prev_algo != estado.algoritmo_activo) reset_anim = true;
+    if (prev_ruta != estado.ruta_resultado) reset_anim = true;
+    if (prev_mst != estado.aristas_mst) reset_anim = true;
+
+    if (reset_anim) {
         anim_progreso = 0.0f;
     }
+
     prev_ejecutado = estado.algoritmo_ejecutado;
+    prev_algo = estado.algoritmo_activo;
+    prev_ruta = estado.ruta_resultado;
+    prev_mst = estado.aristas_mst;
+
     if (estado.algoritmo_ejecutado) {
         anim_progreso += ImGui::GetIO().DeltaTime * 1.5f; // Velocidad fluida
         if (anim_progreso > 1.0f) anim_progreso = 1.0f;
