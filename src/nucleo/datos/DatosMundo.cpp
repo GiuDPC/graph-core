@@ -100,6 +100,16 @@ const std::vector<Ciudad>& obtenerCiudades() {
         {60, "La Habana",     "Cuba",          23.1136f,  -82.3666f,  "HAV", 2},
         {61, "San Juan",      "Puerto Rico",   18.4655f,  -66.1057f,  "SJU", 0},
         {62, "Santo Domingo", "Rep. Dominicana",18.4861f, -69.9312f,  "SDQ", 2},
+        // 63-67: Ciudades Rusas
+        {63, "San Petersburgo", "Rusia",       59.9311f,   30.3609f,  "LED", 5},
+        {64, "Novosibirsk",   "Rusia",         55.0084f,   82.9357f,  "OVB", 4},
+        {65, "Ekaterimburgo", "Rusia",         56.8389f,   60.6057f,  "SVX", 3},
+        {66, "Vladivostok",   "Rusia",         43.1198f,  131.8869f,  "VVO", 2},
+        {67, "Kazán",         "Rusia",         55.7963f,   49.1088f,  "KZN", 2},
+        // 68-70: Hubs Estrategicos Globales
+        {68, "Anchorage",     "EE.UU.",        61.2181f, -149.9003f,  "ANC", 5},
+        {69, "Helsinki",      "Finlandia",     60.1695f,   24.9354f,  "HEL", 6},
+        {70, "Frankfurt",     "Alemania",      50.1109f,    8.6821f,  "FRA", 12},
     };
     return ciudades;
 }
@@ -174,8 +184,15 @@ const std::vector<RutaAerea>& obtenerRutas() {
 
 // Restricciones Geopoliticas
 void aplicarRestriccionesGeopoliticas(Grafo& g) {
+    const auto& ciudades = obtenerCiudades();
     for (auto& a : g.aristas) {
-        bool toca_rusia = (a.origen_id == 15 || a.destino_id == 15);
+        bool toca_rusia = false;
+        if (a.origen_id >= 0 && a.origen_id < (int)ciudades.size() && std::string(ciudades[a.origen_id].pais) == "Rusia") {
+            toca_rusia = true;
+        }
+        if (a.destino_id >= 0 && a.destino_id < (int)ciudades.size() && std::string(ciudades[a.destino_id].pais) == "Rusia") {
+            toca_rusia = true;
+        }
         bool sobrevuelo =
             (a.origen_id == 16 && a.destino_id == 21) ||
             (a.origen_id == 21 && a.destino_id == 16) ||

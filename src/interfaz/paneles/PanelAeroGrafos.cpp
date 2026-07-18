@@ -752,12 +752,12 @@ void dibujar(Interfaz& self, Grafo& red) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.6f, 1.0f), "Dijkstra");
                 ImGui::TableSetColumnIndex(1); ImGui::Text("%.0f", estado.costo_total);
-                ImGui::TableSetColumnIndex(2); ImGui::Text("%d", (int)estado.ruta_resultado.size() - 2); // origen y destino descartados del conteo de "escalas" o usamos res.saltos
+                ImGui::TableSetColumnIndex(2); ImGui::Text("%d", (int)estado.ruta_resultado.size() - 1); // origen y destino descartados del conteo de "escalas" o usamos res.saltos
                 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::TextColored(ImVec4(0.8f, 0.4f, 0.4f, 1.0f), "BFS");
                 ImGui::TableSetColumnIndex(1); ImGui::Text("%.0f", estado.costo_bfs);
-                ImGui::TableSetColumnIndex(2); ImGui::Text("%d", estado.saltos_bfs - 1);
+                ImGui::TableSetColumnIndex(2); ImGui::Text("%d", estado.saltos_bfs);
                 
                 ImGui::EndTable();
             }

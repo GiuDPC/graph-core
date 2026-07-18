@@ -380,6 +380,17 @@ static void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
     if (!estado.algoritmo_ejecutado) return;
     const auto& ciudades = DatosMundo::obtenerCiudades();
 
+    static bool prev_ejecutado = false;
+    static float anim_progreso = 0.0f;
+    if (!prev_ejecutado && estado.algoritmo_ejecutado) {
+        anim_progreso = 0.0f;
+    }
+    prev_ejecutado = estado.algoritmo_ejecutado;
+    if (estado.algoritmo_ejecutado) {
+        anim_progreso += ImGui::GetIO().DeltaTime * 1.5f; // Velocidad fluida
+        if (anim_progreso > 1.0f) anim_progreso = 1.0f;
+    }
+
     auto ciudadAPantalla = [&](int id) -> ImVec2 {
         if (id < 0 || id >= (int)ciudades.size()) return ImVec2(0,0);
         const auto& c = ciudades[id];
@@ -387,16 +398,22 @@ static void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
         ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
         return ImVec2(pos.x + s.x, pos.y + s.y);
     };
-    auto dibujarAristaResultado = [&](int id1, int id2, ImU32 color, float grosor) {
+    auto dibujarAristaResultado = [&](int id1, int id2, ImU32 color, float grosor, float fraccion = 1.0f) {
         if (id1 < 0 || id2 < 0 || id1 >= (int)ciudades.size() || id2 >= (int)ciudades.size()) return;
+        if (fraccion <= 0.01f) return;
+        
         const auto& c1 = ciudades[id1];
         const auto& c2 = ciudades[id2];
         auto pts_latlon = generarRutaOrtodromica(c1.latitud, c1.longitud,
                                                   c2.latitud, c2.longitud, 30);
-        int n = (int)pts_latlon.size();
+        int n_total = (int)pts_latlon.size();
+        int n_dibujar = std::max(2, (int)(n_total * fraccion));
+        if (fraccion >= 1.0f) n_dibujar = n_total;
+
         std::vector<ImVec2> pts_scr;
-        pts_scr.reserve(n);
-        for (const auto& p : pts_latlon) {
+        pts_scr.reserve(n_dibujar);
+        for (int i = 0; i < n_dibujar; i++) {
+            const auto& p = pts_latlon[i];
             ImVec2 v = DatosMundo::latLonAVirtual(p.y, p.x);
             ImVec2 s = virtualAPantalla(v, estado.centro_mapa, estado.zoom_mapa, sz);
             pts_scr.emplace_back(pos.x + s.x, pos.y + s.y);
@@ -407,28 +424,78 @@ static void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
     switch (estado.algoritmo_activo) {
         case EstadoAeroGrafos::Algoritmo::RutaMasCorta:
             if (estado.ruta_resultado.size() < 2) break;
-            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(0, 255, 100, 200), 4.0f);
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(0, 255, 100, 50), 10.0f);
-            }
-            {   auto p1 = ciudadAPantalla(estado.ruta_resultado.front());
-                auto p2 = ciudadAPantalla(estado.ruta_resultado.back());
-                dl->AddCircleFilled(p1, 10.0f, IM_COL32(0,255,100,120), 16);
-                dl->AddCircleFilled(p2, 10.0f, IM_COL32(255,80,80,120), 16);
-                dl->AddCircle(p1, 10.0f, IM_COL32(0,255,100,255), 16, 2.0f);
-                dl->AddCircle(p2, 10.0f, IM_COL32(255,80,80,255), 16, 2.0f);
+            {
+                float dist_acumulada = 0.0f;
+                float total_edges = (float)(estado.ruta_resultado.size() - 1);
+                float progreso_actual = anim_progreso * total_edges;
+                
+                for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                    float fraccion = 0.0f;
+                    if (progreso_actual >= i + 1.0f) fraccion = 1.0f;
+                    else if (progreso_actual > i) fraccion = progreso_actual - i;
+                    
+                    if (fraccion <= 0.0f) break;
+
+                    int origen = estado.ruta_resultado[i];
+                    int destino = estado.ruta_resultado[i+1];
+                    dibujarAristaResultado(origen, destino, IM_COL32(0, 255, 100, 200), 4.0f, fraccion);
+                    dibujarAristaResultado(origen, destino, IM_COL32(0, 255, 100, 50), 10.0f, fraccion);
+                    
+                    // Dibujar etiqueta km para el nodo actual
+                    if (fraccion >= 1.0f && dist_acumulada > 0.0f) {
+                        char buf[32];
+                        snprintf(buf, sizeof(buf), "%.0f km", dist_acumulada);
+                        ImVec2 p = ciudadAPantalla(origen);
+                        ImVec2 tsz = ImGui::CalcTextSize(buf);
+                        ImVec2 b_pos(p.x - tsz.x * 0.5f, p.y - 30.0f);
+                        dl->AddRectFilled(ImVec2(b_pos.x - 6, b_pos.y - 4), ImVec2(b_pos.x + tsz.x + 6, b_pos.y + tsz.y + 4), IM_COL32(20, 30, 40, 240), 4.0f);
+                        dl->AddRect(ImVec2(b_pos.x - 6, b_pos.y - 4), ImVec2(b_pos.x + tsz.x + 6, b_pos.y + tsz.y + 4), IM_COL32(255, 255, 255, 180), 4.0f, 0, 1.5f);
+                        dl->AddText(b_pos, IM_COL32(255, 255, 255, 255), buf);
+                    }
+
+                    float d = DatosMundo::calcularDistancia(ciudades[origen].latitud, ciudades[origen].longitud, ciudades[destino].latitud, ciudades[destino].longitud);
+                    float peso_ruta = (ciudades[destino].longitud > ciudades[origen].longitud) ? (d * 0.90f) : (d * 1.10f);
+                    dist_acumulada += peso_ruta;
+                }
+                
+                if (anim_progreso >= 1.0f) {
+                    // Dibujar etiqueta km para el destino final
+                    int final_dest = estado.ruta_resultado.back();
+                    char buf_fin[32];
+                    snprintf(buf_fin, sizeof(buf_fin), "%.0f km", dist_acumulada);
+                    ImVec2 p_fin = ciudadAPantalla(final_dest);
+                    ImVec2 tsz_fin = ImGui::CalcTextSize(buf_fin);
+                    ImVec2 b_pos_fin(p_fin.x - tsz_fin.x * 0.5f, p_fin.y - 30.0f);
+                    dl->AddRectFilled(ImVec2(b_pos_fin.x - 6, b_pos_fin.y - 4), ImVec2(b_pos_fin.x + tsz_fin.x + 6, b_pos_fin.y + tsz_fin.y + 4), IM_COL32(20, 30, 40, 240), 4.0f);
+                    dl->AddRect(ImVec2(b_pos_fin.x - 6, b_pos_fin.y - 4), ImVec2(b_pos_fin.x + tsz_fin.x + 6, b_pos_fin.y + tsz_fin.y + 4), IM_COL32(255, 255, 255, 180), 4.0f, 0, 1.5f);
+                    dl->AddText(b_pos_fin, IM_COL32(255, 255, 255, 255), buf_fin);
+
+                    auto p1 = ciudadAPantalla(estado.ruta_resultado.front());
+                    auto p2 = ciudadAPantalla(estado.ruta_resultado.back());
+                    dl->AddCircleFilled(p1, 10.0f, IM_COL32(0,255,100,120), 16);
+                    dl->AddCircleFilled(p2, 10.0f, IM_COL32(255,80,80,120), 16);
+                    dl->AddCircle(p1, 10.0f, IM_COL32(0,255,100,255), 16, 2.0f);
+                    dl->AddCircle(p2, 10.0f, IM_COL32(255,80,80,255), 16, 2.0f);
+                }
             }
             break;
         case EstadoAeroGrafos::Algoritmo::ConectarTodo:
-            for (const auto& a : estado.aristas_mst) {
-                dibujarAristaResultado(a.first, a.second,
-                    IM_COL32(0, 220, 255, 180), 3.0f);
-                dibujarAristaResultado(a.first, a.second,
-                    IM_COL32(0, 220, 255, 40), 8.0f);
+            {
+                float total_edges = (float)estado.aristas_mst.size();
+                float progreso_actual = anim_progreso * total_edges;
+                for (size_t i = 0; i < estado.aristas_mst.size(); i++) {
+                    float fraccion = 0.0f;
+                    if (progreso_actual >= i + 1.0f) fraccion = 1.0f;
+                    else if (progreso_actual > i) fraccion = progreso_actual - i;
+                    
+                    if (fraccion <= 0.0f) break;
+
+                    const auto& a = estado.aristas_mst[i];
+                    dibujarAristaResultado(a.first, a.second,
+                        IM_COL32(0, 220, 255, 180), 3.0f, fraccion);
+                    dibujarAristaResultado(a.first, a.second,
+                        IM_COL32(0, 220, 255, 40), 8.0f, fraccion);
+                }
             }
             break;
         case EstadoAeroGrafos::Algoritmo::ExplorarNiveles:
@@ -473,21 +540,41 @@ static void dibujarResultadoAlgoritmo(ImDrawList* dl, EstadoAeroGrafos& estado,
         }
         case EstadoAeroGrafos::Algoritmo::RutaMantenimiento:
             if (estado.ruta_resultado.size() < 2) break;
-            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(255, 200, 50, 180), 2.0f);
+            {
+                float total_edges = (float)(estado.ruta_resultado.size() - 1);
+                float progreso_actual = anim_progreso * total_edges;
+                for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                    float fraccion = 0.0f;
+                    if (progreso_actual >= i + 1.0f) fraccion = 1.0f;
+                    else if (progreso_actual > i) fraccion = progreso_actual - i;
+                    
+                    if (fraccion <= 0.0f) break;
+                    
+                    dibujarAristaResultado(estado.ruta_resultado[i],
+                        estado.ruta_resultado[i+1],
+                        IM_COL32(255, 200, 50, 180), 2.0f, fraccion);
+                }
             }
             break;
         case EstadoAeroGrafos::Algoritmo::VueltaAlMundo:
             if (estado.ruta_resultado.size() < 2) break;
-            for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(255, 200, 20, 200), 3.5f);
-                dibujarAristaResultado(estado.ruta_resultado[i],
-                    estado.ruta_resultado[i+1],
-                    IM_COL32(255, 200, 20, 40), 9.0f);
+            {
+                float total_edges = (float)(estado.ruta_resultado.size() - 1);
+                float progreso_actual = anim_progreso * total_edges;
+                for (size_t i = 0; i + 1 < estado.ruta_resultado.size(); i++) {
+                    float fraccion = 0.0f;
+                    if (progreso_actual >= i + 1.0f) fraccion = 1.0f;
+                    else if (progreso_actual > i) fraccion = progreso_actual - i;
+                    
+                    if (fraccion <= 0.0f) break;
+
+                    dibujarAristaResultado(estado.ruta_resultado[i],
+                        estado.ruta_resultado[i+1],
+                        IM_COL32(255, 200, 20, 200), 3.5f, fraccion);
+                    dibujarAristaResultado(estado.ruta_resultado[i],
+                        estado.ruta_resultado[i+1],
+                        IM_COL32(255, 200, 20, 40), 9.0f, fraccion);
+                }
             }
             break;
         case EstadoAeroGrafos::Algoritmo::AnalizarRed:
@@ -889,11 +976,26 @@ static void manejarInteraccion(EstadoAeroGrafos& estado, bool lienzo_hovered,
             float rx = raton.x - pos.x, ry = raton.y - pos.y;
             float wx = estado.centro_mapa.x + (rx - tam.x * 0.5f) / estado.zoom_mapa;
             float wy = estado.centro_mapa.y + (ry - tam.y * 0.5f) / estado.zoom_mapa;
-            float f = (scroll > 0) ? 1.2f : (1.0f / 1.2f);
+            float f = powf(1.15f, scroll);
             estado.zoom_mapa = std::max(0.2f, std::min(estado.zoom_mapa * f, 15.0f));
             estado.target_zoom = estado.zoom_mapa;
             estado.centro_mapa.x = wx - (rx - tam.x * 0.5f) / estado.zoom_mapa;
             estado.centro_mapa.y = wy - (ry - tam.y * 0.5f) / estado.zoom_mapa;
+            clampaCentro(estado, tam);
+            estado.target_centro = estado.centro_mapa;
+        }
+        
+        if (ImGui::IsKeyPressed(ImGuiKey_Equal) || ImGui::IsKeyPressed(ImGuiKey_KeypadAdd)) {
+            estado.interpolando_camara = false;
+            estado.zoom_mapa = std::min(estado.zoom_mapa * 1.4f, 15.0f);
+            estado.target_zoom = estado.zoom_mapa;
+            clampaCentro(estado, tam);
+            estado.target_centro = estado.centro_mapa;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_Minus) || ImGui::IsKeyPressed(ImGuiKey_KeypadSubtract)) {
+            estado.interpolando_camara = false;
+            estado.zoom_mapa = std::max(0.2f, std::min(estado.zoom_mapa / 1.4f, 15.0f));
+            estado.target_zoom = estado.zoom_mapa;
             clampaCentro(estado, tam);
             estado.target_centro = estado.centro_mapa;
         }
@@ -970,9 +1072,7 @@ static void dibujarInfoZoom(ImDrawList* dl, EstadoAeroGrafos& estado,
     dl->AddText(ImVec2(x, y), fg, buf);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// FUNCION PRINCIPAL DE DIBUJO
-// ══════════════════════════════════════════════════════════════════════════
+//Funcion principal de dibujado
 
 namespace LienzoAeroGrafos {
 
@@ -981,21 +1081,7 @@ void dibujar(Grafo& red, Interfaz& self) {
     float dt = ImGui::GetIO().DeltaTime;
     estado.tiempo_reloj += dt;
 
-    // Camara Cinematica (Lerp)
-    if (estado.interpolando_camara) {
-        float t = std::min(dt * 5.0f, 1.0f);
-        estado.centro_mapa.x = estado.centro_mapa.x + (estado.target_centro.x - estado.centro_mapa.x) * t;
-        estado.centro_mapa.y = estado.centro_mapa.y + (estado.target_centro.y - estado.centro_mapa.y) * t;
-        estado.zoom_mapa = estado.zoom_mapa + (estado.target_zoom - estado.zoom_mapa) * t;
-
-        if (fabsf(estado.centro_mapa.x - estado.target_centro.x) < 0.5f &&
-            fabsf(estado.centro_mapa.y - estado.target_centro.y) < 0.5f &&
-            fabsf(estado.zoom_mapa - estado.target_zoom) < 0.01f) {
-            estado.centro_mapa = estado.target_centro;
-            estado.zoom_mapa = estado.target_zoom;
-            estado.interpolando_camara = false;
-        }
-    }
+    // Camara Cinematica (Lerp) movida mas abajo para tener canvas_size
 
     // Avanzar animacion automaticamente y reproducir sonidos
     if (estado.animacion.activa) {
@@ -1030,6 +1116,40 @@ void dibujar(Grafo& red, Interfaz& self) {
         ImGui::End();
         ImGui::PopStyleVar();
         return;
+    }
+
+    // Camara Cinematica (Lerp) - movida aqui para tener acceso a canvas_size
+    if (estado.interpolando_camara) {
+        float min_zoom_x = canvas_size.x / DatosMundo::ANCHO_VIRTUAL;
+        float min_zoom_y = canvas_size.y / DatosMundo::ALTO_VIRTUAL;
+        float min_zoom = std::max(min_zoom_x, min_zoom_y);
+        estado.target_zoom = std::max(estado.target_zoom, min_zoom);
+        
+        float min_cx = canvas_size.x / (2.0f * estado.target_zoom);
+        float max_cx = DatosMundo::ANCHO_VIRTUAL - min_cx;
+        float min_cy = canvas_size.y / (2.0f * estado.target_zoom);
+        float max_cy = DatosMundo::ALTO_VIRTUAL - min_cy;
+        
+        if (max_cx < min_cx) { estado.target_centro.x = DatosMundo::ANCHO_VIRTUAL / 2.0f; }
+        else { estado.target_centro.x = std::max(min_cx, std::min(max_cx, estado.target_centro.x)); }
+
+        if (max_cy < min_cy) { estado.target_centro.y = DatosMundo::ALTO_VIRTUAL / 2.0f; }
+        else { estado.target_centro.y = std::max(min_cy, std::min(max_cy, estado.target_centro.y)); }
+
+        float t = std::min(dt * 5.0f, 1.0f);
+        estado.centro_mapa.x = estado.centro_mapa.x + (estado.target_centro.x - estado.centro_mapa.x) * t;
+        estado.centro_mapa.y = estado.centro_mapa.y + (estado.target_centro.y - estado.centro_mapa.y) * t;
+        estado.zoom_mapa = estado.zoom_mapa + (estado.target_zoom - estado.zoom_mapa) * t;
+        
+        clampaCentro(estado, canvas_size);
+
+        if (fabsf(estado.centro_mapa.x - estado.target_centro.x) < 0.5f &&
+            fabsf(estado.centro_mapa.y - estado.target_centro.y) < 0.5f &&
+            fabsf(estado.zoom_mapa - estado.target_zoom) < 0.01f) {
+            estado.centro_mapa = estado.target_centro;
+            estado.zoom_mapa = estado.target_zoom;
+            estado.interpolando_camara = false;
+        }
     }
 
     dl->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true);
